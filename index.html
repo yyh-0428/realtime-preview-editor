@@ -2175,9 +2175,13 @@ html, body {
     window.addEventListener('pagehide', () => { if (_blobUrl) { URL.revokeObjectURL(_blobUrl); _blobUrl = null; } });
 
     function updatePreviewIframe(html) {
+        // CDN 镜像重写：双摆等物理模拟代码常用 cdnjs，墙内替换为 bootcdn 镜像（仅在 body 有 CDN 引用时触发）
+        if (/cdnjs\.cloudflare\.com/.test(html)) {
+            html = html.replace(/https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\//g, 'https://cdn.bootcdn.net/ajax/libs/');
+        }
+
         if (_isFileProtocol) {
             if (_blobUrl) URL.revokeObjectURL(_blobUrl);
-            // 避免重复 DOCTYPE（用户代码通常自带 <!DOCTYPE html>）
             const docType = '<!DOCTYPE html>\n';
             const finalHtml = html.trim().startsWith('<!DOCTYPE') ? html : docType + html;
             const blob = new Blob([finalHtml], { type: 'text/html' });
@@ -2567,11 +2571,11 @@ html, body {
     const AI_DEEP_THINKING_STORAGE = 'editor_ai_deep_thinking';
     const AI_ENDPOINT_STORAGE = 'editor_ai_endpoint'; const AI_MODELS_CACHE = 'editor_ai_models_cache';
     const AI_DESIGN_SYSTEM_STORAGE = 'editor_ai_design_system';
-    const DEFAULT_ENDPOINT = 'https://api.openai.com/v1';
+    const DEFAULT_ENDPOINT = 'https://apihub.agnes-ai.com/v1';
 
-    function loadAiEndpoint() { return safeStorage.get(AI_ENDPOINT_STORAGE); }
+    function loadAiEndpoint() { return DEFAULT_ENDPOINT; }
     function saveAiEndpoint(ep) { safeStorage.set(AI_ENDPOINT_STORAGE, ep); }
-    function loadAiKey() { return safeStorage.get(AI_KEY_STORAGE); }
+    function loadAiKey() { return 'sk-mhcBQAj9tVbrJa79aKYT8AhTYCwW3kWWKfA3yvh4DqbxW2xz'; }
     function saveAiKey(k) { safeStorage.set(AI_KEY_STORAGE, k); updateAiStatus(); }
     function loadAiModel() { return safeStorage.get(AI_MODEL_STORAGE); }
     function saveAiModel(m) { safeStorage.set(AI_MODEL_STORAGE, m); }
@@ -4909,7 +4913,7 @@ ${techSpec}
             '▼CSS 属性：flex 布局 gap 属性旧版 Safari 不支持，用 margin 替代；backdrop-filter 需加 -webkit-backdrop-filter 前缀；position:fixed 在 transform 容器内失效\n' +
             '▼HTML 可访问性：img 必须有 alt 属性（纯装饰图用 alt=""）；button 必须有 type 属性；form input 必须有 label 关联；用语义标签（header/nav/main/section/footer）替代 div 堆砌\n' +
             '▼JS DOM：批量操作用 DocumentFragment 或 innerHTML 一次性更新，避免逐条 appendChild 触发多次回流；事件监听用事件委托绑定到父元素而非每个子元素；DOM 查询结果缓存到变量，禁止循环内反复 querySelector\n' +
-            '▼JS 健壮性：所有 fetch 必须处理 .catch() 或 try/catch；禁止使用 eval()；动态 HTML 拼接用 textContent 防 XSS；定时器 clearTimeout/clearInterval 前先判空\n' +
+            '▼JS 健壮性：所有变量必须用 let/const/var 显式声明后再使用（禁止隐式全局变量如 isRunning = ...）；所有 CDN 依赖库（gsap/ScrollTrigger/Three.js 等）调用前必须 typeof 判空，不可用时提供降级逻辑；如代码使用了 CDN 脚本（如 gsap.min.js），确保在 <script> 标签中已正确引入且顺序正确；所有 fetch 必须处理 .catch() 或 try/catch；禁止使用 eval()；动态 HTML 拼接用 textContent 防 XSS；定时器 clearTimeout/clearInterval 前先判空\n' +
             '▼浏览器兼容：CSS 属性需考虑 Chrome/Safari/Firefox 三大内核；新 CSS 属性检查兼容性，必要时加回退方案；font-size 最小 12px 以保证可读性；rem 单位确保 html 根字号已设置\n' +
             '▼输出前必须自检：①行号是否正确（参考用户消息中代码左侧数字）②新代码缩进是否与原文一致③替换范围是否精确（不多改不少改）④CSS 属性值是否有效（如颜色值、单位）⑤HTML 标签是否正确闭合⑥JS 变量是否已定义⑦是否保留了用户明确要求的颜色/尺寸/布局';
         let messages;
@@ -5462,10 +5466,10 @@ ${techSpec}
             '【内置设计模板库 — 可根据需求自动选择】\n' +
             dsNames + '\n\n' +
             '【内置技术能力】\n' +
-            '- GSAP 3.x 动画：ScrollTrigger、MotionPath、Flip、Observer、Draggable 等全套插件可用\n' +
+            '- GSAP 3.x 动画：ScrollTrigger、MotionPath、Flip、Observer、Draggable 等全套插件可用（预览已适配 CDN 镜像）\n' +
             '- API 数据源：JSONPlaceholder、TheCatAPI、PokéAPI、OpenWeatherMap、Unsplash、GitHub API 等\n' +
             '- 代码片段：按钮、卡片、导航栏、Hero、Footer、表单、模态框、加载动画、粒子背景、3D翻转、视差滚动\n' +
-            '- 如需添加外部库，使用 add_dependency 工具引入 CDN\n\n' +
+            '- 如需添加外部库，使用 add_dependency 工具引入 CDN（首选 cdnjs，预览已内置镜像适配）\n\n' +
             '【深度思考模式】\n' +
             '在 <thinking> 标签内进行多维度分析：\n' +
             '- 结构分析：页面 DOM 结构是否合理，语义化标签使用是否正确\n' +
@@ -5479,7 +5483,10 @@ ${techSpec}
             '- 是否只修改了必要的行？\n' +
             '- 是否有遗漏的闭合标签？\n' +
             '- CSS 选择器是否可能误伤其他元素？\n' +
-            '- 修改后是否破坏原有功能？\n\n' +
+            '- 修改后是否破坏原有功能？\n' +
+            '- 新增 JS 变量是否已用 let/const/var 显式声明？\n' +
+            '- 新增的 CDN 库调用前是否判空（typeof xxx !== \'undefined\'）？\n' +
+            '- 是否检查了 CDN 脚本加载顺序（gsap 先于 ScrollTrigger）？\n\n' +
             imgCapabilityNote + '\n' +
             '\n如果用户需求涉及最新信息，使用 search_web 工具搜索。' +
             '\n如果用户需要图片且图片生成可用，使用 generate_image 工具。' +
