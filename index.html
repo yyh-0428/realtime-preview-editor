@@ -4027,8 +4027,7 @@ ${outputFormatRule}
                 const fromLine = block.startLine - 1;
                 const toLine = block.endLine - 1;
                 const from = { line: fromLine, ch: 0 };
-                const toLineText = editor.getLine(toLine);
-                const to = { line: toLine, ch: toLineText ? toLineText.length : 0 };
+                const to = { line: toLine + 1, ch: 0 };
                 editor.replaceRange(block.content, from, to);
                 const newLineCount = block.content.split('\n').length;
                 for (let i = fromLine; i < fromLine + newLineCount; i++) changedLines.add(i);
@@ -4043,8 +4042,7 @@ ${outputFormatRule}
                 const fromLine = block.startLine - 1;
                 const toLine = block.endLine - 1;
                 const from = { line: fromLine, ch: 0 };
-                const toLineText = editor.getLine(toLine);
-                const to = { line: toLine, ch: toLineText ? toLineText.length : 0 };
+                const to = { line: toLine + 1, ch: 0 };
                 editor.replaceRange('', from, to);
                 for (let i = fromLine; i <= toLine; i++) changedLines.add(i);
             }
