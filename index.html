@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://unpkg.com 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src *;">
+<script>/* CSP only for http/https, skip for file:// */if(location.protocol==='http:'||location.protocol==='https:'){document.write('<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\' https://cdnjs.cloudflare.com https://unpkg.com \'unsafe-inline\'; style-src \'self\' https://fonts.googleapis.com https://cdnjs.cloudflare.com \'unsafe-inline\'; font-src \'self\' https://fonts.gstatic.com; img-src \'self\' data: blob:; connect-src *;">');}</script>
 <title>Werkstatt — 实时预览编辑器</title>
 
 <!-- Fonts: DM Sans (UI) + JetBrains Mono (code) -->
@@ -2172,8 +2172,13 @@ html, body {
         editor.focus();
     }
 
+    const _isFileProtocol = location.protocol === 'file:';
+
     function injectPreviewCsp(html) {
-        const csp = '<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data: blob:; font-src \'self\' data:; connect-src *; object-src \'none\'; frame-ancestors \'none\'; base-uri \'self\'; form-action \'none\';">';
+        // file:// 下 CSP 与 srcdoc iframe 不兼容，跳过注入
+        if (_isFileProtocol) return html;
+        // 预览 iframe CSP：允许外部 CDN 资源加载（用户代码常用），仅阻止 object/embed
+        const csp = '<meta http-equiv="Content-Security-Policy" content="default-src * data: blob:; script-src * \'unsafe-inline\' \'unsafe-eval\' data: blob:; style-src * \'unsafe-inline\' data: blob:; img-src * data: blob:; font-src * data: blob:; connect-src *; object-src \'none\'; base-uri *; form-action *;">';
         if (html.includes('<head')) {
             return html.replace(/(<head[^>]*>)/i, '$1\n' + csp);
         } else if (html.includes('<html')) {
@@ -2186,8 +2191,7 @@ html, body {
     function updatePreview() {
         const code = getCode();
         try {
-            const safeCode = injectPreviewCsp(code);
-            previewFrame.srcdoc = safeCode;
+            previewFrame.srcdoc = injectPreviewCsp(code);
             previewFrame.style.display = 'block';
             if (code.trim().length > 0) { previewPlaceholder.classList.add('hidden'); }
             else { previewPlaceholder.classList.remove('hidden'); }
