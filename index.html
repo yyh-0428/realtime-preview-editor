@@ -2142,7 +2142,19 @@ html, body {
         e.target.value = '';
     });
 
-    function updatePreviewWith(compiledHtml) { previewFrame.srcdoc = injectPreviewCsp(compiledHtml); }
+    // Blob-backed preview: avoids Chrome file:// + srcdoc same-origin error
+    let _blobUrl = null;
+    function updatePreviewIframe(html) {
+        if (_isFileProtocol) {
+            if (_blobUrl) URL.revokeObjectURL(_blobUrl);
+            const blob = new Blob(['<!DOCTYPE html>\n' + html], { type: 'text/html' });
+            _blobUrl = URL.createObjectURL(blob);
+            previewFrame.src = _blobUrl;
+        } else {
+            previewFrame.srcdoc = injectPreviewCsp(html);
+        }
+    }
+    function updatePreviewWith(compiledHtml) { updatePreviewIframe(compiledHtml); }
 
     function restoreLanguage() {
         try {
@@ -2194,7 +2206,7 @@ html, body {
     function updatePreview() {
         const code = getCode();
         try {
-            previewFrame.srcdoc = injectPreviewCsp(code);
+            updatePreviewIframe(code);
             previewFrame.style.display = 'block';
             if (code.trim().length > 0) { previewPlaceholder.classList.add('hidden'); }
             else { previewPlaceholder.classList.remove('hidden'); }
