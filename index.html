@@ -607,6 +607,20 @@ html, body {
 .thinking-toggle input:focus + .thinking-toggle-track {
   box-shadow: 0 0 0 2px var(--accent-subtle);
 }
+.thinking-toggle .agent-track { border: 1px solid rgba(99, 102, 241, 0.3); }
+.thinking-toggle input:checked + .thinking-toggle-track.agent-track {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+}
+.agent-mode-active .ai-chat-input-wrap { border-color: rgba(99, 102, 241, 0.4); }
+.agent-status-bar {
+  display: none; align-items: center; gap: 6px; padding: 4px 8px;
+  font-size: 11px; color: var(--text-secondary); background: rgba(99, 102, 241, 0.08);
+  border-radius: 4px; margin-bottom: 6px;
+}
+.agent-mode-active .agent-status-bar { display: flex; }
+.agent-status-bar .agent-step { color: #6366f1; font-weight: 600; }
+.agent-status-bar .agent-dot { width: 6px; height: 6px; border-radius: 50%; background: #6366f1; animation: pulse-dot 1.2s infinite; }
+@keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 .thinking-badge {
   font-size: 10px; font-weight: var(--font-weight-medium);
   color: var(--accent);
@@ -1296,6 +1310,13 @@ html, body {
                             <span class="ai-status-dot" id="aiStatusDot" title="未配置 API Key"></span>
                         </div>
                         <div class="ai-config-row ai-thinking-row">
+                            <label class="thinking-toggle" title="Agent 模式：AI 自动规划、执行、验证，支持多步工具调用">
+                                <input type="checkbox" id="agentModeToggle">
+                                <span class="thinking-toggle-track agent-track">
+                                    <span class="thinking-toggle-thumb"></span>
+                                </span>
+                                <span class="thinking-toggle-label">Agent 模式</span>
+                            </label>
                             <label class="thinking-toggle" title="启用后 AI 将展示结构化思考过程">
                                 <input type="checkbox" id="deepThinkingToggle">
                                 <span class="thinking-toggle-track">
@@ -1327,6 +1348,11 @@ html, body {
                             </select>
                             <span class="design-badge" id="designBadge">默认规范</span>
                         </div>
+                    </div>
+                    <div class="agent-status-bar" id="agentStatusBar">
+                        <span class="agent-dot"></span>
+                        <span class="agent-step" id="agentStepText">就绪</span>
+                        <span id="agentDetailText"></span>
                     </div>
                     <div class="ai-chat-area" id="aiChatArea">
                         <div class="ai-empty-state" id="aiEmptyState">
@@ -4260,7 +4286,9 @@ ${techSpec}
             if (models.length === 0) { showToast('未获取到模型', ''); return; }
             populateModelSelect(models, loadAiModel());
             saveModelsCache(endpoint, models);
-            showToast('已加载 ' + models.length + ' 个模型', '');
+            analyzeModelCapabilities(models); // Agent: detect image/vision models
+            showToast('已加载 ' + models.length + ' 个模型' +
+                (agentModelCache?.imageModels?.length ? '（含图片生成）' : ''), '');
         } catch (err) {
             if (err.name === 'AbortError') { showToast('请求超时，请检查网络', ''); }
             else { showToast(err.message, ''); }
@@ -4310,6 +4338,15 @@ ${techSpec}
         if (!instruction) return;
         const apiKey = loadAiKey();
         if (!apiKey) { showToast('请先设置 API Key', ''); return; }
+
+        // Agent Mode
+        if (agentModeToggle && agentModeToggle.checked) {
+            aiChatInput.value = ''; aiChatInput.disabled = true; btnAiSend.disabled = true;
+            try { await runAgentLoop(instruction); }
+            finally { aiChatInput.disabled = false; btnAiSend.disabled = false; }
+            return;
+        }
+
         const deepThinking = deepThinkingToggle && deepThinkingToggle.checked;
         if (deepThinking && thinkingBadge) {
             const c = detectComplexity(instruction);
@@ -4801,6 +4838,322 @@ ${techSpec}
         document.querySelectorAll('.panel-toggle').forEach(btn => { btn.addEventListener('click', () => togglePanel(btn)); });
         btnCloseSnippets.addEventListener('click', () => { const btn = document.getElementById('btnToggleSidebar'); if (btn) btn.click(); });
         document.querySelector('.main-content').addEventListener('click', () => { if (window.matchMedia('(max-width: 768px)').matches && snippetsPanel.classList.contains('mobile-open')) snippetsPanel.classList.remove('mobile-open'); });
+    }
+
+    // ==================== Agent Mode Engine ====================
+    const agentModeToggle = document.getElementById('agentModeToggle');
+    const agentStatusBar = document.getElementById('agentStatusBar');
+    const agentStepText = document.getElementById('agentStepText');
+    const agentDetailText = document.getElementById('agentDetailText');
+    const AGENT_MODE_STORAGE = 'editor_agent_mode';
+    let agentModelCache = null; // { chatModels: [], imageModels: [], visionModels: [] }
+
+    function loadAgentMode() { try { return sessionStorage.getItem(AGENT_MODE_STORAGE) === 'true'; } catch(e) { return false; } }
+    function saveAgentMode(v) { try { sessionStorage.setItem(AGENT_MODE_STORAGE, v ? 'true' : 'false'); } catch(e) {} }
+
+    function setAgentStatus(step, detail) {
+        if (!agentStepText) return;
+        agentStepText.textContent = step || '';
+        agentDetailText.textContent = detail || '';
+    }
+
+    // Auto-analyze models to detect capabilities
+    function analyzeModelCapabilities(models) {
+        const chatModels = []; const imageModels = []; const visionModels = [];
+        const imageKeywords = ['dall-e', 'dalle', 'image', 'flux', 'stable.diffusion', 'midjourney', 'sd-', 'imagen'];
+        const visionKeywords = ['vision', 'vl', 'multimodal', 'gpt-4o', 'claude-3', 'gemini-pro-vision'];
+        for (const m of models) {
+            const id = (m.id || '').toLowerCase();
+            const isImage = imageKeywords.some(k => id.includes(k));
+            const isVision = visionKeywords.some(k => id.includes(k));
+            if (isImage) { imageModels.push(m); }
+            else if (isVision) { visionModels.push(m); }
+            else { chatModels.push(m); }
+        }
+        // Sort: prefer higher version numbers, then by name
+        const sortByVersion = (a, b) => {
+            const numsA = (a.id.match(/\d+/g) || []).map(Number);
+            const numsB = (b.id.match(/\d+/g) || []).map(Number);
+            for (let i = 0; i < Math.max(numsA.length, numsB.length); i++) {
+                const na = numsA[i] || 0; const nb = numsB[i] || 0;
+                if (na !== nb) return nb - na;
+            }
+            return (b.id || '').localeCompare(a.id || '');
+        };
+        chatModels.sort(sortByVersion); imageModels.sort(sortByVersion); visionModels.sort(sortByVersion);
+        agentModelCache = { chatModels, imageModels, visionModels };
+        return agentModelCache;
+    }
+
+    function getBestChatModel() {
+        if (!agentModelCache || !agentModelCache.chatModels.length) return aiModelSelect?.value || 'gpt-4o';
+        return agentModelCache.chatModels[0].id;
+    }
+
+    function getBestImageModel() {
+        if (!agentModelCache || !agentModelCache.imageModels.length) return null;
+        return agentModelCache.imageModels[0].id;
+    }
+
+    // Built-in Agent Tools
+    const AGENT_TOOLS = [
+        { type: 'function', function: {
+            name: 'analyze_code', description: '读取并分析当前编辑器中的完整代码，了解结构和内容',
+            parameters: { type: 'object', properties: {}, required: [] }
+        }},
+        { type: 'function', function: {
+            name: 'edit_code', description: '使用行号编辑格式修改代码。每行代码左侧有行号。',
+            parameters: { type: 'object', properties: {
+                operation: { type: 'string', enum: ['replace', 'insert', 'delete'], description: '操作类型' },
+                startLine: { type: 'number', description: '起始行号（1-based）' },
+                endLine: { type: 'number', description: '结束行号（1-based，replace/delete 时使用）' },
+                afterLine: { type: 'number', description: '在此行后插入（insert 时使用）' },
+                code: { type: 'string', description: '新代码内容（replace/insert 时使用）' }
+            }, required: ['operation'] }
+        }},
+        { type: 'function', function: {
+            name: 'preview_code', description: '刷新实时预览，查看当前代码的运行效果',
+            parameters: { type: 'object', properties: {}, required: [] }
+        }},
+        { type: 'function', function: {
+            name: 'search_web', description: '搜索网页获取最新信息、文档、API 参考',
+            parameters: { type: 'object', properties: {
+                query: { type: 'string', description: '搜索关键词' }
+            }, required: ['query'] }
+        }},
+        { type: 'function', function: {
+            name: 'generate_image', description: '使用 AI 图片生成模型创建图片，返回 URL 可直接嵌入代码',
+            parameters: { type: 'object', properties: {
+                prompt: { type: 'string', description: '图片描述（英文效果更好）' },
+                size: { type: 'string', enum: ['1024x1024', '1792x1024', '1024x1792'], description: '图片尺寸' }
+            }, required: ['prompt'] }
+        }},
+        { type: 'function', function: {
+            name: 'add_dependency', description: '在预览 HTML 中添加 CDN 依赖（如 GSAP、Chart.js 等）',
+            parameters: { type: 'object', properties: {
+                url: { type: 'string', description: 'CDN 资源的完整 URL' },
+                type: { type: 'string', enum: ['script', 'style'], description: '资源类型' }
+            }, required: ['url', 'type'] }
+        }},
+        { type: 'function', function: {
+            name: 'get_skill', description: '获取内置技能知识（GSAP 动画、设计系统、代码片段）',
+            parameters: { type: 'object', properties: {
+                domain: { type: 'string', enum: ['gsap', 'design', 'snippet', 'api'], description: '技能领域' },
+                query: { type: 'string', description: '具体查询内容' }
+            }, required: ['domain'] }
+        }},
+        { type: 'function', function: {
+            name: 'complete', description: '标记任务完成，总结所做修改',
+            parameters: { type: 'object', properties: {
+                summary: { type: 'string', description: '完成总结' }
+            }, required: ['summary'] }
+        }}
+    ];
+
+    async function executeAgentTool(toolName, args) {
+        switch (toolName) {
+            case 'analyze_code': {
+                const code = getCode();
+                const lines = code.split('\n');
+                const summary = '代码共 ' + lines.length + ' 行，语言: ' + (LANG_CONFIG[currentLang]?.label || 'HTML') + '\n前10行预览:\n' + lines.slice(0, 10).map((l, i) => '  ' + (i+1) + ' | ' + l).join('\n');
+                return summary;
+            }
+            case 'edit_code': {
+                const blocks = [];
+                if (args.operation === 'replace') {
+                    blocks.push({ type: 'replace', startLine: args.startLine, endLine: args.endLine || args.startLine, content: args.code });
+                } else if (args.operation === 'insert') {
+                    blocks.push({ type: 'insert', afterLine: args.afterLine, content: args.code });
+                } else if (args.operation === 'delete') {
+                    blocks.push({ type: 'delete', startLine: args.startLine, endLine: args.endLine || args.startLine });
+                }
+                const result = applyEditBlocks(blocks);
+                if (result.success) {
+                    updatePreview();
+                    highlightChangedLines(result.changedLines);
+                    return '✅ 修改成功，共修改 ' + result.changedLines.length + ' 行';
+                }
+                return '❌ 修改失败: ' + (result.reason || '未知错误');
+            }
+            case 'preview_code': {
+                updatePreview();
+                return '✅ 预览已刷新';
+            }
+            case 'search_web': {
+                try {
+                    const res = await fetch('https://api.duckduckgo.com/?q=' + encodeURIComponent(args.query) + '&format=json&no_html=1');
+                    if (!res.ok) return '⚠️ 搜索失败，请基于已有知识回答';
+                    const data = await res.json();
+                    const results = (data.Results || []).slice(0, 3).map(r => r.Text || '').join('\n');
+                    return results || '未找到相关结果';
+                } catch(e) { return '⚠️ 搜索暂时不可用'; }
+            }
+            case 'generate_image': {
+                const imgModel = getBestImageModel();
+                if (!imgModel) return '⚠️ 当前 API 不支持图片生成模型';
+                try {
+                    const endpoint = loadAiEndpoint();
+                    const imgUrl = (endpoint || DEFAULT_ENDPOINT).replace(/\/+$/, '') + '/images/generations';
+                    const res = await fetch(imgUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + loadAiKey() },
+                        body: JSON.stringify({ model: imgModel, prompt: args.prompt, n: 1, size: args.size || '1024x1024' })
+                    });
+                    if (!res.ok) return '❌ 图片生成失败: HTTP ' + res.status;
+                    const data = await res.json();
+                    const url = data.data?.[0]?.url;
+                    if (url) return '✅ 图片已生成，URL: ' + url + '\n请在 img 标签中使用此 URL。';
+                    return '❌ 未获取到图片 URL';
+                } catch(e) { return '❌ 图片生成出错: ' + e.message; }
+            }
+            case 'add_dependency': {
+                const code = getCode();
+                const tag = args.type === 'script'
+                    ? '<script src="' + args.url + '"><\/script>'
+                    : '<link rel="stylesheet" href="' + args.url + '">';
+                let newCode;
+                if (code.includes('</head>')) {
+                    newCode = code.replace('</head>', '  ' + tag + '\n</head>');
+                } else if (code.includes('<head>')) {
+                    newCode = code.replace('<head>', '<head>\n  ' + tag);
+                } else {
+                    newCode = '<head>\n  ' + tag + '\n</head>\n' + code;
+                }
+                setCode(newCode); updatePreview();
+                return '✅ 已添加' + (args.type === 'script' ? '脚本' : '样式') + ': ' + args.url;
+            }
+            case 'get_skill': {
+                if (args.domain === 'gsap') {
+                    return 'GSAP 3.x 全套可用插件: ScrollTrigger, MotionPath, Flip, Observer, Draggable, SplitText, MorphSVG, Inertia, Physics2D, PhysicsProps, ScrambleText。用法示例: gsap.to(".box", { x: 100, duration: 1, ease: "power2.out" })';
+                }
+                if (args.domain === 'design') {
+                    const ds = autoSelectDesignSystems(args.query || '');
+                    return '推荐设计系统: ' + ds.join(', ') + '\n规范: ' + getDesignSystemPrompt(ds).slice(0, 500);
+                }
+                if (args.domain === 'snippet') {
+                    return '内置代码片段：按钮组件、卡片组件、导航栏、Hero区域、Footer、表单、模态框、加载动画、粒子背景、3D卡片翻转、视差滚动、打字机效果。可用 get_skill domain=snippet query=按钮 获取具体代码。';
+                }
+                if (args.domain === 'api') {
+                    return '内置 API 数据源：JSONPlaceholder、TheCatAPI、TheDogAPI、PokéAPI、OpenWeatherMap、Unsplash、GitHub API、REST Countries 等。可用 get_skill domain=api 查询具体 API。';
+                }
+                return '未知技能领域: ' + args.domain;
+            }
+            case 'complete': return '✅ 任务完成: ' + (args.summary || '无总结');
+            default: return '未知工具: ' + toolName;
+        }
+    }
+
+    async function runAgentLoop(userRequest) {
+        const apiKey = loadAiKey(); if (!apiKey) { showToast('请先设置 API Key', ''); return; }
+        const model = getBestChatModel();
+        const endpoint = loadAiEndpoint() || DEFAULT_ENDPOINT;
+        const chatUrl = endpoint.replace(/\/+$/, '') + '/chat/completions';
+
+        // Refresh model analysis
+        try {
+            const modelsUrl = endpoint.replace(/\/+$/, '') + '/models';
+            const res = await fetch(modelsUrl, { headers: { 'Authorization': 'Bearer ' + apiKey } });
+            if (res.ok) { const data = await res.json(); analyzeModelCapabilities(data.data || []); }
+        } catch(e) { /* use cached if fetch fails */ }
+
+        const imgModel = getBestImageModel();
+        const imgCapabilityNote = imgModel ? '\n图片生成可用：模型 ' + imgModel : '';
+
+        const systemPrompt =
+            '你是 Werkstatt 内置的 AI Agent。你运行在实时预览编辑器中，能自动分析和修改代码。\n' +
+            '工作方式：分析需求 → 调用工具 → 观察结果 → 继续执行 → 完成任务。\n' +
+            '每次只调用必要的工具，避免冗余操作。修改代码后必须预览验证效果。\n' +
+            '如果需要搜索最新信息，使用 search_web 工具。\n' +
+            '如果用户需要图片，检查 generate_image 工具是否可用。\n' +
+            imgCapabilityNote + '\n' +
+            '修改代码时使用 edit_code 工具（行号操作）。先 analyze_code 了解代码结构，再精确修改。';
+
+        const messages = [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userRequest }
+        ];
+
+        hideAiEmptyState(); addChatMessage('user', userRequest);
+        addChatMessage('assistant', '🤖 Agent 模式已启动，正在分析需求…');
+        setAgentStatus('分析中', '正在理解需求');
+        let totalTurns = 0; const MAX_TURNS = 10;
+
+        while (totalTurns < MAX_TURNS) {
+            totalTurns++;
+            try {
+                const payload = { model, messages, tools: AGENT_TOOLS, tool_choice: 'auto' };
+                const res = await fetch(chatUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) {
+                    setAgentStatus('错误', 'API 返回 ' + res.status);
+                    addChatMessage('assistant', '❌ Agent 执行出错: HTTP ' + res.status);
+                    return;
+                }
+                const data = await res.json();
+                const choice = data.choices?.[0]; if (!choice) break;
+                const msg = choice.message;
+                messages.push(msg);
+
+                if (!msg.tool_calls || msg.tool_calls.length === 0) {
+                    // Agent finished - no more tool calls
+                    setAgentStatus('完成', totalTurns + ' 步');
+                    if (msg.content) {
+                        addChatMessage('assistant', msg.content);
+                    }
+                    // Try to apply any code edits the agent described
+                    const parsed = parseThinkingResponse(msg.content || '');
+                    const editBlocks = parseEditBlocks(parsed.answer);
+                    if (editBlocks.length > 0) {
+                        const result = applyEditBlocks(editBlocks);
+                        if (result.success) {
+                            updatePreview();
+                            highlightChangedLines(result.changedLines);
+                            addChatMessage('assistant', '✅ 已自动应用 ' + editBlocks.length + ' 处修改');
+                        }
+                    }
+                    return;
+                }
+
+                // Execute tool calls
+                for (const tc of msg.tool_calls) {
+                    const toolName = tc.function.name;
+                    const toolArgs = JSON.parse(tc.function.arguments || '{}');
+                    setAgentStatus('执行: ' + toolName, toolArgs.query || toolArgs.operation || '');
+                    addChatMessage('assistant', '🔧 调用 ' + toolName + '…');
+
+                    const result = await executeAgentTool(toolName, toolArgs);
+                    messages.push({ role: 'tool', tool_call_id: tc.id, content: result });
+                    if (toolName === 'edit_code') updatePreview();
+                }
+            } catch(e) {
+                setAgentStatus('错误', e.message);
+                addChatMessage('assistant', '❌ ' + e.message);
+                return;
+            }
+        }
+        setAgentStatus('达到上限', MAX_TURNS + ' 步');
+    }
+
+    // Agent mode initialization
+    if (agentModeToggle) {
+        agentModeToggle.checked = loadAgentMode();
+        agentModeToggle.addEventListener('change', () => {
+            const v = agentModeToggle.checked;
+            saveAgentMode(v);
+            if (v) {
+                document.querySelector('.ai-panel')?.classList.add('agent-mode-active');
+                setAgentStatus('就绪', 'Agent 模式已激活');
+            } else {
+                document.querySelector('.ai-panel')?.classList.remove('agent-mode-active');
+                setAgentStatus('', '');
+            }
+        });
+        if (loadAgentMode()) {
+            document.querySelector('.ai-panel')?.classList.add('agent-mode-active');
+        }
     }
 
     // ==================== Events ====================
