@@ -3981,7 +3981,8 @@ ${outputFormatRule}
     // ==================== Line-based Edit Engine ====================
     function parseEditBlocks(text) {
         const blocks = [];
-        const pattern = /```edit\s*\n?([\s\S]*?)\n?```/g;
+        // Support both ```edit and <edit> markup
+        const pattern = /(?:```edit|<edit>)\s*\n?([\s\S]*?)\n?(?:```|<\/edit>)/g;
         let m;
         while ((m = pattern.exec(text)) !== null) {
             const inner = m[1];
