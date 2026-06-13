@@ -5330,16 +5330,55 @@ ${techSpec}
         } catch(e) { /* use cached if fetch fails */ }
 
         const imgModel = getBestImageModel();
-        const imgCapabilityNote = imgModel ? '\n图片生成可用：模型 ' + imgModel : '';
+        const imgCapabilityNote = imgModel ? '\n【图片生成】可用模型：' + imgModel : '\n【图片生成】当前 API 不支持图片生成';
+
+        // Build design systems summary for Agent knowledge
+        const dsNames = Object.entries(DESIGN_SYSTEMS).map(([k, v]) => {
+            if (k === 'default') return '- 通用现代（默认）: ' + v.desc;
+            return '- ' + v.name + ': ' + v.desc;
+        }).join('\n');
 
         const systemPrompt =
-            '你是 Werkstatt 内置的 AI Agent。你运行在实时预览编辑器中，能自动分析和修改代码。\n' +
-            '工作方式：分析需求 → 调用工具 → 观察结果 → 继续执行 → 完成任务。\n' +
-            '每次只调用必要的工具，避免冗余操作。修改代码后必须预览验证效果。\n' +
-            '如果需要搜索最新信息，使用 search_web 工具。\n' +
-            '如果用户需要图片，检查 generate_image 工具是否可用。\n' +
+            '你是 Werkstatt AI Agent — 一个专业的全栈前端开发助手，运行在实时预览编辑器中。\n\n' +
+            '【核心工作流 — ReAct 循环】\n' +
+            '1. 思考（Think）：分析用户需求，判断需要的工具和设计方向\n' +
+            '2. 行动（Act）：调用最必要的工具（每次最多 1-2 个）\n' +
+            '3. 观察（Observe）：查看工具返回结果\n' +
+            '4. 循环：如有需要继续执行，直到任务完成\n' +
+            '5. 完成：调用 complete 工具总结所做修改\n\n' +
+            '【代码修改规范 — 必须使用行号编辑】\n' +
+            '- 编辑代码时通过 edit_code 工具操作，使用行号定位（1-based）\n' +
+            '- replace: 替换从 startLine 到 endLine 的内容\n' +
+            '- insert: 在 afterLine 后插入新代码\n' +
+            '- delete: 删除从 startLine 到 endLine 的内容\n' +
+            '- 修改前必须先 analyze_code 了解代码结构\n' +
+            '- 每次修改范围尽量小且精确（3-15 行为佳）\n' +
+            '- 修改后必须调用 preview_code 验证效果\n\n' +
+            '【内置设计模板库 — 可根据需求自动选择】\n' +
+            dsNames + '\n\n' +
+            '【内置技术能力】\n' +
+            '- GSAP 3.x 动画：ScrollTrigger、MotionPath、Flip、Observer、Draggable 等全套插件可用\n' +
+            '- API 数据源：JSONPlaceholder、TheCatAPI、PokéAPI、OpenWeatherMap、Unsplash、GitHub API 等\n' +
+            '- 代码片段：按钮、卡片、导航栏、Hero、Footer、表单、模态框、加载动画、粒子背景、3D翻转、视差滚动\n' +
+            '- 如需添加外部库，使用 add_dependency 工具引入 CDN\n\n' +
+            '【深度思考模式】\n' +
+            '在 <thinking> 标签内进行多维度分析：\n' +
+            '- 结构分析：页面 DOM 结构是否合理，语义化标签使用是否正确\n' +
+            '- 视觉设计：色彩对比度、间距节奏、排版层次、品牌一致性\n' +
+            '- 交互体验：动画流畅度、响应式适配、无障碍访问（ARIA标签、焦点管理）\n' +
+            '- 代码质量：重复代码、性能优化机会、潜在 Bug、CSS 特异性问题\n' +
+            '- 可维护性：命名规范、注释完整性、HTML 结构清晰度\n' +
+            '分析完成后在 thinking 标签外给出具体修改方案。\n\n' +
+            '【自检要求】\n' +
+            '每次修改前自检：\n' +
+            '- 是否只修改了必要的行？\n' +
+            '- 是否有遗漏的闭合标签？\n' +
+            '- CSS 选择器是否可能误伤其他元素？\n' +
+            '- 修改后是否破坏原有功能？\n\n' +
             imgCapabilityNote + '\n' +
-            '修改代码时使用 edit_code 工具（行号操作）。先 analyze_code 了解代码结构，再精确修改。';
+            '\n如果用户需求涉及最新信息，使用 search_web 工具搜索。' +
+            '\n如果用户需要图片且图片生成可用，使用 generate_image 工具。' +
+            '\n如果用户提到特定设计系统（如"做成 Apple 风格"），自动应用对应模板规范。';
 
         const messages = [
             { role: 'system', content: systemPrompt },
@@ -5384,15 +5423,16 @@ ${techSpec}
                 });
                 if (!res.ok) {
                     const errText = await res.text();
-                    // Detect API that doesn't support tools
-                    if (toolsSupported && (errText.includes('tool') || errText.includes('function') || errText.includes('不支持') || errText.includes('not supported') || errText.includes('tool_choice'))) {
+                    // Detect API that doesn't support tools (400/404 with tool-related error, or any 400/404 on first turn)
+                    const isToolError = errText.includes('tool') || errText.includes('function') || errText.includes('不支持') || errText.includes('not supported') || errText.includes('tool_choice') || errText.includes('invalid');
+                    if (toolsSupported && (isToolError || res.status === 404 || (res.status === 400 && totalTurns <= 2))) {
                         toolsSupported = false;
                         totalTurns--; // retry this turn without tools
-                        addChatMessage('assistant', '当前 API 不支持工具调用，已降级为智能对话模式', ICONS.info);
+                        addChatMessage('assistant', '当前 API 不支持工具调用格式，已降级为智能对话模式', ICONS.info);
                         continue;
                     }
                     setAgentStatus('错误', 'API 返回 ' + res.status);
-                    addChatMessage('assistant', 'Agent 执行出错: HTTP ' + res.status, ICONS.error);
+                    addChatMessage('assistant', 'Agent 执行出错: HTTP ' + res.status + (errText ? ' — ' + errText.slice(0, 120) : ''), ICONS.error);
                     return;
                 }
                 const data = await res.json();
@@ -5419,12 +5459,26 @@ ${techSpec}
                     return;
                 }
 
+                // Parse thinking content if present (even with tool_calls)
+                if (msg.content) {
+                    const parsed = parseThinkingResponse(msg.content);
+                    if (parsed.thinking) {
+                        // Show thinking card for Agent's reasoning
+                        const thinkMsg = addChatMessage('assistant', '', ICONS.agent);
+                        addThinkingCard(thinkMsg, parsed.thinking, 0);
+                    }
+                }
+
                 if (!msg.tool_calls || msg.tool_calls.length === 0) {
                     // Agent finished - no more tool calls
                     setAgentStatus('完成', totalTurns + ' 步');
                     if (msg.content) {
-                        addChatMessage('assistant', msg.content);
                         const parsed = parseThinkingResponse(msg.content);
+                        // Show answer content (not thinking)
+                        if (parsed.answer && parsed.answer.trim()) {
+                            addChatMessage('assistant', parsed.answer);
+                        }
+                        // Try to apply any edit blocks in the final answer
                         const editBlocks = parseEditBlocks(parsed.answer);
                         if (editBlocks.length > 0) {
                             const result = applyEditBlocks(editBlocks);
