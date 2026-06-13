@@ -2177,7 +2177,10 @@ html, body {
     function updatePreviewIframe(html) {
         if (_isFileProtocol) {
             if (_blobUrl) URL.revokeObjectURL(_blobUrl);
-            const blob = new Blob(['<!DOCTYPE html>\n' + html], { type: 'text/html' });
+            // 避免重复 DOCTYPE（用户代码通常自带 <!DOCTYPE html>）
+            const docType = '<!DOCTYPE html>\n';
+            const finalHtml = html.trim().startsWith('<!DOCTYPE') ? html : docType + html;
+            const blob = new Blob([finalHtml], { type: 'text/html' });
             _blobUrl = URL.createObjectURL(blob);
             previewFrame.src = _blobUrl;
         } else {
