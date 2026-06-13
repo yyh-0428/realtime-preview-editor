@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://unpkg.com 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src *;">
 <title>Werkstatt — 实时预览编辑器</title>
 
 <!-- Fonts: DM Sans (UI) + JetBrains Mono (code) -->
@@ -1378,7 +1379,7 @@ html, body {
     </div>
 
     <div class="drag-overlay" id="dragOverlay"></div>
-    <div class="toast success" id="toast">✓ 就绪</div>
+    <div class="toast success" id="toast" role="status" aria-live="polite" aria-atomic="true">✓ 就绪</div>
 
     <!-- Save Modal -->
     <div class="modal-overlay" id="saveModal" role="dialog" aria-modal="true" aria-labelledby="saveModalTitle">
@@ -1571,9 +1572,13 @@ html, body {
     // ==================== Config ====================
     const CODE_STORAGE_KEY = 'editor_code';
     const DEBOUNCE_DELAY = 350;
+    const PREVIEW_DEBOUNCE_DELAY = 400;
     const SAVE_DELAY = 1000;
     let debounceTimer = null;
+    let previewDebounceTimer = null;
     let saveTimer = null;
+    let highlightTimer = null;
+    let highlightedLines = [];
 
     const defaultCode = '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <style>\n    :root { --c: #D4845A; }\n    body { margin:0; height:100dvh; display:grid; place-items:center; background:#F7F5F2; font-family:system-ui; }\n    .card { text-align:center; padding:2rem 3rem; background:#fff; border-radius:10px; box-shadow:0 4px 16px rgba(0,0,0,0.06); }\n    h1 { margin:0; font-size:1.5rem; color:#2D2822; }\n    p { color:#9B948C; font-size:.85rem; margin-bottom:2rem; }\n    #n { font-size:4rem; font-weight:700; color:var(--c); line-height:1; margin-bottom:1.5rem; transition:transform .1s ease; }\n    button { border:none; padding:.6rem 1.5rem; border-radius:6px; font-size:.9rem; font-weight:600; cursor:pointer; transition:all .15s ease; }\n    .add { background:var(--c); color:#fff; }\n    .add:hover { filter:brightness(1.1); transform:translateY(-1px); }\n    .rst { background:#eee; color:#666; margin-left:.5rem; }\n    .rst:hover { background:#ddd; }\n  </style>\n</head>\n<body>\n  <div class="card">\n    <h1>Werkstatt</h1>\n    <p>左侧修改代码，右侧实时预览</p>\n    <div id="n">0</div>\n    <button class="add" onclick="upd(1)">+1</button>\n    <button class="rst" onclick="upd(-c)">重置</button>\n  </div>\n  <script>\n    let c = 0;\n    function upd(v) { c += v; n.textContent = c; n.style.transform = \'scale(1.15)\'; setTimeout(() => n.style.transform = \'\', 100); }\n  <\/script>\n</body>\n</html>';
 
@@ -1600,7 +1605,7 @@ html, body {
                 localStorage.removeItem(key);
             }
             rebuildLangTabs();
-        } catch (e) {}
+        } catch (e) { console.error(e); }
     }
 
     // ==================== Resize ====================
@@ -1623,11 +1628,11 @@ html, body {
                     editorRatio = parsed;
                 }
             }
-        } catch (e) {}
+        } catch (e) { console.error(e); }
     }
 
     function saveRatio() {
-        try { localStorage.setItem(RATIO_STORAGE_KEY, editorRatio); } catch (e) {}
+        try { localStorage.setItem(RATIO_STORAGE_KEY, editorRatio); } catch (e) { console.error(e); }
     }
 
     function getLayoutDirection() {
@@ -1715,7 +1720,11 @@ html, body {
         if (touch) startDrag(touch.clientX, touch.clientY);
     }, { passive: false });
 
-    window.addEventListener('resize', () => { applyRatio(); editor.refresh(); });
+    let resizeRaf = null;
+    window.addEventListener('resize', () => {
+        if (resizeRaf) cancelAnimationFrame(resizeRaf);
+        resizeRaf = requestAnimationFrame(() => { applyRatio(); editor.refresh(); });
+    });
 
     // ==================== Color Mode ====================
     const COLOR_MODE_KEY = 'editor_color_mode';
@@ -1730,7 +1739,7 @@ html, body {
         try {
             const stored = localStorage.getItem(COLOR_MODE_KEY);
             if (stored && (stored === 'light' || stored === 'dark')) return stored;
-        } catch (e) {}
+        } catch (e) { console.error(e); }
         return getSystemColorMode();
     }
 
@@ -1753,7 +1762,7 @@ html, body {
         btnColorMode.classList.add('switching');
         setTimeout(() => btnColorMode.classList.remove('switching'), 350);
         applyColorMode(next);
-        try { localStorage.setItem(COLOR_MODE_KEY, next); } catch (e) {}
+        try { localStorage.setItem(COLOR_MODE_KEY, next); } catch (e) { console.error(e); }
     }
 
     btnColorMode.addEventListener('click', toggleColorMode);
@@ -1798,14 +1807,14 @@ html, body {
     function setTheme(theme) {
         if (!VALID_THEMES.includes(theme)) return;
         applyTheme(theme);
-        try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch (e) {}
+        try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch (e) { console.error(e); }
     }
 
     function loadTheme() {
         try {
             const stored = localStorage.getItem(THEME_STORAGE_KEY);
             if (stored && VALID_THEMES.includes(stored)) return stored;
-        } catch (e) {}
+        } catch (e) { console.error(e); }
         return 'amber';
     }
 
@@ -1865,7 +1874,7 @@ html, body {
         currentFileName = fileName || ('index' + LANG_CONFIG[lang].ext);
         const cfg = LANG_CONFIG[lang];
         editor.setOption('mode', cfg.mode);
-        try { localStorage.setItem(LANG_STORAGE, lang); } catch (e) {}
+        try { localStorage.setItem(LANG_STORAGE, lang); } catch (e) { console.error(e); }
         rebuildLangTabs();
     }
 
@@ -1880,7 +1889,7 @@ html, body {
         langs.forEach(lang => {
             const key = CODE_PREFIX + lang;
             let code = '';
-            try { code = localStorage.getItem(key) || ''; } catch (e) {}
+            try { code = localStorage.getItem(key) || ''; } catch (e) { console.error(e); }
             if (!code.trim()) return;
             hasAny = true;
             const cfg = LANG_CONFIG[lang];
@@ -1903,9 +1912,8 @@ html, body {
         return '<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<style>' + (css || '/* CSS */') + '</style>\n</head>\n<body>\n' + (body || '<!-- HTML -->') + '\n</body>\n</html>';
     }
 
-    function escapeHtmlAttr(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function wrapDefaultHtml(code, lang) {
-        if (lang === 'css') return getHtmlShell('', escapeHtmlAttr(code));
+        if (lang === 'css') return getHtmlShell('', escapeHtml(code));
         if (lang === 'js') return getHtmlShell('', '').replace('<style>/* CSS */</style>', '<style>/* CSS */</style>\n<script>' + code.replace(/<\/script>/gi, '<\\/script>') + '<\/script>');
         return code;
     }
@@ -1993,7 +2001,7 @@ html, body {
             switchLanguage(lang, file.name);
             setCode(code);
             editor.refresh();
-            try { localStorage.setItem(getStorageKey(lang), code); } catch (e) {}
+            try { localStorage.setItem(getStorageKey(lang), code); } catch (e) { console.error(e); }
             showStatus('编译中…', 'syncing');
             try {
                 const compiled = await compileCode(lang);
@@ -2008,7 +2016,7 @@ html, body {
         e.target.value = '';
     });
 
-    function updatePreviewWith(compiledHtml) { previewFrame.srcdoc = compiledHtml; }
+    function updatePreviewWith(compiledHtml) { previewFrame.srcdoc = injectPreviewCsp(compiledHtml); }
 
     function restoreLanguage() {
         try {
@@ -2017,7 +2025,7 @@ html, body {
                 const code = localStorage.getItem(getStorageKey(saved));
                 if (code && code.trim()) { switchLanguage(saved); setCode(code); return true; }
             }
-        } catch (e) {}
+        } catch (e) { console.error(e); }
         return false;
     }
 
@@ -2041,10 +2049,22 @@ html, body {
         editor.focus();
     }
 
+    function injectPreviewCsp(html) {
+        const csp = '<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data: blob:; font-src \'self\' data:; connect-src *; object-src \'none\'; frame-ancestors \'none\'; base-uri \'self\'; form-action \'none\';">';
+        if (html.includes('<head')) {
+            return html.replace(/(<head[^>]*>)/i, '$1\n' + csp);
+        } else if (html.includes('<html')) {
+            return html.replace(/(<html[^>]*>)/i, '$1\n<head>\n' + csp + '\n</head>');
+        } else {
+            return '<!DOCTYPE html>\n<html>\n<head>\n' + csp + '\n</head>\n<body>\n' + html + '\n</body>\n</html>';
+        }
+    }
+
     function updatePreview() {
         const code = getCode();
         try {
-            previewFrame.srcdoc = code;
+            const safeCode = injectPreviewCsp(code);
+            previewFrame.srcdoc = safeCode;
             previewFrame.style.display = 'block';
             if (code.trim().length > 0) { previewPlaceholder.classList.add('hidden'); }
             else { previewPlaceholder.classList.remove('hidden'); }
@@ -2118,7 +2138,7 @@ html, body {
                     document.body.appendChild(ta); ta.select();
                     ok = document.execCommand('copy');
                     document.body.removeChild(ta);
-                } catch (e) {}
+                } catch (e) { console.error(e); }
                 if (ok) onCopySuccess(); else showToast('复制失败', '');
             } else { showToast('复制失败', ''); }
         }
@@ -2208,12 +2228,10 @@ html, body {
         let html = '';
         snippets.forEach((s, i) => {
             const preview = (s.code || '').replace(/\s+/g, ' ').trim().substring(0, 55) || '(空代码)';
-            html += '<div class="snippet-item" data-index="' + i + '"><div class="snippet-title">' + escapeHTML(s.title) + '</div><div class="snippet-preview">' + escapeHTML(preview) + '</div><div class="snippet-meta"><span>' + formatTime(s.createdAt) + '</span><button class="snippet-delete" data-action="delete" data-index="' + i + '" aria-label="删除"><svg><use href="#icon-trash"/></svg></button></div></div>';
+            html += '<div class="snippet-item" data-index="' + i + '"><div class="snippet-title">' + escapeHtml(s.title) + '</div><div class="snippet-preview">' + escapeHtml(preview) + '</div><div class="snippet-meta"><span>' + formatTime(s.createdAt) + '</span><button class="snippet-delete" data-action="delete" data-index="' + i + '" aria-label="删除"><svg><use href="#icon-trash"/></svg></button></div></div>';
         });
         snippetsList.innerHTML = html;
     }
-
-    function escapeHTML(str) { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
 
     function openSaveModal() { snippetTitleInput.value = ''; saveError.classList.remove('visible'); snippetTitleInput.classList.remove('error'); saveModal.classList.add('active'); snippetTitleInput.focus(); }
     function closeSaveModal() { saveModal.classList.remove('active'); }
@@ -2230,10 +2248,10 @@ html, body {
     const workspace = document.querySelector('.workspace');
 
     function loadPanelStates() {
-        try { const saved = localStorage.getItem(PANEL_STATE_KEY); if (saved) return JSON.parse(saved); } catch (e) {}
+        try { const saved = localStorage.getItem(PANEL_STATE_KEY); if (saved) return JSON.parse(saved); } catch (e) { console.error(e); }
         return { side: true, editor: true, preview: true };
     }
-    function savePanelStates(states) { try { localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(states)); } catch (e) {} }
+    function savePanelStates(states) { try { localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(states)); } catch (e) { console.error(e); } }
 
     function applyPanelStates(states) {
         const clsMap = { side: 'side-hidden', editor: 'editor-hidden', preview: 'preview-hidden' };
@@ -2279,12 +2297,12 @@ html, body {
     let isDraggingLeft = false; let startLeftPanelPct = 0; let startLeftCoord = 0;
 
     function loadPanelWidth() {
-        try { const val = localStorage.getItem(PANEL_WIDTH_KEY); const num = parseInt(val, 10); if (!isNaN(num) && num >= PANEL_MIN_PCT && num <= PANEL_MAX_PCT) return num; } catch (e) {}
+        try { const val = localStorage.getItem(PANEL_WIDTH_KEY); const num = parseInt(val, 10); if (!isNaN(num) && num >= PANEL_MIN_PCT && num <= PANEL_MAX_PCT) return num; } catch (e) { console.error(e); }
         return PANEL_DEFAULT_PCT;
     }
     function savePanelWidth() {
         const cp = parseFloat(snippetsPanel.style.width);
-        if (!isNaN(cp)) { try { localStorage.setItem(PANEL_WIDTH_KEY, Math.round(cp)); } catch (e) {} }
+        if (!isNaN(cp)) { try { localStorage.setItem(PANEL_WIDTH_KEY, Math.round(cp)); } catch (e) { console.error(e); } }
     }
     function applyPanelWidth(pct) { snippetsPanel.style.width = pct + 'vw'; document.documentElement.style.setProperty('--panel-side-width', pct + 'vw'); }
 
@@ -2339,15 +2357,15 @@ html, body {
     const DEFAULT_ENDPOINT = 'https://api.openai.com/v1';
 
     function loadAiEndpoint() { try { return localStorage.getItem(AI_ENDPOINT_STORAGE) || ''; } catch (e) { return ''; } }
-    function saveAiEndpoint(ep) { try { localStorage.setItem(AI_ENDPOINT_STORAGE, ep); } catch (e) {} }
-    function loadAiKey() { try { return localStorage.getItem(AI_KEY_STORAGE) || ''; } catch (e) { return ''; } }
-    function saveAiKey(k) { try { localStorage.setItem(AI_KEY_STORAGE, k); } catch (e) {} updateAiStatus(); }
+    function saveAiEndpoint(ep) { try { localStorage.setItem(AI_ENDPOINT_STORAGE, ep); } catch (e) { console.error(e); } }
+    function loadAiKey() { try { return sessionStorage.getItem(AI_KEY_STORAGE) || ''; } catch (e) { return ''; } }
+    function saveAiKey(k) { try { sessionStorage.setItem(AI_KEY_STORAGE, k); } catch (e) { console.error(e); } updateAiStatus(); }
     function loadAiModel() { try { return localStorage.getItem(AI_MODEL_STORAGE) || ''; } catch (e) { return ''; } }
-    function saveAiModel(m) { try { localStorage.setItem(AI_MODEL_STORAGE, m); } catch (e) {} }
+    function saveAiModel(m) { try { localStorage.setItem(AI_MODEL_STORAGE, m); } catch (e) { console.error(e); } }
     function loadDesignSystem() { try { return localStorage.getItem(AI_DESIGN_SYSTEM_STORAGE) || 'default'; } catch (e) { return 'default'; } }
-    function saveDesignSystem(ds) { try { localStorage.setItem(AI_DESIGN_SYSTEM_STORAGE, ds); } catch (e) {} }
+    function saveDesignSystem(ds) { try { localStorage.setItem(AI_DESIGN_SYSTEM_STORAGE, ds); } catch (e) { console.error(e); } }
     function loadModelsCache() { try { const r = localStorage.getItem(AI_MODELS_CACHE); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
-    function saveModelsCache(ep, models) { try { localStorage.setItem(AI_MODELS_CACHE, JSON.stringify({ endpoint: ep, models: models, ts: Date.now() })); } catch (e) {} }
+    function saveModelsCache(ep, models) { try { localStorage.setItem(AI_MODELS_CACHE, JSON.stringify({ endpoint: ep, models: models, ts: Date.now() })); } catch (e) { console.error(e); } }
     function getEndpointChatUrl(ep) { let u = (ep || DEFAULT_ENDPOINT).replace(/\/+$/, ''); if (!/\/chat\/completions$/.test(u)) u += '/chat/completions'; return u; }
     function getEndpointModelsUrl(ep) { let u = (ep || DEFAULT_ENDPOINT).replace(/\/+$/, ''); return u + '/models'; }
 
@@ -2361,7 +2379,7 @@ html, body {
 
     // ==================== Deep Thinking ====================
     function loadDeepThinking() { try { return localStorage.getItem(AI_DEEP_THINKING_STORAGE) === 'true'; } catch (e) { return false; } }
-    function saveDeepThinking(v) { try { localStorage.setItem(AI_DEEP_THINKING_STORAGE, v ? 'true' : 'false'); } catch (e) {} }
+    function saveDeepThinking(v) { try { localStorage.setItem(AI_DEEP_THINKING_STORAGE, v ? 'true' : 'false'); } catch (e) { console.error(e); } }
 
     // ==================== Design Systems ====================
     // ==================== 内置技能知识库 ====================
@@ -4039,13 +4057,17 @@ ${outputFormatRule}`;
 
     function highlightChangedLines(lines) {
         if (!lines || lines.length === 0) return;
-        const markers = [];
+        if (highlightTimer) { clearTimeout(highlightTimer); highlightTimer = null; }
+        highlightedLines.forEach(line => editor.removeLineClass(line, 'background', 'cm-line-modified'));
+        highlightedLines = [];
         lines.forEach(line => {
             editor.addLineClass(line, 'background', 'cm-line-modified');
-            markers.push(line);
+            highlightedLines.push(line);
         });
-        setTimeout(() => {
-            markers.forEach(line => editor.removeLineClass(line, 'background', 'cm-line-modified'));
+        highlightTimer = setTimeout(() => {
+            highlightedLines.forEach(line => editor.removeLineClass(line, 'background', 'cm-line-modified'));
+            highlightedLines = [];
+            highlightTimer = null;
         }, 3500);
     }
 
@@ -4194,16 +4216,22 @@ ${outputFormatRule}`;
         if (!apiKey) { showToast('请先输入 API Key', ''); return; }
         const modelsUrl = getEndpointModelsUrl(endpoint);
         btnRefreshModels.classList.add('spinning'); btnRefreshModels.disabled = true;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
         try {
-            const res = await fetch(modelsUrl, { headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' } });
+            const res = await fetch(modelsUrl, { headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' }, signal: controller.signal });
+            clearTimeout(timeoutId);
             if (!res.ok) { let em = '获取失败'; if (res.status === 401) em = 'API Key 无效'; else if (res.status === 404) em = '不支持 /models'; throw new Error(em); }
             const data = await res.json(); const models = data.data || [];
             if (models.length === 0) { showToast('未获取到模型', ''); return; }
             populateModelSelect(models, loadAiModel());
             saveModelsCache(endpoint, models);
             showToast('已加载 ' + models.length + ' 个模型', '');
-        } catch (err) { showToast(err.message, ''); }
-        finally { btnRefreshModels.classList.remove('spinning'); btnRefreshModels.disabled = false; }
+        } catch (err) {
+            if (err.name === 'AbortError') { showToast('请求超时，请检查网络', ''); }
+            else { showToast(err.message, ''); }
+        }
+        finally { clearTimeout(timeoutId); btnRefreshModels.classList.remove('spinning'); btnRefreshModels.disabled = false; }
     }
 
     aiEndpointInput.addEventListener('blur', () => { const ep = aiEndpointInput.value.trim(); saveAiEndpoint(ep); const cached = loadModelsCache(); if (ep && loadAiKey() && (!cached || cached.endpoint !== ep)) fetchModels(); });
@@ -4239,7 +4267,7 @@ ${outputFormatRule}`;
         const sk = loadAiKey();
         if (sk) aiKeyInput.value = sk.slice(0, 10) + '••••' + sk.slice(-4);
     });
-    aiKeyInput.addEventListener('focus', () => { const k = loadAiKey(); aiKeyInput.value = k; aiKeyInput.type = 'text'; });
+    aiKeyInput.addEventListener('focus', () => { const k = loadAiKey(); if (k) aiKeyInput.value = k; });
     aiModelSelect.addEventListener('change', () => { saveAiModel(aiModelSelect.value); });
     btnRefreshModels.addEventListener('click', () => fetchModels());
 
@@ -4559,7 +4587,10 @@ ${outputFormatRule}`;
         const { messages, codeFence, currentCode } = buildAiPayload(instruction, deepThinking);
         const chatUrl = getEndpointChatUrl(loadAiEndpoint());
         const payload = { model: model, messages: messages, stream: true };
-        const res = await fetch(chatUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey }, body: JSON.stringify(payload) });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 120000);
+        const res = await fetch(chatUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey }, body: JSON.stringify(payload), signal: controller.signal });
+        clearTimeout(timeoutId);
         if (!res.ok) {
             let em = 'API 错误 ' + res.status;
             if (res.status === 401) em = 'API Key 无效';
@@ -4689,7 +4720,10 @@ ${outputFormatRule}`;
         msgEl.appendChild(card); aiChatArea.scrollTop = aiChatArea.scrollHeight;
     }
 
-    function escapeHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
 
     function initAiPanel() {
         const ep = loadAiEndpoint(); if (ep) aiEndpointInput.value = ep;
@@ -4753,7 +4787,8 @@ ${outputFormatRule}`;
 
     // ==================== Events ====================
     editor.on('change', () => {
-        updatePreview();
+        if (previewDebounceTimer) clearTimeout(previewDebounceTimer);
+        previewDebounceTimer = setTimeout(() => { updatePreview(); }, PREVIEW_DEBOUNCE_DELAY);
         showStatus('等待更新…', 'syncing');
         if (formatLastFormatted !== null) { formatLastOriginal = null; formatLastFormatted = null; btnFormat.innerHTML = '<svg class="btn-icon"><use href="#icon-format"/></svg> 格式化'; }
         if (debounceTimer) clearTimeout(debounceTimer);
