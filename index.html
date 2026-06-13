@@ -4528,12 +4528,17 @@ ${techSpec}
         const outputFormatRule =
             '【输出格式——强制要求，违反将导致用户无法正常使用】\n' +
             '你必须用下面的行号编辑格式输出代码修改。绝对禁止输出完整代码文件。\n\n' +
+            '输出步骤：\n' +
+            '1. 先输出一行自检摘要，以 【自检】 开头，写清楚：改第几行、改了什么、检查结果\n' +
+            '2. 然后紧跟 ```edit 块\n\n' +
+            '正确示例（整体输出）：\n' +
+            '【自检】改第 5 行背景色 blue→red，行号正确，缩进一致，替换精确\n' +
             '```edit\n' +
-            'REPLACE X-Y:\n' +
-            '（替换第 X 到 Y 行的新代码，不带行号前缀）\n' +
+            'REPLACE 5-5:\n' +
+            '  background: red;\n' +
             'END\n' +
             '```\n\n' +
-            '也可用 INSERT after X: / DELETE X-Y，每条以 END 结束。可在 ```edit 块中组合多个操作。\n' +
+            '也可用 INSERT after X: / DELETE X-Y，每条以 END 结束。\n' +
             '- 行号 = 用户消息中代码左侧的数字（1 到 ' + totalLines + '）\n' +
             '- REPLACE 时新代码不带行号前缀，保持原始缩进\n' +
             '- INSERT after X 表示在第 X 行末尾之后插入，自动换行\n' +
