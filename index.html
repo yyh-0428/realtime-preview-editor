@@ -3764,7 +3764,7 @@ ${PUBLIC_APIS_KNOWLEDGE}
         return { level: 'high', label: '深度思考', steps: 10 };
     }
 
-    function buildDeepThinkingPrompt(instruction, complexity, currentCode, langLabel, structureHints, designSystemPrompt, editorCtx, outputFormatRule, totalLines) {
+    function buildDeepThinkingPrompt(instruction, complexity, currentCode, langLabel, structureHints, designSystemPrompt, editorCtx, outputFormatRule, techSpec, totalLines) {
         const isHtml = currentLang === 'html';
         const codeFence = isHtml ? 'html' : currentLang;
         const lineCount = totalLines || (currentCode.split('\n').length);
@@ -3852,6 +3852,8 @@ ${PUBLIC_APIS_KNOWLEDGE}
 ${designSystemPrompt}
 
 ${outputFormatRule}
+
+${techSpec}
 
 工作规则：
 1. 【用户指令绝对优先】用户明确要求的颜色、尺寸、布局等必须执行。用户说红色就是红色
@@ -4500,12 +4502,20 @@ ${outputFormatRule}
             '- INSERT after X 表示在第 X 行末尾之后插入，自动换行\n' +
             '- DELETE X-Y 删除第 X 到第 Y 行\n' +
             '- 若用户指令与现有代码无关（如纯问答），回复 "NOT_CODE_TASK"';
+        const techSpec =
+            '【代码技术规范——必须严格遵守】\n' +
+            '▼CSS 动画：transition 必须写明属性名和时长，禁止 transition: all（性能差）；animation 必须定义 @keyframes；需 GPU 加速的动画加 will-change 或 transform: translateZ(0)；父元素 display:none 时 transition/animation 无效\n' +
+            '▼CSS 属性：flex 布局 gap 属性旧版 Safari 不支持，用 margin 替代；backdrop-filter 需加 -webkit-backdrop-filter 前缀；position:fixed 在 transform 容器内失效\n' +
+            '▼HTML 可访问性：img 必须有 alt 属性（纯装饰图用 alt=""）；button 必须有 type 属性；form input 必须有 label 关联；用语义标签（header/nav/main/section/footer）替代 div 堆砌\n' +
+            '▼JS DOM：批量操作用 DocumentFragment 或 innerHTML 一次性更新，避免逐条 appendChild 触发多次回流；事件监听用事件委托绑定到父元素而非每个子元素；DOM 查询结果缓存到变量，禁止循环内反复 querySelector\n' +
+            '▼JS 健壮性：所有 fetch 必须处理 .catch() 或 try/catch；禁止使用 eval()；动态 HTML 拼接用 textContent 防 XSS；定时器 clearTimeout/clearInterval 前先判空\n' +
+            '▼浏览器兼容：CSS 属性需考虑 Chrome/Safari/Firefox 三大内核；新 CSS 属性检查兼容性，必要时加回退方案；font-size 最小 12px 以保证可读性；rem 单位确保 html 根字号已设置';
         let messages;
         if (deepThinking) {
             const complexity = detectComplexity(instruction);
-            messages = buildDeepThinkingPrompt(instruction, complexity, currentCodeWithLines, langLabel, structureHints, designSystemPrompt, editorCtx, outputFormatRule, totalLines);
+            messages = buildDeepThinkingPrompt(instruction, complexity, currentCodeWithLines, langLabel, structureHints, designSystemPrompt, editorCtx, outputFormatRule, techSpec, totalLines);
         } else {
-            const systemPrompt = '你是实时预览编辑器内置的资深前端开发工程师。用户正在编辑 ' + langLabel + ' 代码。\n\n' + designSystemPrompt + '\n\n' + outputFormatRule + '\n\n工作规则：\n1. 【用户指令绝对优先】用户明确要求的颜色、尺寸、布局等必须执行。用户说红色就是红色\n2. 保持原有代码风格和缩进，只做必要的修改，不改动无关代码\n3. 所有 CSS/HTML/JS 必须语法正确，属性值符合 W3C 规范\n4. 用户未指定样式时才使用设计规范作为默认填充，禁止为规范覆盖用户明确要求\n5. 组件代码必须完整可运行（display、padding、border、background、color 等属性齐全）\n6. 动效代码使用标准 CSS，禁止无效语法如 transition: all ease\n7. 颜色值使用规范色值或用户指定色值，禁止编造颜色';
+            const systemPrompt = '你是实时预览编辑器内置的资深前端开发工程师。用户正在编辑 ' + langLabel + ' 代码。\n\n' + designSystemPrompt + '\n\n' + outputFormatRule + '\n\n' + techSpec + '\n\n工作规则：\n1. 【用户指令绝对优先】用户明确要求的颜色、尺寸、布局等必须执行。用户说红色就是红色\n2. 保持原有代码风格和缩进，只做必要的修改，不改动无关代码\n3. 所有 CSS/HTML/JS 必须语法正确，属性值符合 W3C 规范\n4. 用户未指定样式时才使用设计规范作为默认填充，禁止为规范覆盖用户明确要求\n5. 组件代码必须完整可运行（display、padding、border、background、color 等属性齐全）\n6. 动效代码使用标准 CSS，禁止无效语法如 transition: all ease\n7. 颜色值使用规范色值或用户指定色值，禁止编造颜色';
             messages = [
                 { role: 'system', content: systemPrompt },
                 { role: 'user', content: '当前代码（共 ' + totalLines + ' 行，每行左侧标注了行号）：\n```' + codeFence + '\n' + currentCodeWithLines + '\n```\n\n指令：' + instruction + '\n\n⚠️ 你必须使用行号编辑格式（REPLACE X-Y / INSERT after X / DELETE X-Y）输出修改，禁止输出完整代码文件。行号参考上面代码左侧的数字。' }
