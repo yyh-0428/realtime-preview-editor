@@ -790,6 +790,43 @@ html, body {
   background: var(--bg-surface-raised); color: var(--text-primary);
 }
 
+/* Retry bar for error recovery */
+.ai-retry-bar {
+  display: flex; gap: var(--space-2); margin-top: var(--space-2);
+  padding-top: var(--space-2); border-top: 1px solid var(--border-subtle);
+}
+.ai-retry-bar .btn {
+  font-size: var(--font-size-caption); padding: 4px 10px;
+  border-radius: var(--radius-sm); cursor: pointer; border: 1px solid transparent;
+}
+.ai-retry-bar .btn-retry {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
+.ai-retry-bar .btn-retry-continue {
+  background: var(--bg-surface-raised); color: var(--text-primary);
+  border-color: var(--border-default);
+}
+.ai-retry-bar .btn:hover { opacity: 0.85; }
+
+/* Markdown rendering in chat */
+.ai-message.assistant .msg-text h1,
+.ai-message.assistant .msg-text h2,
+.ai-message.assistant .msg-text h3 {
+  font-size: var(--font-size-ui); margin: 4px 0; font-weight: var(--font-weight-semibold);
+}
+.ai-message.assistant .msg-text p { margin: 4px 0; }
+.ai-message.assistant .msg-text code {
+  background: var(--bg-surface); padding: 1px 4px; border-radius: 3px;
+  font-family: var(--font-mono); font-size: 12px;
+}
+.ai-message.assistant .msg-text pre {
+  background: var(--bg-surface); padding: var(--space-2);
+  border-radius: var(--radius-sm); overflow-x: auto; margin: 4px 0;
+}
+.ai-message.assistant .msg-text ul,
+.ai-message.assistant .msg-text ol { margin: 4px 0; padding-left: 16px; }
+.ai-message.assistant .msg-text li { margin: 2px 0; }
+
 .ai-diff-card {
   background: var(--bg-editor); border: 1px solid var(--border-default);
   border-radius: var(--radius-sm); margin-top: var(--space-2);
@@ -4395,16 +4432,35 @@ ${techSpec}
         let thinkingBodyEl = null;
         let assistantMsgEl = null;
         let streamEnded = false;
+        let streamError = null;
+        let retryMsgEl = null;
 
         function flushThinkingDisplay() {
             if (!thinkingBodyEl) return;
-            // Extract thinking content between tags (handles partial tags)
             let displayText = thinkingBuffer;
             const openIdx = displayText.indexOf('<thinking>');
             if (openIdx !== -1) displayText = displayText.slice(openIdx + 10);
             const closeIdx = displayText.indexOf('</thinking>');
             if (closeIdx !== -1) displayText = displayText.slice(0, closeIdx);
             thinkingBodyEl.innerHTML = renderThinkingSteps(displayText.trim());
+            aiChatArea.scrollTop = aiChatArea.scrollHeight;
+        }
+
+        // Stream-render: append raw text during streaming, parse markdown at paragraph end
+        let streamTextBuf = '';
+        let lastRenderTime = 0;
+        const RENDER_THROTTLE = 80; // ms
+
+        function flushStreamText() {
+            if (!assistantMsgEl || streamTextBuf.length === 0) return;
+            const now = Date.now();
+            if (now - lastRenderTime < RENDER_THROTTLE) return;
+            lastRenderTime = now;
+            const textSpan = assistantMsgEl.querySelector('.msg-text');
+            if (textSpan) {
+                // During streaming: show plain text (no markdown parsing to avoid flicker)
+                textSpan.textContent = streamTextBuf;
+            }
             aiChatArea.scrollTop = aiChatArea.scrollHeight;
         }
 
@@ -4418,34 +4474,112 @@ ${techSpec}
                 const ch = chunk[i];
                 if (!thinkingClosed) {
                     thinkingBuffer += ch;
-                    // Detect opening tag and create card
                     if (!thinkingCardEl && thinkingBuffer.includes('<thinking>')) {
                         const cardInfo = createStreamingThinkingCard(assistantMsgEl);
                         thinkingCardEl = cardInfo.card;
                         thinkingBodyEl = cardInfo.body;
                         inThinking = true;
                     }
-                    // Detect closing tag
                     if (thinkingBuffer.includes('</thinking>')) {
                         thinkingClosed = true;
                         inThinking = false;
                         flushThinkingDisplay();
-                        // Update header label to "思考过程"
                         const labelEl = thinkingCardEl.querySelector('.thinking-header span');
                         if (labelEl) labelEl.textContent = '思考过程';
                     }
                     if (inThinking && !thinkingClosed && thinkingBodyEl) {
-                        // Throttle UI updates to every ~30 chars to avoid flicker
                         if (thinkingBuffer.length % 30 === 0) flushThinkingDisplay();
                     }
                 } else {
                     codeBuffer += ch;
+                    streamTextBuf += ch;
                 }
             }
-            // Show code preview while streaming (after thinking closed)
+            // Throttled plain-text display during streaming
             if (thinkingClosed && codeBuffer.length > 0 && assistantMsgEl) {
-                const preview = codeBuffer.slice(-80);
-                setAssistantMsgText(assistantMsgEl, '生成代码中… ' + preview.replace(/\s+/g, ' '));
+                flushStreamText();
+            }
+        }
+
+        async function handleParsedResponse(parsed, targetMsgEl, cFence) {
+            const hasThinking = !!parsed.thinking;
+            if (parsed.answer.includes('NOT_CODE_TASK')) {
+                if (targetMsgEl) setAssistantMsgText(targetMsgEl, '请描述代码修改需求。');
+                return;
+            }
+            const editBlocks = parseEditBlocks(parsed.answer);
+            if (editBlocks.length > 0) {
+                const beforeCode = getCode();
+                const result = applyEditBlocks(editBlocks);
+                if (result.success) {
+                    const afterCode = getCode();
+                    const safety = checkCodeSafety(beforeCode, afterCode, 'searchreplace');
+                    if (!safety.safe) {
+                        setCode(beforeCode);
+                        if (targetMsgEl) setAssistantMsgText(targetMsgEl, safety.message);
+                        addDiffCard(targetMsgEl, afterCode, false);
+                        showToast('修改已撤销：' + safety.message, 'warning');
+                    } else {
+                        updatePreview();
+                        highlightChangedLines(result.changedLines);
+                        const opNames = editBlocks.map(b => b.type === 'replace' ? '替换' + b.startLine + '-' + b.endLine + '行' : b.type === 'insert' ? '插入到' + b.afterLine + '行后' : '删除' + b.startLine + '-' + b.endLine + '行').join('、');
+                        if (targetMsgEl) setAssistantMsgText(targetMsgEl, '已自动应用 ' + editBlocks.length + ' 处修改（' + opNames + '）');
+                        addDiffCard(targetMsgEl, afterCode, true);
+                        showToast('代码已自动更新', 'success');
+                    }
+                } else {
+                    if (targetMsgEl) setAssistantMsgText(targetMsgEl, '行号编辑应用失败，请手动应用。');
+                    addDiffCard(targetMsgEl, parsed.answer, false);
+                }
+                return;
+            }
+            const srBlocks = parseSearchReplaceBlocks(parsed.answer);
+            if (srBlocks.length > 0) {
+                const beforeCode = getCode();
+                const result = applySearchReplaceBlocks(srBlocks);
+                if (result.success) {
+                    const afterCode = getCode();
+                    const safety = checkCodeSafety(beforeCode, afterCode, 'searchreplace');
+                    if (!safety.safe) {
+                        setCode(beforeCode);
+                        if (targetMsgEl) setAssistantMsgText(targetMsgEl, safety.message);
+                        addDiffCard(targetMsgEl, afterCode, false);
+                        showToast('修改已撤销：' + safety.message, 'warning');
+                    } else {
+                        updatePreview();
+                        highlightChangedLines(result.changedLines);
+                        if (targetMsgEl) setAssistantMsgText(targetMsgEl, '已自动应用 ' + srBlocks.length + ' 处修改（第 ' + (result.changedLines[0] + 1) + ' 行起）');
+                        addDiffCard(targetMsgEl, afterCode, true);
+                        showToast('代码已自动更新', 'success');
+                    }
+                } else {
+                    if (targetMsgEl) setAssistantMsgText(targetMsgEl, '自动应用失败：' + (result.reason === 'search_not_found' ? '找不到匹配文本' : result.reason === 'ambiguous_search' ? '匹配文本不唯一' : '未知错误') + '，请手动应用。');
+                    addDiffCard(targetMsgEl, parsed.answer, false);
+                }
+                return;
+            }
+            const blockRe = new RegExp('```(?:' + cFence + '|html)?\\s*\\n?([\\s\\S]*?)```');
+            const codeMatch = parsed.answer.match(blockRe);
+            const extractedCode = codeMatch ? codeMatch[1].trim() : parsed.answer.trim();
+            if (extractedCode) {
+                const beforeCode = getCode();
+                const safety = checkCodeSafety(beforeCode, extractedCode, 'full');
+                if (!safety.safe) {
+                    if (targetMsgEl) setAssistantMsgText(targetMsgEl, safety.message);
+                    addDiffCard(targetMsgEl, extractedCode, false);
+                    showToast(safety.message, 'warning');
+                } else {
+                    setCode(extractedCode);
+                    updatePreview();
+                    const diffLines = computeDiffLines(beforeCode, extractedCode);
+                    highlightChangedLines(diffLines);
+                    const diffSummary = buildDiffSummary(beforeCode, extractedCode);
+                    if (targetMsgEl) setAssistantMsgText(targetMsgEl, diffSummary || '代码已修改');
+                    addDiffCard(targetMsgEl, extractedCode, true);
+                    showToast('代码已自动更新', 'success');
+                }
+            } else if (!hasThinking) {
+                if (targetMsgEl) setAssistantMsgText(targetMsgEl, parsed.answer.trim() || '完成');
             }
         }
 
@@ -4474,94 +4608,64 @@ ${techSpec}
                 setAssistantMsgText(assistantMsgEl, parsed.thinking ? '代码已生成' : (parsed.answer.trim() || '完成'));
             }
 
-            // Handle code output
-            if (parsed.answer.includes('NOT_CODE_TASK')) {
-                if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, '请描述代码修改需求。');
-            } else {
-                // 1. Try line-based edit blocks first
-                const editBlocks = parseEditBlocks(parsed.answer);
-                if (editBlocks.length > 0) {
-                    const beforeCode = getCode();
-                    const result = applyEditBlocks(editBlocks);
-                    if (result.success) {
-                        const afterCode = getCode();
-                        const safety = checkCodeSafety(beforeCode, afterCode, 'searchreplace');
-                        if (!safety.safe) {
-                            setCode(beforeCode);
-                            if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, safety.message);
-                            addDiffCard(assistantMsgEl, afterCode, false);
-                            showToast('修改已撤销：' + safety.message, 'warning');
-                        } else {
-                            updatePreview();
-                            highlightChangedLines(result.changedLines);
-                            const opNames = editBlocks.map(b => b.type === 'replace' ? '替换' + b.startLine + '-' + b.endLine + '行' : b.type === 'insert' ? '插入到' + b.afterLine + '行后' : '删除' + b.startLine + '-' + b.endLine + '行').join('、');
-                            if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, '已自动应用 ' + editBlocks.length + ' 处修改（' + opNames + '）');
-                            addDiffCard(assistantMsgEl, afterCode, true);
-                            showToast('代码已自动更新', 'success');
-                        }
-                    } else {
-                        if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, '行号编辑应用失败，请手动应用。');
-                        addDiffCard(assistantMsgEl, parsed.answer, false);
-                    }
-                } else {
-                    // 2. Fallback to Search/Replace blocks
-                    const srBlocks = parseSearchReplaceBlocks(parsed.answer);
-                    if (srBlocks.length > 0) {
-                        const beforeCode = getCode();
-                        const result = applySearchReplaceBlocks(srBlocks);
-                        if (result.success) {
-                            const afterCode = getCode();
-                            const safety = checkCodeSafety(beforeCode, afterCode, 'searchreplace');
-                            if (!safety.safe) {
-                                setCode(beforeCode);
-                                if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, safety.message);
-                                addDiffCard(assistantMsgEl, afterCode, false);
-                                showToast('修改已撤销：' + safety.message, 'warning');
-                            } else {
-                                updatePreview();
-                                highlightChangedLines(result.changedLines);
-                                if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, '已自动应用 ' + srBlocks.length + ' 处修改（第 ' + (result.changedLines[0] + 1) + ' 行起）');
-                                addDiffCard(assistantMsgEl, afterCode, true);
-                                showToast('代码已自动更新', 'success');
-                            }
-                        } else {
-                            if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, '自动应用失败：' + (result.reason === 'search_not_found' ? '找不到匹配文本' : result.reason === 'ambiguous_search' ? '匹配文本不唯一' : '未知错误') + '，请手动应用。');
-                            addDiffCard(assistantMsgEl, parsed.answer, false);
-                        }
-                    } else {
-                        // 3. Fallback to full code block
-                        const blockRe = new RegExp('```(?:' + codeFence + '|html)?\\s*\\n?([\\s\\S]*?)```');
-                        const codeMatch = parsed.answer.match(blockRe);
-                        const extractedCode = codeMatch ? codeMatch[1].trim() : parsed.answer.trim();
-                        if (extractedCode) {
-                            const beforeCode = getCode();
-                            const safety = checkCodeSafety(beforeCode, extractedCode, 'full');
-                            if (!safety.safe) {
-                                if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, safety.message);
-                                addDiffCard(assistantMsgEl, extractedCode, false);
-                                showToast(safety.message, 'warning');
-                            } else {
-                                setCode(extractedCode);
-                                updatePreview();
-                                const diffLines = computeDiffLines(beforeCode, extractedCode);
-                                highlightChangedLines(diffLines);
-                                const diffSummary = buildDiffSummary(beforeCode, extractedCode);
-                                if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, diffSummary || '代码已修改');
-                                addDiffCard(assistantMsgEl, extractedCode, true);
-                                showToast('代码已自动更新', 'success');
-                            }
-                        } else if (!parsed.thinking) {
-                            if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, parsed.answer.trim() || '完成');
-                        }
-                    }
+            // Final markdown render for non-code text responses
+            if (assistantMsgEl && parsed.answer && !parsed.answer.includes('NOT_CODE_TASK') && !parsed.answer.match(/(REPLACE|INSERT|DELETE|```)/)) {
+                const textSpan = assistantMsgEl.querySelector('.msg-text');
+                if (textSpan && typeof marked !== 'undefined') {
+                    try { textSpan.innerHTML = marked.parse(parsed.answer); } catch (e) { textSpan.textContent = parsed.answer; }
                 }
             }
+
+            await handleParsedResponse(parsed, assistantMsgEl, codeFence);
         } catch (err) {
+            streamError = err;
             removeTypingIndicator();
             if (assistantMsgEl) {
-                setAssistantMsgText(assistantMsgEl, 'Error: ' + (err.message || '请求失败'));
+                // Show error with retry options, preserving any generated content
+                const preserved = streamTextBuf.trim();
+                const errorHtml = '<span style="color:var(--semantic-error);">Error: ' + escapeHtml(err.message || '请求失败') + '</span>' +
+                    (preserved ? '<div style="margin-top:8px;font-size:12px;color:var(--text-secondary);">已生成 ' + preserved.length + ' 字内容</div>' : '');
+                const textSpan = assistantMsgEl.querySelector('.msg-text');
+                if (textSpan) textSpan.innerHTML = errorHtml;
+
+                // Add retry buttons
+                const retryBar = document.createElement('div');
+                retryBar.className = 'ai-retry-bar';
+                retryBar.innerHTML = '<button class="btn btn-accent btn-retry" data-action="retry">重新生成</button>' +
+                    (preserved ? '<button class="btn btn-retry-continue" data-action="continue">从断点继续</button>' : '');
+                assistantMsgEl.appendChild(retryBar);
+
+                retryBar.querySelectorAll('[data-action]').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const action = e.target.dataset.action;
+                        retryBar.remove();
+                        if (action === 'retry') {
+                            // Clear and retry from beginning
+                            if (assistantMsgEl) assistantMsgEl.remove();
+                            btnAiSend.click();
+                        } else if (action === 'continue') {
+                            // Continue from where we left off
+                            aiChatInput.disabled = true; btnAiSend.disabled = true;
+                            aiStatusDot.classList.add('loading'); addTypingIndicator();
+                            const continueMsg = '[继续生成] 请继续输出剩余内容。已生成内容：\n' + preserved.slice(-500);
+                            try {
+                                const { fullText: contText } = await callAiApiStream(apiKey, aiModelSelect.value, continueMsg, deepThinking, onStreamChunk);
+                                // Append new content
+                                streamTextBuf += contText;
+                                // Re-process full result
+                                const fullParsed = parseThinkingResponse(thinkingBuffer + '\n' + streamTextBuf);
+                                handleParsedResponse(fullParsed, assistantMsgEl, codeFence);
+                            } catch (e2) {
+                                if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, '继续生成也失败了: ' + e2.message);
+                            } finally {
+                                aiChatInput.disabled = false; btnAiSend.disabled = false;
+                                aiStatusDot.classList.remove('loading');
+                            }
+                        }
+                    });
+                });
             } else {
-                addChatMessage('assistant', 'Error: ' + (err.message || '请求失败'));
+                addChatMessage('assistant', 'Error: ' + (err.message || '请求失败'), ICONS.error);
             }
         } finally {
             aiChatInput.disabled = false; btnAiSend.disabled = false;
@@ -4648,7 +4752,7 @@ ${techSpec}
     async function callAiApi(apiKey, model, instruction, deepThinking) {
         const { messages, codeFence, currentCode } = buildAiPayload(instruction, deepThinking);
         const chatUrl = getEndpointChatUrl(loadAiEndpoint());
-        const payload = { model: model, messages: messages, temperature: 0.2 };
+        const payload = { model: model, messages: messages };
         const res = await fetch(chatUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey }, body: JSON.stringify(payload) });
         if (!res.ok) {
             let em = 'API 错误 ' + res.status;
@@ -4681,7 +4785,7 @@ ${techSpec}
     async function callAiApiStream(apiKey, model, instruction, deepThinking, onChunk) {
         const { messages, codeFence, currentCode } = buildAiPayload(instruction, deepThinking);
         const chatUrl = getEndpointChatUrl(loadAiEndpoint());
-        const payload = { model: model, messages: messages, stream: true, temperature: 0.2 };
+        const payload = { model: model, messages: messages, stream: true };
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 120000);
         const res = await fetch(chatUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey }, body: JSON.stringify(payload), signal: controller.signal });
@@ -5168,10 +5272,10 @@ ${techSpec}
             try {
                 let payload;
                 if (toolsSupported) {
-                    payload = { model, messages, tools: AGENT_TOOLS, tool_choice: 'auto', temperature: 0.2 };
+                    payload = { model, messages, tools: AGENT_TOOLS, tool_choice: 'auto' };
                 } else {
                     // Fallback: no tools, just regular chat with enhanced system prompt
-                    payload = { model, messages, temperature: 0.2 };
+                    payload = { model, messages };
                 }
                 const res = await fetch(chatUrl, {
                     method: 'POST',
