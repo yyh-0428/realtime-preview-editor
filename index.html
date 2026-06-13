@@ -824,6 +824,7 @@ html, body {
   font-family: var(--font-ui); font-size: var(--font-size-ui);
   outline: none; min-width: 0;
   transition: border-color var(--duration-fast);
+  resize: none; overflow-y: auto; max-height: 160px; line-height: 1.5;
 }
 .ai-chat-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-subtle); }
 .ai-chat-input::placeholder { color: var(--text-tertiary); }
@@ -1379,7 +1380,7 @@ html, body {
                         </div>
                     </div>
                     <div class="ai-input-bar">
-                        <input type="text" class="ai-chat-input" id="aiChatInput" placeholder="描述你想要修改的内容…" maxlength="2000">
+                        <textarea class="ai-chat-input" id="aiChatInput" placeholder="描述你想要修改的内容…" rows="1"></textarea>
                         <button class="btn btn-accent" id="btnAiSend" disabled>
                             <svg class="btn-icon"><use href="#icon-lightning"></use></svg> 发送
                         </button>
@@ -4572,6 +4573,19 @@ ${techSpec}
 
     aiChatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && !btnAiSend.disabled) { e.preventDefault(); btnAiSend.click(); } });
 
+    // Auto-resize textarea
+    function autoResizeTextarea() {
+        aiChatInput.style.height = 'auto';
+        aiChatInput.style.height = Math.min(aiChatInput.scrollHeight, 160) + 'px';
+    }
+    aiChatInput.addEventListener('input', autoResizeTextarea);
+    // Reset height after send
+    const origBtnAiSendClick = btnAiSend.onclick;
+    btnAiSend.addEventListener('click', () => {
+        aiChatInput.style.height = 'auto';
+        aiChatInput.rows = 1;
+    });
+
     function buildAiPayload(instruction, deepThinking) {
         const currentCode = getCode();
         const codeLines = currentCode.split('\n');
@@ -4634,7 +4648,7 @@ ${techSpec}
     async function callAiApi(apiKey, model, instruction, deepThinking) {
         const { messages, codeFence, currentCode } = buildAiPayload(instruction, deepThinking);
         const chatUrl = getEndpointChatUrl(loadAiEndpoint());
-        const payload = { model: model, messages: messages };
+        const payload = { model: model, messages: messages, temperature: 0.2 };
         const res = await fetch(chatUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey }, body: JSON.stringify(payload) });
         if (!res.ok) {
             let em = 'API 错误 ' + res.status;
@@ -4667,7 +4681,7 @@ ${techSpec}
     async function callAiApiStream(apiKey, model, instruction, deepThinking, onChunk) {
         const { messages, codeFence, currentCode } = buildAiPayload(instruction, deepThinking);
         const chatUrl = getEndpointChatUrl(loadAiEndpoint());
-        const payload = { model: model, messages: messages, stream: true };
+        const payload = { model: model, messages: messages, stream: true, temperature: 0.2 };
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 120000);
         const res = await fetch(chatUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey }, body: JSON.stringify(payload), signal: controller.signal });
@@ -5154,10 +5168,10 @@ ${techSpec}
             try {
                 let payload;
                 if (toolsSupported) {
-                    payload = { model, messages, tools: AGENT_TOOLS, tool_choice: 'auto' };
+                    payload = { model, messages, tools: AGENT_TOOLS, tool_choice: 'auto', temperature: 0.2 };
                 } else {
                     // Fallback: no tools, just regular chat with enhanced system prompt
-                    payload = { model, messages };
+                    payload = { model, messages, temperature: 0.2 };
                 }
                 const res = await fetch(chatUrl, {
                     method: 'POST',
