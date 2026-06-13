@@ -1374,8 +1374,11 @@ html, body {
                                 <svg><use href="#icon-refresh"></use></svg>
                             </button>
                         </div>
-                        <div class="ai-config-row">
-                            <input type="password" class="ai-key-input" id="aiKeyInput" placeholder="输入 API Key" maxlength="200" autocomplete="off">
+                        <div class="ai-config-row" style="position:relative;">
+                            <input type="password" class="ai-key-input" id="aiKeyInput" placeholder="输入 API Key" maxlength="200" autocomplete="off" style="padding-right:28px;">
+                            <button class="btn-icon-only" id="btnToggleKeyVisibility" title="显示/隐藏 Key" aria-label="显示/隐藏 Key" style="position:absolute;right:calc(var(--space-2) + 2px);top:50%;transform:translateY(-50%);padding:2px;opacity:0.5;z-index:2;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
                             <select class="ai-model-select" id="aiModelSelect"></select>
                             <span class="ai-status-dot" id="aiStatusDot" title="未配置 API Key"></span>
                         </div>
@@ -2485,8 +2488,8 @@ html, body {
 
     function loadAiEndpoint() { try { return localStorage.getItem(AI_ENDPOINT_STORAGE) || ''; } catch (e) { return ''; } }
     function saveAiEndpoint(ep) { try { localStorage.setItem(AI_ENDPOINT_STORAGE, ep); } catch (e) { console.error(e); } }
-    function loadAiKey() { try { return sessionStorage.getItem(AI_KEY_STORAGE) || ''; } catch (e) { return ''; } }
-    function saveAiKey(k) { try { sessionStorage.setItem(AI_KEY_STORAGE, k); } catch (e) { console.error(e); } updateAiStatus(); }
+    function loadAiKey() { try { return localStorage.getItem(AI_KEY_STORAGE) || ''; } catch (e) { return ''; } }
+    function saveAiKey(k) { try { localStorage.setItem(AI_KEY_STORAGE, k); } catch (e) { console.error(e); } updateAiStatus(); }
     function loadAiModel() { try { return localStorage.getItem(AI_MODEL_STORAGE) || ''; } catch (e) { return ''; } }
     function saveAiModel(m) { try { localStorage.setItem(AI_MODEL_STORAGE, m); } catch (e) { console.error(e); } }
     function loadDesignSystem() { try { return localStorage.getItem(AI_DESIGN_SYSTEM_STORAGE) || 'default'; } catch (e) { return 'default'; } }
@@ -4441,9 +4444,25 @@ ${techSpec}
         const k = aiKeyInput.value.trim();
         if (k && !k.includes('•')) saveAiKey(k);
         const sk = loadAiKey();
-        if (sk) aiKeyInput.value = sk.slice(0, 10) + '••••' + sk.slice(-4);
+        if (sk && aiKeyInput.type === 'password') aiKeyInput.value = sk.slice(0, 10) + '••••' + sk.slice(-4);
     });
     aiKeyInput.addEventListener('focus', () => { const k = loadAiKey(); if (k) aiKeyInput.value = k; });
+    // Key visibility toggle
+    const btnToggleKeyVisibility = document.getElementById('btnToggleKeyVisibility');
+    if (btnToggleKeyVisibility) {
+        btnToggleKeyVisibility.addEventListener('click', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            const isPassword = aiKeyInput.type === 'password';
+            aiKeyInput.type = isPassword ? 'text' : 'password';
+            btnToggleKeyVisibility.innerHTML = isPassword
+                ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+                : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+            btnToggleKeyVisibility.title = isPassword ? '隐藏 Key' : '显示 Key';
+            if (isPassword) { const k = loadAiKey(); if (k) aiKeyInput.value = k; }
+            else { const sk = loadAiKey(); if (sk) aiKeyInput.value = sk.slice(0, 10) + '••••' + sk.slice(-4); }
+            aiKeyInput.focus();
+        });
+    }
     aiModelSelect.addEventListener('change', () => { saveAiModel(aiModelSelect.value); });
     btnRefreshModels.addEventListener('click', () => fetchModels());
 
