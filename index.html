@@ -1495,8 +1495,9 @@ html, body {
     function getEditorContext() {
         const cursor = editor.getCursor();
         const selections = editor.listSelections();
+        const totalLines = editor.lineCount();
         let ctx = '';
-        if (selections.length > 0) {
+        if (selections && selections.length > 0) {
             const s = selections[0];
             const from = { line: Math.min(s.anchor.line, s.head.line), ch: Math.min(s.anchor.ch, s.head.ch) };
             const to = { line: Math.max(s.anchor.line, s.head.line), ch: Math.max(s.anchor.ch, s.head.ch) };
@@ -1505,14 +1506,40 @@ html, body {
                 const snippet = selectedText.slice(0, 600) + (selectedText.length > 600 ? '\n...' : '');
                 // Analyze structural context: find enclosing function/class/tag
                 const structCtx = getStructuralContext(from.line, to.line);
+                // Get surrounding context (3 lines before and after)
+                let surrounding = '';
+                const preStart = Math.max(0, from.line - 3);
+                const postEnd = Math.min(totalLines - 1, to.line + 3);
+                if (preStart < from.line || postEnd > to.line) {
+                    const surLines = [];
+                    for (let i = preStart; i <= postEnd; i++) {
+                        const ln = editor.getLine(i);
+                        const prefix = i >= from.line && i <= to.line ? '▶' : ' ';
+                        surLines.push('  ' + (i + 1) + ' |' + prefix + ' ' + ln.slice(0, 120));
+                    }
+                    surrounding = '\n\n选中区域周边代码（▶ 标记的是选中行）：\n```\n' + surLines.join('\n') + '\n```';
+                }
                 ctx = '\n用户当前选中了第 ' + (from.line + 1) + ' 行到第 ' + (to.line + 1) + ' 行' +
                       (structCtx ? '（位于 ' + structCtx + ' 内）' : '') +
-                      '，选中内容：\n```\n' + snippet + '\n```\n\n【重要】你只修改这段选中区域内的代码，不要改动选中区域之外的任何代码。';
+                      '，选中内容：\n```\n' + snippet + '\n```' + surrounding +
+                      '\n\n【重要】你只修改这段选中区域内的代码，不要改动选中区域之外的任何代码。';
             } else {
+                // Cursor at specific position — show surrounding context too
                 const structCtx = getStructuralContext(cursor.line, cursor.line);
+                const curLineText = editor.getLine(cursor.line);
+                const surLines = [];
+                for (let i = Math.max(0, cursor.line - 3); i <= Math.min(totalLines - 1, cursor.line + 3); i++) {
+                    const ln = editor.getLine(i);
+                    const prefix = i === cursor.line ? '▶' : ' ';
+                    surLines.push('  ' + (i + 1) + ' |' + prefix + ' ' + ln.slice(0, 120));
+                }
                 ctx = '\n用户光标当前在第 ' + (cursor.line + 1) + ' 行第 ' + (cursor.ch + 1) + ' 列' +
-                      (structCtx ? '（位于 ' + structCtx + ' 内）' : '') + '。';
+                      (structCtx ? '（位于 ' + structCtx + ' 内）' : '') +
+                      '，当前行内容：`' + curLineText.slice(0, 200) + '`\n\n周边代码上下文（▶ 标记的是当前行）：\n```\n' + surLines.join('\n') + '\n```';
             }
+        } else {
+            // No cursor position available
+            ctx = '\n编辑器当前共 ' + totalLines + ' 行代码，用户未选中特定区域。';
         }
         return ctx;
     }
@@ -3771,7 +3798,8 @@ ${PUBLIC_APIS_KNOWLEDGE}
         const frameworks = {
             low: `你是资深全栈开发工程师。用户提出了一个相对直接的代码修改需求。
 
-请先简要分析需求，然后在 <thinking> 标签中输出你的思考过程（2个步骤：问题理解 → 实现计划），最后输出修改后的代码。`,
+请先简要分析需求，然后在 <thinking> 标签中输出你的思考过程（3个步骤：问题理解 → 实现计划 → 输出前自检），最后输出修改后的代码。
+输出前自检：检查行号是否正确、缩进是否一致、改动是否精确、CSS属性值是否有效、HTML标签是否闭合。`,
             medium: `你是资深全栈开发工程师。请按以下结构化框架进行思考，将思考过程包裹在 <thinking> 标签中，最后输出修改后的代码。
 
 思考框架（请在 <thinking> 标签内完成，每个步骤至少展开2-3句话，不能只列标题）：
@@ -3781,7 +3809,8 @@ ${PUBLIC_APIS_KNOWLEDGE}
 【技术评估】当前代码结构是否支持？需要引入新技术吗？边界条件如何处理？
 【方案分析】列出可行方案，对比优缺点，选择最优方案并说明理由
 【风险预判】哪些已有功能可能被破坏？如何避免回归问题？
-【实现计划】具体的代码修改步骤和关键变更点，以及验证方法`,
+【实现计划】具体的代码修改步骤和关键变更点，以及验证方法
+【输出前自检】逐项检查：行号是否正确、缩进是否与原文一致、替换范围是否精确、CSS属性值是否有效、HTML标签是否正确闭合、JS变量是否已定义、是否保留了用户明确要求的颜色/尺寸/布局`,
             high: `你是资深全栈开发工程师和软件架构师。请按以下深度分析框架进行系统性思考，将完整的思考过程包裹在 <thinking> 标签中，最后输出修改后的代码。
 
 深度思考框架（请在 <thinking> 标签内完成，每个步骤必须详细展开至少3-5句话，不能只列标题或关键词）：
@@ -3845,7 +3874,15 @@ ${PUBLIC_APIS_KNOWLEDGE}
 - 选择的方案及详细理由
 - 具体的代码修改清单（按文件/区域组织）
 - 验证与测试建议
-- 如果用户后续还想改什么，提前给出建议`
+- 如果用户后续还想改什么，提前给出建议
+
+【输出前自检——编辑块验证】
+- 每个 REPLACE/INSERT/DELETE 的行号是否与周边代码上下文一致？
+- 换行符和缩进是否保留正确？
+- CSS 属性值是否使用有效的值和单位？
+- HTML 标签是否正确闭合？
+- 是否保留了用户明确要求的颜色、尺寸、布局？
+- 是否有多余的修改（改动了用户没要求的部分）？`
         };
         const systemContent = frameworks[complexity.level] + `
 
@@ -4509,7 +4546,8 @@ ${techSpec}
             '▼HTML 可访问性：img 必须有 alt 属性（纯装饰图用 alt=""）；button 必须有 type 属性；form input 必须有 label 关联；用语义标签（header/nav/main/section/footer）替代 div 堆砌\n' +
             '▼JS DOM：批量操作用 DocumentFragment 或 innerHTML 一次性更新，避免逐条 appendChild 触发多次回流；事件监听用事件委托绑定到父元素而非每个子元素；DOM 查询结果缓存到变量，禁止循环内反复 querySelector\n' +
             '▼JS 健壮性：所有 fetch 必须处理 .catch() 或 try/catch；禁止使用 eval()；动态 HTML 拼接用 textContent 防 XSS；定时器 clearTimeout/clearInterval 前先判空\n' +
-            '▼浏览器兼容：CSS 属性需考虑 Chrome/Safari/Firefox 三大内核；新 CSS 属性检查兼容性，必要时加回退方案；font-size 最小 12px 以保证可读性；rem 单位确保 html 根字号已设置';
+            '▼浏览器兼容：CSS 属性需考虑 Chrome/Safari/Firefox 三大内核；新 CSS 属性检查兼容性，必要时加回退方案；font-size 最小 12px 以保证可读性；rem 单位确保 html 根字号已设置\n' +
+            '▼输出前必须自检：①行号是否正确（参考用户消息中代码左侧数字）②新代码缩进是否与原文一致③替换范围是否精确（不多改不少改）④CSS 属性值是否有效（如颜色值、单位）⑤HTML 标签是否正确闭合⑥JS 变量是否已定义⑦是否保留了用户明确要求的颜色/尺寸/布局';
         let messages;
         if (deepThinking) {
             const complexity = detectComplexity(instruction);
