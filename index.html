@@ -354,6 +354,19 @@ html, body {
 .btn-accent:hover { background: var(--accent-hover); color: #1A1816; }
 .btn-accent:active { background: var(--accent-active); }
 
+.btn-stop {
+  background: var(--semantic-error) !important;
+  color: #fff !important;
+  font-weight: var(--font-weight-semibold);
+  animation: btnPulse 1.5s ease-in-out infinite;
+}
+.btn-stop:hover { background: #D4685C !important; }
+.btn-stop:active { background: #B85C50 !important; }
+@keyframes btnPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(200, 116, 106, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(200, 116, 106, 0); }
+}
+
 .btn-danger { color: var(--semantic-error); }
 .btn-danger:hover { background: var(--semantic-error-bg); }
 
@@ -1263,6 +1276,7 @@ html, body {
         <symbol id="icon-screen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></symbol>
         <symbol id="icon-maximize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></symbol>
         <symbol id="icon-minimize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6"/><path d="M20 10h-6V4"/><path d="M14 10l7-7"/><path d="M3 21l7-7"/></symbol>
+        <symbol id="icon-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
     </svg>
 
     <div class="app-container">
@@ -2481,9 +2495,41 @@ html, body {
     function updateAiStatus() {
         const key = loadAiKey();
         const hasKey = key && key.trim().length > 0;
-        btnAiSend.disabled = !hasKey;
+        if (!isAiGenerating) btnAiSend.disabled = !hasKey;
         aiStatusDot.title = hasKey ? 'API Key 已配置' : '未配置 API Key';
         aiStatusDot.classList.toggle('ready', hasKey);
+    }
+
+    // Global abort controller for canceling ongoing AI requests
+    let activeAbortController = null;
+    let isAiGenerating = false;
+
+    function setAiGenerating(generating) {
+        isAiGenerating = generating;
+        if (generating) {
+            btnAiSend.innerHTML = '<svg class="btn-icon"><use href="#icon-stop"/></svg> 停止';
+            btnAiSend.classList.add('btn-stop');
+            btnAiSend.disabled = false;
+            aiChatInput.disabled = true;
+        } else {
+            btnAiSend.innerHTML = '<svg class="btn-icon"><use href="#icon-lightning"/></svg> 发送';
+            btnAiSend.classList.remove('btn-stop');
+            btnAiSend.disabled = !loadAiKey();
+            aiChatInput.disabled = false;
+            aiStatusDot.classList.remove('loading');
+            activeAbortController = null;
+        }
+    }
+
+    function abortAiGeneration() {
+        if (activeAbortController) {
+            activeAbortController.abort();
+            activeAbortController = null;
+        }
+        isAiGenerating = false;
+        setAiGenerating(false);
+        removeTypingIndicator();
+        showToast('已停止生成', '');
     }
 
     // ==================== Deep Thinking ====================
@@ -4398,6 +4444,12 @@ ${techSpec}
     btnRefreshModels.addEventListener('click', () => fetchModels());
 
     btnAiSend.addEventListener('click', async () => {
+        // If AI is currently generating, click = stop
+        if (isAiGenerating) {
+            abortAiGeneration();
+            return;
+        }
+
         const instruction = aiChatInput.value.trim();
         if (!instruction) return;
         const apiKey = loadAiKey();
@@ -4405,9 +4457,11 @@ ${techSpec}
 
         // Agent Mode
         if (agentModeToggle && agentModeToggle.checked) {
-            aiChatInput.value = ''; aiChatInput.disabled = true; btnAiSend.disabled = true;
+            aiChatInput.value = '';
+            setAiGenerating(true);
             try { await runAgentLoop(instruction); }
-            finally { aiChatInput.disabled = false; btnAiSend.disabled = false; }
+            catch (e) { if (e.name !== 'AbortError') addChatMessage('assistant', 'Agent 执行中断: ' + e.message, ICONS.error); }
+            finally { setAiGenerating(false); }
             return;
         }
 
@@ -4418,7 +4472,8 @@ ${techSpec}
             thinkingBadge.style.display = 'inline';
         }
         hideAiEmptyState(); addChatMessage('user', instruction);
-        aiChatInput.value = ''; aiChatInput.disabled = true; btnAiSend.disabled = true;
+        aiChatInput.value = '';
+        setAiGenerating(true);
         aiStatusDot.classList.add('loading'); addTypingIndicator();
         highlightSelectionForAi(); // Highlight selected code so user sees what AI is focusing on
         const startTime = Date.now();
@@ -4584,8 +4639,26 @@ ${techSpec}
         }
 
         try {
-            const { fullText, codeFence, currentCode } = await callAiApiStream(apiKey, aiModelSelect.value, instruction, deepThinking, onStreamChunk);
+            const { fullText, codeFence, currentCode, aborted } = await callAiApiStream(apiKey, aiModelSelect.value, instruction, deepThinking, onStreamChunk);
             streamEnded = true;
+
+            // If user aborted, preserve what we got and don't parse as error
+            if (aborted) {
+                removeTypingIndicator();
+                if (assistantMsgEl) {
+                    const preserved = streamTextBuf.trim();
+                    if (preserved) {
+                        setAssistantMsgText(assistantMsgEl, preserved);
+                        // Try to parse any partial edit blocks
+                        const partialParsed = parseThinkingResponse(thinkingBuffer + '\n' + streamTextBuf);
+                        if (partialParsed.answer) handleParsedResponse(partialParsed, assistantMsgEl, codeFence);
+                    } else {
+                        setAssistantMsgText(assistantMsgEl, '已停止生成');
+                    }
+                }
+                return;
+            }
+
             const duration = Date.now() - startTime;
             removeTypingIndicator();
 
@@ -4618,6 +4691,8 @@ ${techSpec}
 
             await handleParsedResponse(parsed, assistantMsgEl, codeFence);
         } catch (err) {
+            // Ignore AbortError (user clicked stop)
+            if (err.name === 'AbortError') return;
             streamError = err;
             removeTypingIndicator();
             if (assistantMsgEl) {
@@ -4645,7 +4720,7 @@ ${techSpec}
                             btnAiSend.click();
                         } else if (action === 'continue') {
                             // Continue from where we left off
-                            aiChatInput.disabled = true; btnAiSend.disabled = true;
+                            setAiGenerating(true);
                             aiStatusDot.classList.add('loading'); addTypingIndicator();
                             const continueMsg = '[继续生成] 请继续输出剩余内容。已生成内容：\n' + preserved.slice(-500);
                             try {
@@ -4656,10 +4731,9 @@ ${techSpec}
                                 const fullParsed = parseThinkingResponse(thinkingBuffer + '\n' + streamTextBuf);
                                 handleParsedResponse(fullParsed, assistantMsgEl, codeFence);
                             } catch (e2) {
-                                if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, '继续生成也失败了: ' + e2.message);
+                                if (e2.name !== 'AbortError' && assistantMsgEl) setAssistantMsgText(assistantMsgEl, '继续生成也失败了: ' + e2.message);
                             } finally {
-                                aiChatInput.disabled = false; btnAiSend.disabled = false;
-                                aiStatusDot.classList.remove('loading');
+                                setAiGenerating(false);
                             }
                         }
                     });
@@ -4668,8 +4742,7 @@ ${techSpec}
                 addChatMessage('assistant', 'Error: ' + (err.message || '请求失败'), ICONS.error);
             }
         } finally {
-            aiChatInput.disabled = false; btnAiSend.disabled = false;
-            aiStatusDot.classList.remove('loading'); updateAiStatus();
+            setAiGenerating(false);
             if (thinkingBadge) thinkingBadge.style.display = 'none';
             clearAiSelectionHighlight();
         }
@@ -4677,10 +4750,10 @@ ${techSpec}
 
     aiChatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && !btnAiSend.disabled) { e.preventDefault(); btnAiSend.click(); } });
 
-    // Auto-resize textarea
+    // Auto-resize textarea (no max height limit)
     function autoResizeTextarea() {
         aiChatInput.style.height = 'auto';
-        aiChatInput.style.height = Math.min(aiChatInput.scrollHeight, 160) + 'px';
+        aiChatInput.style.height = aiChatInput.scrollHeight + 'px';
     }
     aiChatInput.addEventListener('input', autoResizeTextarea);
     // Reset height after send
@@ -4787,7 +4860,8 @@ ${techSpec}
         const chatUrl = getEndpointChatUrl(loadAiEndpoint());
         const payload = { model: model, messages: messages, stream: true };
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 120000);
+        activeAbortController = controller;
+        const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 min for long generations
         const res = await fetch(chatUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey }, body: JSON.stringify(payload), signal: controller.signal });
         clearTimeout(timeoutId);
         if (!res.ok) {
@@ -4814,37 +4888,48 @@ ${techSpec}
         const decoder = new TextDecoder();
         let buffer = '';
         let fullText = '';
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop(); // keep incomplete line
-            for (const line of lines) {
-                const trimmed = line.trim();
-                if (!trimmed.startsWith('data:')) continue;
-                const dataStr = trimmed.slice(5).trim();
-                if (dataStr === '[DONE]') continue;
-                try {
-                    const chunk = JSON.parse(dataStr);
-                    const content = chunk.choices?.[0]?.delta?.content || '';
-                    if (content) {
-                        fullText += content;
-                        if (onChunk) onChunk(content, fullText);
-                    }
-                } catch (e) { /* ignore malformed lines */ }
+        try {
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // keep incomplete line
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (!trimmed.startsWith('data:')) continue;
+                    const dataStr = trimmed.slice(5).trim();
+                    if (dataStr === '[DONE]') continue;
+                    try {
+                        const chunk = JSON.parse(dataStr);
+                        const content = chunk.choices?.[0]?.delta?.content || '';
+                        if (content) {
+                            fullText += content;
+                            if (onChunk) onChunk(content, fullText);
+                        }
+                    } catch (e) { /* ignore malformed lines */ }
+                }
             }
-        }
-        // Process remaining buffer
-        if (buffer.trim().startsWith('data:')) {
-            const dataStr = buffer.trim().slice(5).trim();
-            if (dataStr !== '[DONE]') {
-                try {
-                    const chunk = JSON.parse(dataStr);
-                    const content = chunk.choices?.[0]?.delta?.content || '';
-                    if (content) { fullText += content; if (onChunk) onChunk(content, fullText); }
-                } catch (e) { /* ignore */ }
+            // Process remaining buffer
+            if (buffer.trim().startsWith('data:')) {
+                const dataStr = buffer.trim().slice(5).trim();
+                if (dataStr !== '[DONE]') {
+                    try {
+                        const chunk = JSON.parse(dataStr);
+                        const content = chunk.choices?.[0]?.delta?.content || '';
+                        if (content) { fullText += content; if (onChunk) onChunk(content, fullText); }
+                    } catch (e) { /* ignore */ }
+                }
             }
+        } catch (e) {
+            if (e.name === 'AbortError') {
+                // User cancelled — return what we have so far
+                return { fullText, codeFence, currentCode, aborted: true };
+            }
+            throw e;
+        } finally {
+            reader.releaseLock();
+            activeAbortController = null;
         }
         return { fullText, codeFence, currentCode };
     }
@@ -5264,11 +5349,23 @@ ${techSpec}
         hideAiEmptyState(); addChatMessage('user', userRequest);
         const statusMsg = addChatMessage('assistant', 'Agent 模式已启动，正在分析需求…', ICONS.agent);
         setAgentStatus('分析中', '正在理解需求');
-        let totalTurns = 0; const MAX_TURNS = 10;
+        let totalTurns = 0;
         let toolsSupported = true; // Will be set to false if API rejects tools
 
-        while (totalTurns < MAX_TURNS) {
+        while (true) {
+            // Check if user requested abort
+            if (!isAiGenerating) {
+                setAgentStatus('已停止', '用户中断');
+                addChatMessage('assistant', 'Agent 执行已被用户中断', ICONS.warn);
+                throw new Error('AbortError');
+            }
             totalTurns++;
+            // Safety: after 50 turns, ask if we should continue (not hard stop)
+            if (totalTurns > 50) {
+                setAgentStatus('提示', '已执行 50+ 步');
+                addChatMessage('assistant', 'Agent 已执行超过 50 步，任务可能较复杂。如需继续，请重新描述需求。', ICONS.info);
+                break;
+            }
             try {
                 let payload;
                 if (toolsSupported) {
@@ -5277,10 +5374,13 @@ ${techSpec}
                     // Fallback: no tools, just regular chat with enhanced system prompt
                     payload = { model, messages };
                 }
+                const controller = new AbortController();
+                activeAbortController = controller;
                 const res = await fetch(chatUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
                 });
                 if (!res.ok) {
                     const errText = await res.text();
@@ -5340,6 +5440,12 @@ ${techSpec}
 
                 // Execute tool calls
                 for (const tc of msg.tool_calls) {
+                    // Check abort before each tool
+                    if (!isAiGenerating) {
+                        setAgentStatus('已停止', '用户中断');
+                        addChatMessage('assistant', 'Agent 执行已被用户中断', ICONS.warn);
+                        throw new Error('AbortError');
+                    }
                     let toolName, toolArgs;
                     try {
                         toolName = tc.function?.name || 'unknown';
@@ -5355,13 +5461,17 @@ ${techSpec}
                     messages.push({ role: 'tool', tool_call_id: tc.id, content: result });
                 }
             } catch(e) {
+                if (e.name === 'AbortError' || e.message === 'AbortError') {
+                    setAgentStatus('已停止', '用户中断');
+                    throw e; // Let outer handler deal with it
+                }
                 setAgentStatus('错误', e.message);
-                addChatMessage('assistant', e.message, ICONS.error);
+                addChatMessage('assistant', 'Agent 执行出错: ' + e.message, ICONS.error);
                 return;
             }
         }
-        setAgentStatus('达到上限', MAX_TURNS + ' 步');
-        addChatMessage('assistant', '已达到最大执行轮数（' + MAX_TURNS + ' 步），任务可能未完成', ICONS.warn);
+        setAgentStatus('完成', totalTurns + ' 步');
+        addChatMessage('assistant', 'Agent 执行结束（共 ' + totalTurns + ' 步）', ICONS.check);
     }
 
     // Agent mode initialization
