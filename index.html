@@ -638,7 +638,13 @@ html, body {
 /* Agent message icons */
 .msg-icon-wrap { display: inline-flex; vertical-align: middle; margin-right: 4px; }
 .msg-icon-wrap svg { width: 14px; height: 14px; color: var(--text-secondary); }
+/* :has() supported since Safari 15.4 / Chrome 105; fallback below */
 .ai-message.assistant .msg-text:has(.msg-icon-wrap) { display: flex; align-items: flex-start; gap: 4px; }
+/* Fallback: if :has() not supported, .msg-icon-wrap container still looks ok */
+.ai-message.assistant .msg-icon-wrap ~ * { display: inline; }
+@supports not selector(:has(*)) {
+    .ai-message.assistant .msg-text { display: flex; align-items: flex-start; gap: 4px; }
+}
 
 /* Toast icons via pseudo-elements */
 .toast.success::before {
@@ -1098,6 +1104,16 @@ html, body {
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.success { border-color: var(--semantic-success); }
+
+
+/* ---- Safari 兼容修复 ---- */
+/* Safari 有时 input[type="password"] 渲染异常 */
+.browser-safari input[type="password"] { font-family: var(--font-mono); }
+/* Safari 按钮内 SVG 对齐 */
+.browser-safari .btn-icon-only svg { vertical-align: middle; }
+/* Safari 滚动条微调 */
+.browser-safari .ai-chat-area::-webkit-scrollbar,
+.browser-safari .snippets-body::-webkit-scrollbar { width: var(--space-1); }
 
 /* ============================================================
    PANEL VISIBILITY
@@ -1711,10 +1727,10 @@ html, body {
     function loadEditorCode() {
         try {
             const key = getStorageKey(currentLang);
-            const saved = localStorage.getItem(key);
+            const saved = safeStorage.get(key);
             if (saved && saved.trim()) return saved;
             if (currentLang === 'html') {
-                const legacy = localStorage.getItem(CODE_STORAGE_KEY);
+                const legacy = safeStorage.get(CODE_STORAGE_KEY);
                 if (legacy && legacy.trim()) return legacy;
             }
             return null;
@@ -1726,9 +1742,9 @@ html, body {
             const code = getCode();
             const key = getStorageKey(currentLang);
             if (code && code.trim() !== defaultCode.trim()) {
-                localStorage.setItem(key, code);
+                safeStorage.set(key, code);
             } else {
-                localStorage.removeItem(key);
+                safeStorage.remove(key);
             }
             rebuildLangTabs();
         } catch (e) { console.error(e); }
@@ -1747,7 +1763,7 @@ html, body {
 
     function loadRatio() {
         try {
-            const saved = localStorage.getItem(RATIO_STORAGE_KEY);
+            const saved = safeStorage.get(RATIO_STORAGE_KEY);
             if (saved !== null) {
                 const parsed = parseFloat(saved);
                 if (!isNaN(parsed) && parsed >= MIN_RATIO && parsed <= MAX_RATIO) {
@@ -1758,7 +1774,7 @@ html, body {
     }
 
     function saveRatio() {
-        try { localStorage.setItem(RATIO_STORAGE_KEY, editorRatio); } catch (e) { console.error(e); }
+        safeStorage.set(RATIO_STORAGE_KEY, String(editorRatio));
     }
 
     function getLayoutDirection() {
@@ -1863,7 +1879,7 @@ html, body {
 
     function loadColorMode() {
         try {
-            const stored = localStorage.getItem(COLOR_MODE_KEY);
+            const stored = safeStorage.get(COLOR_MODE_KEY);
             if (stored && (stored === 'light' || stored === 'dark')) return stored;
         } catch (e) { console.error(e); }
         return getSystemColorMode();
@@ -1888,14 +1904,14 @@ html, body {
         btnColorMode.classList.add('switching');
         setTimeout(() => btnColorMode.classList.remove('switching'), 350);
         applyColorMode(next);
-        try { localStorage.setItem(COLOR_MODE_KEY, next); } catch (e) { console.error(e); }
+        safeStorage.set(COLOR_MODE_KEY, next);
     }
 
     btnColorMode.addEventListener('click', toggleColorMode);
 
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
         try {
-            const stored = localStorage.getItem(COLOR_MODE_KEY);
+            const stored = safeStorage.get(COLOR_MODE_KEY);
             if (!stored || (stored !== 'light' && stored !== 'dark')) {
                 applyColorMode(e.matches ? 'dark' : 'light');
             }
@@ -1933,12 +1949,12 @@ html, body {
     function setTheme(theme) {
         if (!VALID_THEMES.includes(theme)) return;
         applyTheme(theme);
-        try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch (e) { console.error(e); }
+        safeStorage.set(THEME_STORAGE_KEY, theme);
     }
 
     function loadTheme() {
         try {
-            const stored = localStorage.getItem(THEME_STORAGE_KEY);
+            const stored = safeStorage.get(THEME_STORAGE_KEY);
             if (stored && VALID_THEMES.includes(stored)) return stored;
         } catch (e) { console.error(e); }
         return 'amber';
@@ -1956,6 +1972,16 @@ html, body {
             gfm: true, breaks: true
         });
     }
+
+    // ==================== 全局错误边界 ====================
+    window.addEventListener('error', (e) => {
+        // 忽略来自预览 iframe 的错误（用户代码错误不应影响编辑器）
+        if (e.target && (e.target.tagName === 'IFRAME' || e.target.nodeName === 'IFRAME')) return;
+        console.error('[Werkstatt] 未捕获错误:', e.error?.message || e.message);
+    });
+    window.addEventListener('unhandledrejection', (e) => {
+        console.error('[Werkstatt] 未处理的 Promise 拒绝:', e.reason?.message || e.reason);
+    });
 
     document.addEventListener('DOMContentLoaded', () => {
         const colorMode = loadColorMode();
@@ -2000,7 +2026,7 @@ html, body {
         currentFileName = fileName || ('index' + LANG_CONFIG[lang].ext);
         const cfg = LANG_CONFIG[lang];
         editor.setOption('mode', cfg.mode);
-        try { localStorage.setItem(LANG_STORAGE, lang); } catch (e) { console.error(e); }
+        safeStorage.set(LANG_STORAGE, lang);
         rebuildLangTabs();
     }
 
@@ -2015,7 +2041,7 @@ html, body {
         langs.forEach(lang => {
             const key = CODE_PREFIX + lang;
             let code = '';
-            try { code = localStorage.getItem(key) || ''; } catch (e) { console.error(e); }
+            code = safeStorage.get(key);
             if (!code.trim()) return;
             hasAny = true;
             const cfg = LANG_CONFIG[lang];
@@ -2127,7 +2153,7 @@ html, body {
             switchLanguage(lang, file.name);
             setCode(code);
             editor.refresh();
-            try { localStorage.setItem(getStorageKey(lang), code); } catch (e) { console.error(e); }
+            safeStorage.set(getStorageKey(lang), code);
             showStatus('编译中…', 'syncing');
             try {
                 const compiled = await compileCode(lang);
@@ -2144,6 +2170,10 @@ html, body {
 
     // Blob-backed preview: avoids Chrome file:// + srcdoc same-origin error
     let _blobUrl = null;
+    // 页面卸载时清理 Blob URL，防止内存泄漏
+    window.addEventListener('beforeunload', () => { if (_blobUrl) { URL.revokeObjectURL(_blobUrl); _blobUrl = null; } });
+    window.addEventListener('pagehide', () => { if (_blobUrl) { URL.revokeObjectURL(_blobUrl); _blobUrl = null; } });
+
     function updatePreviewIframe(html) {
         if (_isFileProtocol) {
             if (_blobUrl) URL.revokeObjectURL(_blobUrl);
@@ -2158,9 +2188,9 @@ html, body {
 
     function restoreLanguage() {
         try {
-            const saved = localStorage.getItem(LANG_STORAGE);
+            const saved = safeStorage.get(LANG_STORAGE);
             if (saved && LANG_CONFIG[saved]) {
-                const code = localStorage.getItem(getStorageKey(saved));
+                const code = safeStorage.get(getStorageKey(saved));
                 if (code && code.trim()) { switchLanguage(saved); setCode(code); return true; }
             }
         } catch (e) { console.error(e); }
@@ -2168,6 +2198,36 @@ html, body {
     }
 
     // ==================== Core ====================
+    // ==================== safeStorage — 浏览器兼容 localStorage 包装 ====================
+    // Safari 隐私浏览 / Firefox 严格模式下 localStorage 可能不可用，统一降级为内存存储
+    const safeStorage = (() => {
+        let _ok = null, _mem = {};
+        const check = () => {
+            if (_ok !== null) return _ok;
+            try { const k = '__ws_test__'; localStorage.setItem(k, '1'); localStorage.removeItem(k); _ok = true; }
+            catch (e) { _ok = false; console.warn('[Werkstatt] localStorage 不可用，使用内存存储:', e.message); }
+            return _ok;
+        };
+        return {
+            ok() { return check(); },
+            get(k, fb = '') { if (!check()) return _mem[k] ?? fb; try { const v = localStorage.getItem(k); return v !== null ? v : fb; } catch (e) { return _mem[k] ?? fb; } },
+            set(k, v) { _mem[k] = v; if (!check()) return false; try { localStorage.setItem(k, v); return true; } catch (e) { return false; } },
+            remove(k) { delete _mem[k]; if (!check()) return false; try { localStorage.removeItem(k); return true; } catch (e) { return false; } },
+            json(k, fb = null) { try { const r = this.get(k); return r ? JSON.parse(r) : fb; } catch (e) { return fb; } },
+            setJson(k, v) { try { return this.set(k, JSON.stringify(v)); } catch (e) { return false; } }
+        };
+    })();
+
+    // ==================== 浏览器嗅探 (CSS hook) ====================
+    (() => {
+        const ua = navigator.userAgent;
+        const cls = document.documentElement.classList;
+        if (ua.includes('Safari/') && !ua.includes('Chrome/') && !ua.includes('Chromium/')) cls.add('browser-safari');
+        if (ua.includes('Firefox/')) cls.add('browser-firefox');
+        if (ua.includes('Chrome/') || ua.includes('Chromium/')) cls.add('browser-chrome');
+        if (ua.includes('Edg/')) cls.add('browser-edge');
+    })();
+
     function init() {
         loadRatio();
         applyRatio();
@@ -2269,7 +2329,14 @@ html, body {
         const code = getCode();
         if (code.trim().length === 0) { showToast('没有可复制的代码', ''); return; }
         try {
-            await navigator.clipboard.writeText(code);
+            // Safari 需要聚焦 + 用户手势; 提供 execCommand 回退
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(code);
+            } else {
+                const ta = document.createElement('textarea');
+                ta.value = code; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta);
+                ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+            }
             onCopySuccess();
         } catch (err) {
             if (err.name === 'NotAllowedError') {
@@ -2336,7 +2403,7 @@ html, body {
 
     function loadSnippetsFromStorage() {
         try {
-            const raw = localStorage.getItem(SNIPPET_STORAGE_KEY);
+            const raw = safeStorage.get(SNIPPET_STORAGE_KEY);
             if (raw) {
                 snippets = JSON.parse(raw);
                 if (!Array.isArray(snippets)) snippets = [];
@@ -2358,8 +2425,8 @@ html, body {
     }
 
     function saveSnippetsToStorage() {
-        try { localStorage.setItem(SNIPPET_STORAGE_KEY, JSON.stringify(snippets)); storageAvailable = true; storageWarning.style.display = 'none'; }
-        catch (e) { storageAvailable = false; storageWarning.style.display = 'block'; showToast('存储空间不足', ''); }
+        if (safeStorage.setJson(SNIPPET_STORAGE_KEY, snippets)) { storageAvailable = true; storageWarning.style.display = 'none'; }
+        else { storageAvailable = false; storageWarning.style.display = 'block'; }
     }
 
     function generateId() { return Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 8); }
@@ -2390,10 +2457,10 @@ html, body {
     const workspace = document.querySelector('.workspace');
 
     function loadPanelStates() {
-        try { const saved = localStorage.getItem(PANEL_STATE_KEY); if (saved) return JSON.parse(saved); } catch (e) { console.error(e); }
+        return safeStorage.json(PANEL_STATE_KEY);
         return { side: true, editor: true, preview: true };
     }
-    function savePanelStates(states) { try { localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(states)); } catch (e) { console.error(e); } }
+    function savePanelStates(states) { safeStorage.setJson(PANEL_STATE_KEY, states); }
 
     function applyPanelStates(states) {
         const clsMap = { side: 'side-hidden', editor: 'editor-hidden', preview: 'preview-hidden' };
@@ -2439,12 +2506,12 @@ html, body {
     let isDraggingLeft = false; let startLeftPanelPct = 0; let startLeftCoord = 0;
 
     function loadPanelWidth() {
-        try { const val = localStorage.getItem(PANEL_WIDTH_KEY); const num = parseInt(val, 10); if (!isNaN(num) && num >= PANEL_MIN_PCT && num <= PANEL_MAX_PCT) return num; } catch (e) { console.error(e); }
+        try { const val = safeStorage.get(PANEL_WIDTH_KEY); const num = parseInt(val, 10); if (!isNaN(num) && num >= PANEL_MIN_PCT && num <= PANEL_MAX_PCT) return num; } catch (e) { console.error(e); }
         return PANEL_DEFAULT_PCT;
     }
     function savePanelWidth() {
         const cp = parseFloat(snippetsPanel.style.width);
-        if (!isNaN(cp)) { try { localStorage.setItem(PANEL_WIDTH_KEY, Math.round(cp)); } catch (e) { console.error(e); } }
+        if (!isNaN(cp)) { safeStorage.set(PANEL_WIDTH_KEY, String(Math.round(cp))); }
     }
     function applyPanelWidth(pct) { snippetsPanel.style.width = pct + 'vw'; document.documentElement.style.setProperty('--panel-side-width', pct + 'vw'); }
 
@@ -2498,16 +2565,16 @@ html, body {
     const AI_DESIGN_SYSTEM_STORAGE = 'editor_ai_design_system';
     const DEFAULT_ENDPOINT = 'https://api.openai.com/v1';
 
-    function loadAiEndpoint() { try { return localStorage.getItem(AI_ENDPOINT_STORAGE) || ''; } catch (e) { return ''; } }
-    function saveAiEndpoint(ep) { try { localStorage.setItem(AI_ENDPOINT_STORAGE, ep); } catch (e) { console.error(e); } }
-    function loadAiKey() { try { return localStorage.getItem(AI_KEY_STORAGE) || ''; } catch (e) { return ''; } }
-    function saveAiKey(k) { try { localStorage.setItem(AI_KEY_STORAGE, k); } catch (e) { console.error(e); } updateAiStatus(); }
-    function loadAiModel() { try { return localStorage.getItem(AI_MODEL_STORAGE) || ''; } catch (e) { return ''; } }
-    function saveAiModel(m) { try { localStorage.setItem(AI_MODEL_STORAGE, m); } catch (e) { console.error(e); } }
-    function loadDesignSystem() { try { return localStorage.getItem(AI_DESIGN_SYSTEM_STORAGE) || 'default'; } catch (e) { return 'default'; } }
-    function saveDesignSystem(ds) { try { localStorage.setItem(AI_DESIGN_SYSTEM_STORAGE, ds); } catch (e) { console.error(e); } }
-    function loadModelsCache() { try { const r = localStorage.getItem(AI_MODELS_CACHE); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
-    function saveModelsCache(ep, models) { try { localStorage.setItem(AI_MODELS_CACHE, JSON.stringify({ endpoint: ep, models: models, ts: Date.now() })); } catch (e) { console.error(e); } }
+    function loadAiEndpoint() { return safeStorage.get(AI_ENDPOINT_STORAGE); }
+    function saveAiEndpoint(ep) { safeStorage.set(AI_ENDPOINT_STORAGE, ep); }
+    function loadAiKey() { return safeStorage.get(AI_KEY_STORAGE); }
+    function saveAiKey(k) { safeStorage.set(AI_KEY_STORAGE, k); updateAiStatus(); }
+    function loadAiModel() { return safeStorage.get(AI_MODEL_STORAGE); }
+    function saveAiModel(m) { safeStorage.set(AI_MODEL_STORAGE, m); }
+    function loadDesignSystem() { return safeStorage.get(AI_DESIGN_SYSTEM_STORAGE, 'default'); }
+    function saveDesignSystem(ds) { safeStorage.set(AI_DESIGN_SYSTEM_STORAGE, ds); }
+    function loadModelsCache() { return safeStorage.json(AI_MODELS_CACHE); }
+    function saveModelsCache(ep, models) { safeStorage.setJson(AI_MODELS_CACHE, { endpoint: ep, models: models, ts: Date.now() }); }
     function getEndpointChatUrl(ep) { let u = (ep || DEFAULT_ENDPOINT).replace(/\/+$/, ''); if (!/\/chat\/completions$/.test(u)) u += '/chat/completions'; return u; }
     function getEndpointModelsUrl(ep) { let u = (ep || DEFAULT_ENDPOINT).replace(/\/+$/, ''); return u + '/models'; }
 
@@ -2552,8 +2619,8 @@ html, body {
     }
 
     // ==================== Deep Thinking ====================
-    function loadDeepThinking() { try { return localStorage.getItem(AI_DEEP_THINKING_STORAGE) === 'true'; } catch (e) { return false; } }
-    function saveDeepThinking(v) { try { localStorage.setItem(AI_DEEP_THINKING_STORAGE, v ? 'true' : 'false'); } catch (e) { console.error(e); } }
+    function loadDeepThinking() { return safeStorage.get(AI_DEEP_THINKING_STORAGE) === 'true'; }
+    function saveDeepThinking(v) { safeStorage.set(AI_DEEP_THINKING_STORAGE, v ? 'true' : 'false'); }
 
     // ==================== Design Systems ====================
     // ==================== 内置技能知识库 ====================
