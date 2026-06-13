@@ -2460,12 +2460,13 @@ html, body {
     const workspace = document.querySelector('.workspace');
 
     function loadPanelStates() {
-        return safeStorage.json(PANEL_STATE_KEY);
-        return { side: true, editor: true, preview: true };
+        return safeStorage.json(PANEL_STATE_KEY) || { side: true, editor: true, preview: true };
     }
     function savePanelStates(states) { safeStorage.setJson(PANEL_STATE_KEY, states); }
 
     function applyPanelStates(states) {
+        // 兜底：存储不可用时默认全显示
+        if (!states || typeof states !== 'object') states = { side: true, editor: true, preview: true };
         const clsMap = { side: 'side-hidden', editor: 'editor-hidden', preview: 'preview-hidden' };
         Object.entries(clsMap).forEach(([key, cls]) => {
             if (states[key]) workspace.classList.remove(cls); else workspace.classList.add(cls);
@@ -4861,8 +4862,7 @@ ${techSpec}
         aiChatInput.style.height = aiChatInput.scrollHeight + 'px';
     }
     aiChatInput.addEventListener('input', autoResizeTextarea);
-    // Reset height after send
-    const origBtnAiSendClick = btnAiSend.onclick;
+    // Reset textarea height after send
     btnAiSend.addEventListener('click', () => {
         aiChatInput.style.height = 'auto';
         aiChatInput.rows = 1;
