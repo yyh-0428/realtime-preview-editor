@@ -621,6 +621,24 @@ html, body {
 .agent-status-bar .agent-step { color: #6366f1; font-weight: 600; }
 .agent-status-bar .agent-dot { width: 6px; height: 6px; border-radius: 50%; background: #6366f1; animation: pulse-dot 1.2s infinite; }
 @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* Agent message icons */
+.msg-icon-wrap { display: inline-flex; vertical-align: middle; margin-right: 4px; }
+.msg-icon-wrap svg { width: 14px; height: 14px; color: var(--text-secondary); }
+.ai-message.assistant .msg-text:has(.msg-icon-wrap) { display: flex; align-items: flex-start; gap: 4px; }
+
+/* Toast icons via pseudo-elements */
+.toast.success::before {
+  content: ''; display: inline-block; width: 12px; height: 12px; margin-right: 6px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2328a745' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13.5 3.5L6 11 2.5 7.5'/%3E%3C/svg%3E");
+  background-size: contain; vertical-align: middle;
+}
+.toast.error::before {
+  content: ''; display: inline-block; width: 12px; height: 12px; margin-right: 6px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23dc3545' stroke-width='1.5' stroke-linecap='round'%3E%3Cpath d='M4 4l8 8M12 4l-8 8'/%3E%3C/svg%3E");
+  background-size: contain; vertical-align: middle;
+}
+
 .thinking-badge {
   font-size: 10px; font-weight: var(--font-weight-medium);
   color: var(--accent);
@@ -1405,7 +1423,7 @@ html, body {
     </div>
 
     <div class="drag-overlay" id="dragOverlay"></div>
-    <div class="toast success" id="toast" role="status" aria-live="polite" aria-atomic="true">✓ 就绪</div>
+    <div class="toast success" id="toast" role="status" aria-live="polite" aria-atomic="true">就绪</div>
 
     <!-- Save Modal -->
     <div class="modal-overlay" id="saveModal" role="dialog" aria-modal="true" aria-labelledby="saveModalTitle">
@@ -4298,13 +4316,21 @@ ${techSpec}
 
     aiEndpointInput.addEventListener('blur', () => { const ep = aiEndpointInput.value.trim(); saveAiEndpoint(ep); const cached = loadModelsCache(); if (ep && loadAiKey() && (!cached || cached.endpoint !== ep)) fetchModels(); });
 
-    function addChatMessage(role, text) {
+    function addChatMessage(role, text, iconSvg) {
         const m = document.createElement('div');
         m.className = 'ai-message ' + role;
         if (role === 'assistant') {
             const textSpan = document.createElement('span');
             textSpan.className = 'msg-text';
-            textSpan.textContent = text;
+            if (iconSvg) {
+                const iconWrap = document.createElement('span');
+                iconWrap.className = 'msg-icon-wrap';
+                iconWrap.innerHTML = iconSvg;
+                textSpan.appendChild(iconWrap);
+                textSpan.appendChild(document.createTextNode(' ' + text));
+            } else {
+                textSpan.textContent = text;
+            }
             m.appendChild(textSpan);
         } else {
             m.textContent = text;
@@ -4841,6 +4867,20 @@ ${techSpec}
     }
 
     // ==================== Agent Mode Engine ====================
+    // SVG icon constants for Agent mode (no emoji)
+    const ICONS = {
+        check: '<svg class="msg-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3.5L6 11 2.5 7.5"/></svg>',
+        error: '<svg class="msg-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>',
+        warn: '<svg class="msg-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2l6.5 11H1.5L8 2z"/><path d="M8 6.5v3"/><circle cx="8" cy="12" r="0.7" fill="currentColor"/></svg>',
+        agent: '<svg class="msg-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="10" height="10" rx="2"/><circle cx="6" cy="7" r="1" fill="currentColor"/><circle cx="10" cy="7" r="1" fill="currentColor"/><path d="M6 11c1 .5 3 .5 4 0"/></svg>',
+        tool: '<svg class="msg-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l3 3 7-7-3-3-7 7z"/><path d="M10 3l3 3"/></svg>',
+        spark: '<svg class="msg-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1v3M8 12v3M1 8h3M12 8h3M3.3 3.3l2.1 2.1M10.6 10.6l2.1 2.1M3.3 12.7l2.1-2.1M10.6 5.4l2.1-2.1"/></svg>',
+        search: '<svg class="msg-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="5"/><path d="M11 11l4 4"/></svg>',
+        image: '<svg class="msg-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="10" rx="1"/><circle cx="5.5" cy="6.5" r="1.5" fill="currentColor"/><path d="M2 11l3-3 2 2 3-3 4 4"/></svg>',
+        code: '<svg class="msg-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5l-3 3 3 3M11 5l3 3-3 3"/></svg>',
+        info: '<svg class="msg-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v1M8 8v3"/></svg>'
+    };
+
     const agentModeToggle = document.getElementById('agentModeToggle');
     const agentStatusBar = document.getElementById('agentStatusBar');
     const agentStepText = document.getElementById('agentStepText');
@@ -4955,8 +4995,7 @@ ${techSpec}
             case 'analyze_code': {
                 const code = getCode();
                 const lines = code.split('\n');
-                const summary = '代码共 ' + lines.length + ' 行，语言: ' + (LANG_CONFIG[currentLang]?.label || 'HTML') + '\n前10行预览:\n' + lines.slice(0, 10).map((l, i) => '  ' + (i+1) + ' | ' + l).join('\n');
-                return summary;
+                return '代码共 ' + lines.length + ' 行，语言: ' + (LANG_CONFIG[currentLang]?.label || 'HTML') + '\n前10行预览:\n' + lines.slice(0, 10).map((l, i) => '  ' + (i+1) + ' | ' + l).join('\n');
             }
             case 'edit_code': {
                 const blocks = [];
@@ -4971,40 +5010,71 @@ ${techSpec}
                 if (result.success) {
                     updatePreview();
                     highlightChangedLines(result.changedLines);
-                    return '✅ 修改成功，共修改 ' + result.changedLines.length + ' 行';
+                    return '[OK] 修改成功，共修改 ' + result.changedLines.length + ' 行';
                 }
-                return '❌ 修改失败: ' + (result.reason || '未知错误');
+                return '[ERR] 修改失败: ' + (result.reason || '未知错误');
             }
             case 'preview_code': {
                 updatePreview();
-                return '✅ 预览已刷新';
+                return '[OK] 预览已刷新';
             }
             case 'search_web': {
                 try {
-                    const res = await fetch('https://api.duckduckgo.com/?q=' + encodeURIComponent(args.query) + '&format=json&no_html=1');
-                    if (!res.ok) return '⚠️ 搜索失败，请基于已有知识回答';
-                    const data = await res.json();
-                    const results = (data.Results || []).slice(0, 3).map(r => r.Text || '').join('\n');
-                    return results || '未找到相关结果';
-                } catch(e) { return '⚠️ 搜索暂时不可用'; }
+                    // Try multiple search endpoints for robustness
+                    const endpoints = [
+                        'https://api.duckduckgo.com/?q=' + encodeURIComponent(args.query) + '&format=json&no_html=1',
+                        'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(args.query)
+                    ];
+                    let lastErr = '';
+                    for (const url of endpoints) {
+                        const searchCtrl = new AbortController();
+                        const searchTimeout = setTimeout(() => searchCtrl.abort(), 8000);
+                        try {
+                            const res = await fetch(url, { signal: searchCtrl.signal });
+                            clearTimeout(searchTimeout);
+                            if (res.ok) {
+                                const text = await res.text();
+                                // Try to extract some text from HTML or JSON
+                                const snippets = text.match(/class="result__snippet"[^>]*>([^<]+)/g);
+                                if (snippets && snippets.length > 0) {
+                                    return snippets.slice(0, 3).map(s => s.replace(/<[^>]+>/g, '').trim()).join('\n');
+                                }
+                                return '搜索完成，未获取到详细结果。请基于已有知识回答。';
+                            }
+                        } catch(e) { clearTimeout(searchTimeout); lastErr = e.message; }
+                    }
+                    return '[WARN] 搜索暂时不可用。请基于已有知识回答。';
+                } catch(e) { return '[WARN] 搜索暂时不可用。请基于已有知识回答。'; }
             }
             case 'generate_image': {
                 const imgModel = getBestImageModel();
-                if (!imgModel) return '⚠️ 当前 API 不支持图片生成模型';
+                if (!imgModel) return '[WARN] 当前 API 不支持图片生成模型';
                 try {
-                    const endpoint = loadAiEndpoint();
-                    const imgUrl = (endpoint || DEFAULT_ENDPOINT).replace(/\/+$/, '') + '/images/generations';
-                    const res = await fetch(imgUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + loadAiKey() },
-                        body: JSON.stringify({ model: imgModel, prompt: args.prompt, n: 1, size: args.size || '1024x1024' })
-                    });
-                    if (!res.ok) return '❌ 图片生成失败: HTTP ' + res.status;
-                    const data = await res.json();
-                    const url = data.data?.[0]?.url;
-                    if (url) return '✅ 图片已生成，URL: ' + url + '\n请在 img 标签中使用此 URL。';
-                    return '❌ 未获取到图片 URL';
-                } catch(e) { return '❌ 图片生成出错: ' + e.message; }
+                    const endpoint = loadAiEndpoint() || DEFAULT_ENDPOINT;
+                    const base = endpoint.replace(/\/+$/, '');
+                    // Try multiple possible image generation endpoints
+                    const possibleUrls = [
+                        base + '/images/generations',
+                        base + '/v1/images/generations'
+                    ];
+                    let lastErr = '';
+                    for (const imgUrl of possibleUrls) {
+                        try {
+                            const res = await fetch(imgUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + loadAiKey() },
+                                body: JSON.stringify({ model: imgModel, prompt: args.prompt, n: 1, size: args.size || '1024x1024' })
+                            });
+                            if (res.ok) {
+                                const data = await res.json();
+                                const url = data.data?.[0]?.url || data.url || data.data?.[0]?.b64_json;
+                                if (url) return '[OK] 图片已生成，URL: ' + url + '\n请在 img 标签中使用此 URL。';
+                            }
+                            lastErr = 'HTTP ' + res.status;
+                        } catch(e) { lastErr = e.message; }
+                    }
+                    return '[ERR] 图片生成失败: ' + lastErr;
+                } catch(e) { return '[ERR] 图片生成出错: ' + e.message; }
             }
             case 'add_dependency': {
                 const code = getCode();
@@ -5020,7 +5090,7 @@ ${techSpec}
                     newCode = '<head>\n  ' + tag + '\n</head>\n' + code;
                 }
                 setCode(newCode); updatePreview();
-                return '✅ 已添加' + (args.type === 'script' ? '脚本' : '样式') + ': ' + args.url;
+                return '[OK] 已添加' + (args.type === 'script' ? '脚本' : '样式') + ': ' + args.url;
             }
             case 'get_skill': {
                 if (args.domain === 'gsap') {
@@ -5038,7 +5108,7 @@ ${techSpec}
                 }
                 return '未知技能领域: ' + args.domain;
             }
-            case 'complete': return '✅ 任务完成: ' + (args.summary || '无总结');
+            case 'complete': return '[OK] 任务完成: ' + (args.summary || '无总结');
             default: return '未知工具: ' + toolName;
         }
     }
@@ -5074,22 +5144,37 @@ ${techSpec}
         ];
 
         hideAiEmptyState(); addChatMessage('user', userRequest);
-        addChatMessage('assistant', '🤖 Agent 模式已启动，正在分析需求…');
+        const statusMsg = addChatMessage('assistant', 'Agent 模式已启动，正在分析需求…', ICONS.agent);
         setAgentStatus('分析中', '正在理解需求');
         let totalTurns = 0; const MAX_TURNS = 10;
+        let toolsSupported = true; // Will be set to false if API rejects tools
 
         while (totalTurns < MAX_TURNS) {
             totalTurns++;
             try {
-                const payload = { model, messages, tools: AGENT_TOOLS, tool_choice: 'auto' };
+                let payload;
+                if (toolsSupported) {
+                    payload = { model, messages, tools: AGENT_TOOLS, tool_choice: 'auto' };
+                } else {
+                    // Fallback: no tools, just regular chat with enhanced system prompt
+                    payload = { model, messages };
+                }
                 const res = await fetch(chatUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
                     body: JSON.stringify(payload)
                 });
                 if (!res.ok) {
+                    const errText = await res.text();
+                    // Detect API that doesn't support tools
+                    if (toolsSupported && (errText.includes('tool') || errText.includes('function') || errText.includes('不支持') || errText.includes('not supported') || errText.includes('tool_choice'))) {
+                        toolsSupported = false;
+                        totalTurns--; // retry this turn without tools
+                        addChatMessage('assistant', '当前 API 不支持工具调用，已降级为智能对话模式', ICONS.info);
+                        continue;
+                    }
                     setAgentStatus('错误', 'API 返回 ' + res.status);
-                    addChatMessage('assistant', '❌ Agent 执行出错: HTTP ' + res.status);
+                    addChatMessage('assistant', 'Agent 执行出错: HTTP ' + res.status, ICONS.error);
                     return;
                 }
                 const data = await res.json();
@@ -5097,21 +5182,39 @@ ${techSpec}
                 const msg = choice.message;
                 messages.push(msg);
 
+                // Fallback mode: no tool_calls from API, treat content as final answer
+                if (!toolsSupported) {
+                    setAgentStatus('完成', totalTurns + ' 步');
+                    if (msg.content) {
+                        addChatMessage('assistant', msg.content);
+                        const parsed = parseThinkingResponse(msg.content);
+                        const editBlocks = parseEditBlocks(parsed.answer);
+                        if (editBlocks.length > 0) {
+                            const result = applyEditBlocks(editBlocks);
+                            if (result.success) {
+                                updatePreview();
+                                highlightChangedLines(result.changedLines);
+                                addChatMessage('assistant', '已自动应用 ' + editBlocks.length + ' 处修改', ICONS.check);
+                            }
+                        }
+                    }
+                    return;
+                }
+
                 if (!msg.tool_calls || msg.tool_calls.length === 0) {
                     // Agent finished - no more tool calls
                     setAgentStatus('完成', totalTurns + ' 步');
                     if (msg.content) {
                         addChatMessage('assistant', msg.content);
-                    }
-                    // Try to apply any code edits the agent described
-                    const parsed = parseThinkingResponse(msg.content || '');
-                    const editBlocks = parseEditBlocks(parsed.answer);
-                    if (editBlocks.length > 0) {
-                        const result = applyEditBlocks(editBlocks);
-                        if (result.success) {
-                            updatePreview();
-                            highlightChangedLines(result.changedLines);
-                            addChatMessage('assistant', '✅ 已自动应用 ' + editBlocks.length + ' 处修改');
+                        const parsed = parseThinkingResponse(msg.content);
+                        const editBlocks = parseEditBlocks(parsed.answer);
+                        if (editBlocks.length > 0) {
+                            const result = applyEditBlocks(editBlocks);
+                            if (result.success) {
+                                updatePreview();
+                                highlightChangedLines(result.changedLines);
+                                addChatMessage('assistant', '已自动应用 ' + editBlocks.length + ' 处修改', ICONS.check);
+                            }
                         }
                     }
                     return;
@@ -5119,22 +5222,28 @@ ${techSpec}
 
                 // Execute tool calls
                 for (const tc of msg.tool_calls) {
-                    const toolName = tc.function.name;
-                    const toolArgs = JSON.parse(tc.function.arguments || '{}');
+                    let toolName, toolArgs;
+                    try {
+                        toolName = tc.function?.name || 'unknown';
+                        toolArgs = JSON.parse(tc.function?.arguments || '{}');
+                    } catch (parseErr) {
+                        addChatMessage('assistant', '工具参数解析失败，跳过此步骤', ICONS.warn);
+                        continue;
+                    }
                     setAgentStatus('执行: ' + toolName, toolArgs.query || toolArgs.operation || '');
-                    addChatMessage('assistant', '🔧 调用 ' + toolName + '…');
+                    addChatMessage('assistant', '调用 ' + toolName + '…', ICONS.tool);
 
                     const result = await executeAgentTool(toolName, toolArgs);
                     messages.push({ role: 'tool', tool_call_id: tc.id, content: result });
-                    if (toolName === 'edit_code') updatePreview();
                 }
             } catch(e) {
                 setAgentStatus('错误', e.message);
-                addChatMessage('assistant', '❌ ' + e.message);
+                addChatMessage('assistant', e.message, ICONS.error);
                 return;
             }
         }
         setAgentStatus('达到上限', MAX_TURNS + ' 步');
+        addChatMessage('assistant', '已达到最大执行轮数（' + MAX_TURNS + ' 步），任务可能未完成', ICONS.warn);
     }
 
     // Agent mode initialization
@@ -5146,6 +5255,11 @@ ${techSpec}
             if (v) {
                 document.querySelector('.ai-panel')?.classList.add('agent-mode-active');
                 setAgentStatus('就绪', 'Agent 模式已激活');
+                // Agent mode and deep thinking are mutually exclusive
+                if (deepThinkingToggle && deepThinkingToggle.checked) {
+                    deepThinkingToggle.checked = false;
+                    saveDeepThinking(false);
+                }
             } else {
                 document.querySelector('.ai-panel')?.classList.remove('agent-mode-active');
                 setAgentStatus('', '');
@@ -5154,6 +5268,18 @@ ${techSpec}
         if (loadAgentMode()) {
             document.querySelector('.ai-panel')?.classList.add('agent-mode-active');
         }
+    }
+    // Deep thinking toggle: disable agent mode when enabled
+    if (deepThinkingToggle) {
+        const origDtChange = deepThinkingToggle.onchange;
+        deepThinkingToggle.addEventListener('change', () => {
+            if (deepThinkingToggle.checked && agentModeToggle && agentModeToggle.checked) {
+                agentModeToggle.checked = false;
+                saveAgentMode(false);
+                document.querySelector('.ai-panel')?.classList.remove('agent-mode-active');
+                setAgentStatus('', '');
+            }
+        });
     }
 
     // ==================== Events ====================
