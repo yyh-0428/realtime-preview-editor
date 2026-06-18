@@ -4006,7 +4006,7 @@ ${PUBLIC_APIS_KNOWLEDGE}
         let score = Math.min(text.length / 20, 5);
         COMPLEXITY_KEYWORDS.high.forEach(k => { if (text.includes(k.toLowerCase())) score += 3; });
         COMPLEXITY_KEYWORDS.simple.forEach(k => { if (text.includes(k.toLowerCase())) score -= 0.8; });
-        const commandCount = (text.match(/[，,;；]|然后|接着|同时|另外|再|还|并且|以及|之后|之前|如果|否则|当|当.*时/g) || []).length;
+        const commandCount = (text.match(/[，,;；]|然后|接着|同时|另外|并且|以及|之后|之前|如果|否则/g) || []).length;
         score += commandCount * 1.5;
         if (score <= 2.5) return { level: 'low', label: '轻量思考', steps: 3 };
         if (score <= 5.5) return { level: 'medium', label: '标准思考', steps: 6 };
@@ -4251,14 +4251,14 @@ ${techSpec}
             for (const op of ops) {
                 const trimmed = op.trim();
                 if (!trimmed) continue;
-                const replaceMatch = trimmed.match(/^REPLACE\s+(\d+)(?:-(\d+))?\s*:\s*\n?([\s\S]*?)\n?END\s*$/);
+                const replaceMatch = trimmed.match(/^REPLACE\s+(\d+)(?:-(\d+))?\s*:\s*\n?([\s\S]*?)\s*END\s*$/);
                 if (replaceMatch) {
                     const startLine = parseInt(replaceMatch[1], 10);
                     const endLine = replaceMatch[2] ? parseInt(replaceMatch[2], 10) : startLine;
                     blocks.push({ type: 'replace', startLine, endLine, content: replaceMatch[3].trim() });
                     continue;
                 }
-                const insertMatch = trimmed.match(/^INSERT\s+after\s+(\d+)\s*:\s*\n?([\s\S]*?)\n?END\s*$/);
+                const insertMatch = trimmed.match(/^INSERT\s+after\s+(\d+)\s*:\s*\n?([\s\S]*?)\s*END\s*$/);
                 if (insertMatch) {
                     const afterLine = parseInt(insertMatch[1], 10);
                     blocks.push({ type: 'insert', afterLine, content: insertMatch[2].trim() });
@@ -5307,7 +5307,8 @@ ${techSpec}
             case 'analyze_code': {
                 const code = getCode();
                 const lines = code.split('\n');
-                return '代码共 ' + lines.length + ' 行，语言: ' + (LANG_CONFIG[currentLang]?.label || 'HTML') + '\n前10行预览:\n' + lines.slice(0, 10).map((l, i) => '  ' + (i+1) + ' | ' + l).join('\n');
+                const lang = LANG_CONFIG[currentLang]?.label || 'HTML';
+                return '代码共 ' + lines.length + ' 行，语言: ' + lang + '\n当前完整代码（带行号）：\n```\n' + lines.map((l, i) => '  ' + (i+1) + ' | ' + l).join('\n') + '\n```';
             }
             case 'edit_code': {
                 const blocks = [];
