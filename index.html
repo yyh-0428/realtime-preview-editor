@@ -1185,46 +1185,224 @@ html, body {
 .CodeMirror-vscrollbar::-webkit-scrollbar { display: none; }
 
 /* ============================================================
-   RESPONSIVE
+   RESPONSIVE — Mobile-first enhancements
    ============================================================ */
-@media (max-width: 768px) {
-  .workspace { flex-direction: column; }
-  .side-panel {
-    width: 100%; height: 0;
-    border-right: none; border-bottom: 1px solid var(--border-subtle);
-    transition: height var(--duration-slow) var(--ease-out-expo);
-  }
-  .side-panel.mobile-open { height: 320px; opacity: 1; }
-  .side-panel.collapsed { width: 100%; height: 0; opacity: 0; }
 
+/* ── Mobile Bottom Navigation Bar ── */
+.mobile-nav-bar {
+  display: none;
+  flex-shrink: 0;
+  background: var(--bg-toolbar);
+  border-top: 1px solid var(--border-default);
+  padding: var(--space-1) var(--space-3);
+  gap: var(--space-1);
+  z-index: 25;
+  align-items: center;
+  justify-content: center;
+}
+.mobile-nav-btn {
+  flex: 1;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: none; background: transparent;
+  color: var(--text-tertiary);
+  font-family: var(--font-ui); font-size: var(--font-size-ui);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out-quart);
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-nav-btn:hover { color: var(--text-secondary); background: var(--bg-surface-raised); }
+.mobile-nav-btn.active { color: var(--accent); background: var(--accent-subtle); }
+.mobile-nav-btn .btn-icon { width: var(--icon-md); height: var(--icon-md); }
+
+/* ── Side-panel overlay backdrop (mobile) ── */
+.side-panel-backdrop {
+  display: none;
+  position: absolute; inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 15;
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-out-quart);
+  pointer-events: none;
+}
+.side-panel-backdrop.active { opacity: 1; pointer-events: auto; }
+
+@media (max-width: 768px) {
+  /* ── App Shell: stack toolbar + workspace + bottom nav ── */
+  .app-container { flex-direction: column; }
+
+  /* ── Toolbar: simplified, single-row ── */
+  .toolbar {
+    padding: var(--space-1) var(--space-2);
+    gap: var(--space-1);
+    min-height: 48px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .toolbar::-webkit-scrollbar { display: none; }
+  .toolbar-left { gap: var(--space-1); flex-shrink: 0; }
+  .toolbar-actions { gap: var(--space-half); flex-shrink: 0; flex-wrap: nowrap; }
+
+  /* Hide non-essential toolbar items on mobile */
+  .brand-mark { display: none; }
+  .toolbar-title { font-size: var(--font-size-body); }
+  .toolbar-sep { display: none; }
+  .toolbar-status { display: none; }
+  .theme-picker { display: none; }
+
+  /* Compact buttons */
+  .btn {
+    padding: var(--space-2) var(--space-2);
+    font-size: var(--font-size-caption);
+    gap: var(--space-half);
+    min-height: 36px;
+    min-width: 36px;
+  }
+  .panel-toggle {
+    min-width: 36px; min-height: 36px;
+    padding: var(--space-1) var(--space-2);
+  }
+  .panel-toggle .btn-icon { width: var(--icon-md); height: var(--icon-md); }
+
+  /* Hide text labels on some action buttons, keep icon-only */
+  #btnClear, #btnCopy, #btnDownload, #btnImport {
+    font-size: 0; gap: 0; padding: var(--space-2); min-width: 36px; justify-content: center;
+  }
+  #btnClear .btn-icon, #btnCopy .btn-icon, #btnDownload .btn-icon, #btnImport .btn-icon {
+    width: var(--icon-md); height: var(--icon-md); opacity: 1;
+  }
+  #btnRefresh { font-size: 0; gap: 0; padding: var(--space-2); min-width: 36px; justify-content: center; }
+  #btnRefresh .btn-icon { width: var(--icon-md); height: var(--icon-md); opacity: 1; }
+  #btnFormat { font-size: var(--font-size-caption); padding: var(--space-2) var(--space-2); }
+
+  /* ── Workspace: column layout ── */
+  .workspace { flex-direction: column; position: relative; }
+
+  /* ── Side Panel: overlay drawer ── */
+  .side-panel {
+    position: absolute; top: 0; left: 0; bottom: 0;
+    width: 85vw; max-width: 340px;
+    height: 100% !important;
+    border-right: 1px solid var(--border-default);
+    border-bottom: none;
+    z-index: 20;
+    transform: translateX(-105%);
+    opacity: 1;
+    transition: transform var(--duration-slow) var(--ease-out-expo);
+    box-shadow: var(--shadow-lg);
+    background: var(--bg-surface);
+    display: flex !important; /* override side-hidden display:none on mobile */
+  }
+  .side-panel.mobile-open {
+    transform: translateX(0);
+    height: 100% !important;
+  }
+  .side-panel.collapsed {
+    transform: translateX(-105%);
+    opacity: 1;
+    pointer-events: none;
+    width: 85vw; max-width: 340px;
+  }
+  /* Override display:none from side-hidden on mobile — use overlay instead */
+  .workspace.side-hidden .side-panel { display: flex !important; }
+  .side-panel-backdrop { display: block; }
+
+  /* ── Main Content: vertical stack ── */
   .main-content { flex-direction: column; }
 
-  .editor-panel { flex-basis: auto; height: 50%; flex-shrink: 0; }
-  .preview-panel { flex-basis: auto; height: 50%; }
+  /* ── Editor / Preview: vertical split, full-height toggle via mobile nav ── */
+  .editor-panel {
+    flex-basis: auto; height: 60%; flex-shrink: 0;
+    transition: height var(--duration-normal) var(--ease-out-quart);
+  }
+  .preview-panel {
+    flex-basis: auto; height: 40%;
+    transition: height var(--duration-normal) var(--ease-out-quart);
+  }
 
-  .resizer { width: 100%; height: var(--resizer-size); cursor: row-resize; }
+  /* When editor is "maximized" via mobile nav */
+  .workspace.editor-focused .editor-panel { height: 100%; flex-shrink: 1; }
+  .workspace.editor-focused .preview-panel { height: 0; overflow: hidden; }
+  .workspace.editor-focused .resizer { display: none; }
+
+  /* When preview is "maximized" via mobile nav */
+  .workspace.preview-focused .editor-panel { height: 0; overflow: hidden; }
+  .workspace.preview-focused .preview-panel { height: 100%; flex-shrink: 1; }
+  .workspace.preview-focused .resizer { display: none; }
+
+  /* ── Resizer: horizontal bar ── */
+  .resizer { width: 100%; height: var(--resizer-size); cursor: row-resize; flex-shrink: 0; }
   .resizer-left { display: none; }
   .resizer::before { left: 0; right: 0; top: 1.5px; bottom: 1.5px; }
-  .resizer::after { left: 0; right: 0; top: -6px; bottom: -6px; }
+  .resizer::after { left: 0; right: 0; top: -10px; bottom: -10px; }
   .drag-overlay { cursor: row-resize; }
 
-  .toolbar { padding: var(--space-1) var(--space-2); gap: var(--space-1); min-height: 40px; }
-  .toolbar-title { font-size: var(--font-size-body); }
-  .btn { padding: var(--space-1) var(--space-2); font-size: var(--font-size-caption); gap: var(--space-half); }
-  .editor-panel-header, .preview-panel-header { padding: var(--space-1) var(--space-2); font-size: var(--font-size-caption); }
-  .theme-dot { width: var(--space-4); height: var(--space-4); min-width: var(--space-4); min-height: var(--space-4); }
+  /* ── Panel headers ── */
+  .editor-panel-header, .preview-panel-header {
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--font-size-caption);
+    min-height: 36px;
+  }
+
+  /* ── Mobile bottom nav: show ── */
+  .mobile-nav-bar { display: flex; }
+
+  /* ── Modal: full-width on small screens ── */
+  .modal-box {
+    min-width: auto; width: calc(100vw - var(--space-8));
+    padding: var(--space-4);
+    gap: var(--space-3);
+  }
+  .modal-actions { flex-direction: column; }
+  .modal-actions .btn { width: 100%; justify-content: center; min-height: 44px; }
+
+  /* ── Toast: stay within viewport ── */
+  .toast { max-width: 90vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ── AI Panel: compact ── */
+  .ai-config-bar { padding: var(--space-1); gap: var(--space-half); }
+  .ai-config-row { flex-wrap: wrap; gap: var(--space-half); }
+  .ai-input-bar { padding: var(--space-1); gap: var(--space-half); }
+  .ai-chat-input { font-size: var(--font-size-body); min-height: 40px; }
+  .ai-chat-input::placeholder { font-size: var(--font-size-body); }
+
+  /* ── Snippets: larger touch targets ── */
+  .snippet-item { padding: var(--space-3) var(--space-2); }
+  .snippet-delete { padding: var(--space-2); min-width: 36px; min-height: 36px; }
+  .btn-icon-only { min-width: 36px; min-height: 36px; }
+
+  /* ── Panel tabs ── */
+  .panel-tab { padding: var(--space-2) var(--space-2); font-size: var(--font-size-body); }
+
+  /* ── Preview fullscreen button ── */
+  .preview-fullscreen-btn { width: 36px; height: 36px; }
 }
 
+/* ── Landscape phone ── */
 @media (max-height: 500px) and (orientation: landscape) {
   .workspace { flex-direction: row; }
-  .side-panel { width: 0; height: auto; }
-  .side-panel.mobile-open { width: var(--panel-side-width); height: auto; }
+  .side-panel {
+    position: absolute; top: 0; left: 0; bottom: 0;
+    width: 0; height: auto !important;
+    transform: translateX(-105%);
+  }
+  .side-panel.mobile-open { width: 320px; transform: translateX(0); }
   .main-content { flex-direction: row; }
-  .editor-panel { flex-basis: 50%; height: auto; }
-  .preview-panel { flex-basis: 50%; height: auto; }
+  .editor-panel { flex-basis: 50%; height: auto !important; }
+  .preview-panel { flex-basis: 50%; height: auto !important; }
   .resizer { width: var(--resizer-size); height: 100%; cursor: col-resize; }
   .resizer::before { left: 1.5px; right: 1.5px; top: 0; bottom: 0; }
   .toolbar { min-height: 36px; padding: var(--space-1) var(--space-2); }
+  .mobile-nav-bar { display: none; }
+  .workspace.editor-focused .editor-panel,
+  .workspace.preview-focused .preview-panel { flex-basis: 100% !important; }
+  .workspace.editor-focused .preview-panel,
+  .workspace.preview-focused .editor-panel { flex-basis: 0 !important; overflow: hidden; }
 }
 
 /* ============================================================
@@ -1355,6 +1533,8 @@ html, body {
 
         <!-- Workspace -->
         <div class="workspace">
+            <!-- Side-panel overlay backdrop (mobile) -->
+            <div class="side-panel-backdrop" id="sidePanelBackdrop"></div>
             <!-- Side Panel -->
             <aside class="side-panel snippets-panel" id="sidePanel">
                 <div class="panel-tabs">
@@ -1491,6 +1671,19 @@ html, body {
                 </section>
             </main>
         </div>
+
+        <!-- Mobile Bottom Navigation Bar -->
+        <nav class="mobile-nav-bar" id="mobileNavBar">
+            <button class="mobile-nav-btn active" data-view="editor" aria-label="编辑器">
+                <svg class="btn-icon"><use href="#icon-code-brackets"/></svg> 编辑
+            </button>
+            <button class="mobile-nav-btn" data-view="split" aria-label="分屏">
+                <svg class="btn-icon"><use href="#icon-layout-sidebar"/></svg> 分屏
+            </button>
+            <button class="mobile-nav-btn" data-view="preview" aria-label="预览">
+                <svg class="btn-icon"><use href="#icon-screen"/></svg> 预览
+            </button>
+        </nav>
     </div>
 
     <div class="drag-overlay" id="dragOverlay"></div>
@@ -1782,6 +1975,8 @@ html, body {
     }
 
     function applyRatio() {
+        // Skip ratio application when mobile nav is focused on a single panel
+        if (workspace.classList.contains('editor-focused') || workspace.classList.contains('preview-focused')) return;
         const direction = getLayoutDirection();
         if (direction === 'horizontal') {
             editorPanel.style.flexBasis = `${editorRatio * 100}%`;
@@ -2493,6 +2688,19 @@ html, body {
         const states = loadPanelStates();
         states[key] = !isVisible;
         savePanelStates(states);
+
+        // Mobile: toggle side panel as overlay drawer
+        if (key === 'side' && window.matchMedia('(max-width: 768px)').matches) {
+            const backdrop = document.getElementById('sidePanelBackdrop');
+            if (!isVisible) {
+                snippetsPanel.classList.add('mobile-open');
+                if (backdrop) backdrop.classList.add('active');
+            } else {
+                snippetsPanel.classList.remove('mobile-open');
+                if (backdrop) backdrop.classList.remove('active');
+            }
+        }
+
         setTimeout(() => editor.refresh(), 100);
     }
 
@@ -5452,7 +5660,49 @@ ${techSpec}
         confirmModal.addEventListener('click', (e) => { if (e.target === confirmModal) closeConfirm(); });
         document.querySelectorAll('.panel-toggle').forEach(btn => { btn.addEventListener('click', () => togglePanel(btn)); });
         btnCloseSnippets.addEventListener('click', () => { const btn = document.getElementById('btnToggleSidebar'); if (btn) btn.click(); });
-        document.querySelector('.main-content').addEventListener('click', () => { if (window.matchMedia('(max-width: 768px)').matches && snippetsPanel.classList.contains('mobile-open')) snippetsPanel.classList.remove('mobile-open'); });
+
+        // Mobile: close side panel overlay when tapping main content or backdrop
+        document.querySelector('.main-content').addEventListener('click', () => {
+            if (window.matchMedia('(max-width: 768px)').matches && snippetsPanel.classList.contains('mobile-open')) {
+                snippetsPanel.classList.remove('mobile-open');
+                const backdrop = document.getElementById('sidePanelBackdrop');
+                if (backdrop) backdrop.classList.remove('active');
+            }
+        });
+        const sidePanelBackdrop = document.getElementById('sidePanelBackdrop');
+        if (sidePanelBackdrop) {
+            sidePanelBackdrop.addEventListener('click', () => {
+                const btn = document.getElementById('btnToggleSidebar');
+                if (btn) btn.click();
+            });
+        }
+
+        // Mobile bottom nav bar: switch between editor / split / preview
+        const mobileNavBar = document.getElementById('mobileNavBar');
+        if (mobileNavBar) {
+            const mobileNavBtns = mobileNavBar.querySelectorAll('.mobile-nav-btn');
+            mobileNavBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!window.matchMedia('(max-width: 768px)').matches) return;
+                    mobileNavBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const view = btn.dataset.view;
+                    workspace.classList.remove('editor-focused', 'preview-focused');
+                    if (view === 'editor') {
+                        workspace.classList.add('editor-focused');
+                    } else if (view === 'preview') {
+                        workspace.classList.add('preview-focused');
+                    }
+                    // Reset editor/preview panel heights for split view
+                    if (view === 'split') {
+                        editorPanel.style.height = '';
+                        previewPanel.style.height = '';
+                        applyRatio();
+                    }
+                    setTimeout(() => editor.refresh(), 100);
+                });
+            });
+        }
     }
 
     // ==================== Agent Mode Engine ====================
