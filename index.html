@@ -4228,13 +4228,15 @@ ${techSpec}
         matches.sort((a, b) => b.idx - a.idx);
 
         const changedLines = new Set();
-        for (const m of matches) {
-            editor.replaceRange(m.replace, m.from, m.to);
-            const startLine = m.from.line;
-            const endPos = editor.posFromIndex(editor.indexFromPos(m.from) + m.replace.length);
-            const endLine = endPos.line;
-            for (let l = startLine; l <= endLine; l++) changedLines.add(l);
-        }
+        editor.operation(() => {
+            for (const m of matches) {
+                editor.replaceRange(m.replace, m.from, m.to);
+                const startLine = m.from.line;
+                const endPos = editor.posFromIndex(editor.indexFromPos(m.from) + m.replace.length);
+                const endLine = endPos.line;
+                for (let l = startLine; l <= endLine; l++) changedLines.add(l);
+            }
+        });
 
         return { success: true, changedLines: Array.from(changedLines).sort((a, b) => a - b) };
     }
@@ -4283,31 +4285,38 @@ ${techSpec}
             const lineB = b.type === 'insert' ? b.afterLine : b.startLine;
             return lineB - lineA;
         });
-        for (const block of sorted) {
-            if (block.type === 'replace') {
-                const fromLine = block.startLine - 1;
-                const toLine = block.endLine - 1;
-                const from = { line: fromLine, ch: 0 };
-                const to = { line: toLine + 1, ch: 0 };
-                editor.replaceRange(block.content, from, to);
-                const newLineCount = block.content.split('\n').length;
-                for (let i = fromLine; i < fromLine + newLineCount; i++) changedLines.add(i);
-            } else if (block.type === 'insert') {
-                const afterLine = block.afterLine - 1;
-                const lineText = editor.getLine(afterLine);
-                const pos = { line: afterLine, ch: lineText ? lineText.length : 0 };
-                editor.replaceRange('\n' + block.content, pos);
-                const newLineCount = block.content.split('\n').length;
-                for (let i = afterLine + 1; i <= afterLine + newLineCount; i++) changedLines.add(i);
-            } else if (block.type === 'delete') {
-                const fromLine = block.startLine - 1;
-                const toLine = block.endLine - 1;
-                const from = { line: fromLine, ch: 0 };
-                const to = { line: toLine + 1, ch: 0 };
-                editor.replaceRange('', from, to);
-                for (let i = fromLine; i <= toLine; i++) changedLines.add(i);
+        const lastLine = editor.lineCount() - 1;
+        editor.operation(() => {
+            for (const block of sorted) {
+                if (block.type === 'replace') {
+                    const fromLine = block.startLine - 1;
+                    const toLine = block.endLine - 1;
+                    const from = { line: fromLine, ch: 0 };
+                    const to = toLine + 1 > lastLine
+                        ? { line: lastLine, ch: editor.getLine(lastLine).length }
+                        : { line: toLine + 1, ch: 0 };
+                    editor.replaceRange(block.content, from, to);
+                    const newLineCount = block.content.split('\n').length;
+                    for (let i = fromLine; i < fromLine + newLineCount; i++) changedLines.add(i);
+                } else if (block.type === 'insert') {
+                    const afterLine = block.afterLine - 1;
+                    const lineText = editor.getLine(afterLine);
+                    const pos = { line: afterLine, ch: lineText ? lineText.length : 0 };
+                    editor.replaceRange('\n' + block.content, pos);
+                    const newLineCount = block.content.split('\n').length;
+                    for (let i = afterLine + 1; i <= afterLine + newLineCount; i++) changedLines.add(i);
+                } else if (block.type === 'delete') {
+                    const fromLine = block.startLine - 1;
+                    const toLine = block.endLine - 1;
+                    const from = { line: fromLine, ch: 0 };
+                    const to = toLine + 1 > lastLine
+                        ? { line: lastLine, ch: editor.getLine(lastLine).length }
+                        : { line: toLine + 1, ch: 0 };
+                    editor.replaceRange('', from, to);
+                    for (let i = fromLine; i <= toLine; i++) changedLines.add(i);
+                }
             }
-        }
+        });
         return { success: true, changedLines: Array.from(changedLines).sort((a, b) => a - b) };
     }
 
@@ -4330,11 +4339,20 @@ ${techSpec}
     function computeDiffLines(orig, mod) {
         const o = orig.split('\n');
         const n = mod.split('\n');
-        const changed = new Set();
-        const maxLen = Math.max(o.length, n.length);
-        for (let i = 0; i < maxLen; i++) {
-            if (o[i] !== n[i]) changed.add(i);
+        const oLen = o.length, nLen = n.length;
+        const dp = Array(oLen + 1).fill(null).map(() => new Int32Array(nLen + 1));
+        for (let i = oLen - 1; i >= 0; i--) {
+            for (let j = nLen - 1; j >= 0; j--) {
+                dp[i][j] = o[i] === n[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+            }
         }
+        const changed = new Set();
+        let i = 0, j = 0;
+        while (i < oLen && j < nLen) {
+            if (o[i] === n[j]) { i++; j++; }
+            else { changed.add(j); j++; }
+        }
+        while (j < nLen) changed.add(j++);
         return Array.from(changed);
     }
 
@@ -4379,12 +4397,23 @@ ${techSpec}
 
         // Rule 3: For JS, check if major function definitions are preserved
         if (currentLang === 'javascript') {
-            const origFns = new Set();
-            const modFns = new Set();
-            const fnMatches = originalCode.match(/function\s+(\w+)/g);
-            if (fnMatches) fnMatches.forEach(f => origFns.add(f.replace('function ', '')));
-            const modFnMatches = modifiedCode.match(/function\s+(\w+)/g);
-            if (modFnMatches) modFnMatches.forEach(f => modFns.add(f.replace('function ', '')));
+            function extractFnNames(code) {
+                const names = new Set();
+                let m;
+                const re1 = /function\s+(\w+)\s*\(/g;
+                while ((m = re1.exec(code)) !== null) names.add(m[1]);
+                const re2 = /(?:const|let|var)\s+(\w+)\s*=\s*(?:\([^)]*\)\s*=>|function)/g;
+                while ((m = re2.exec(code)) !== null) names.add(m[1]);
+                const re3 = /(?:^|\n)\s+(?:async\s+)?(\w+)\s*\([^)]*\)\s*\{/g;
+                while ((m = re3.exec(code)) !== null) {
+                    if (!['if', 'for', 'while', 'switch', 'catch', 'constructor'].includes(m[1])) {
+                        names.add(m[1]);
+                    }
+                }
+                return names;
+            }
+            const origFns = extractFnNames(originalCode);
+            const modFns = extractFnNames(modifiedCode);
             let missingFns = 0;
             origFns.forEach(f => { if (!modFns.has(f)) missingFns++; });
             if (origFns.size > 3 && missingFns / origFns.size > 0.5) {
@@ -4829,12 +4858,58 @@ ${techSpec}
                             if (assistantMsgEl) assistantMsgEl.remove();
                             btnAiSend.click();
                         } else if (action === 'continue') {
-                            // Continue from where we left off
+                            // Continue from where we left off — rebuild full context with partial output as assistant message
                             setAiGenerating(true);
                             aiStatusDot.classList.add('loading'); addTypingIndicator();
-                            const continueMsg = '[继续生成] 请继续输出剩余内容。已生成内容：\n' + preserved.slice(-500);
                             try {
-                                const { fullText: contText } = await callAiApiStream(apiKey, aiModelSelect.value, continueMsg, deepThinking, onStreamChunk);
+                                // Rebuild full payload with original instruction + partial assistant output
+                                const { messages: contMessages, codeFence: contCodeFence } = buildAiPayload(instruction, deepThinking);
+                                // Append the partial output as an assistant message so AI continues from there
+                                contMessages.push({ role: 'assistant', content: (thinkingBuffer || '') + '\n' + preserved });
+                                contMessages.push({ role: 'user', content: '[继续生成] 请从上面的内容断点处继续输出，不要重复已生成的内容。' });
+                                const chatUrl = getEndpointChatUrl(loadAiEndpoint());
+                                const contPayload = { model: aiModelSelect.value, messages: contMessages, stream: true };
+                                const contController = new AbortController();
+                                activeAbortController = contController;
+                                const contRes = await fetch(chatUrl, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+                                    body: JSON.stringify(contPayload),
+                                    signal: contController.signal
+                                });
+                                if (!contRes.ok) throw new Error('API 错误 ' + contRes.status);
+                                // Parse SSE stream
+                                let contText = '';
+                                const ct2 = contRes.headers.get('Content-Type') || '';
+                                if (!ct2.includes('text/event-stream')) {
+                                    const data = await contRes.json();
+                                    contText = data.choices?.[0]?.message?.content || '';
+                                    if (contText && onStreamChunk) onStreamChunk(contText, contText);
+                                } else {
+                                    const reader2 = contRes.body.getReader();
+                                    const decoder2 = new TextDecoder();
+                                    let buf2 = '';
+                                    try {
+                                        while (true) {
+                                            const { done, value } = await reader2.read();
+                                            if (done) break;
+                                            buf2 += decoder2.decode(value, { stream: true });
+                                            const lines2 = buf2.split('\n');
+                                            buf2 = lines2.pop();
+                                            for (const line2 of lines2) {
+                                                const t2 = line2.trim();
+                                                if (!t2.startsWith('data:')) continue;
+                                                const ds2 = t2.slice(5).trim();
+                                                if (ds2 === '[DONE]') continue;
+                                                try {
+                                                    const chunk2 = JSON.parse(ds2);
+                                                    const content2 = chunk2.choices?.[0]?.delta?.content || '';
+                                                    if (content2) { contText += content2; if (onStreamChunk) onStreamChunk(content2, contText); }
+                                                } catch(e3) { /* ignore */ }
+                                            }
+                                        }
+                                    } finally { reader2.releaseLock(); }
+                                }
                                 // Append new content
                                 streamTextBuf += contText;
                                 // Re-process full result
@@ -5060,7 +5135,21 @@ ${techSpec}
         const applyBtn = autoApplied
             ? '<span class="ai-applied-label" style="font-size:var(--font-size-caption);color:var(--semantic-success);">已自动应用</span>'
             : '<button class="btn btn-accent btn-apply-ai-code">应用到编辑器</button>';
-        card.innerHTML = '<div class="ai-diff-header"><span>' + title + '</span><span>' + code.split('\n').length + ' 行</span></div><div class="ai-diff-code">' + escapeHtml(code.slice(0, 1500)) + (code.length > 1500 ? '\n…（已截断）' : '') + '</div><div class="ai-diff-actions">' + applyBtn + '<button class="btn btn-copy-ai-code">复制</button></div>';
+        const isLong = code.length > 1500;
+        const truncatedHtml = escapeHtml(code.slice(0, 1500)) + (isLong ? '\n…（已截断，点击展开）' : '');
+        const fullHtml = escapeHtml(code);
+        card.innerHTML = '<div class="ai-diff-header"><span>' + title + '</span><span>' + code.split('\n').length + ' 行</span></div><div class="ai-diff-code' + (isLong ? ' diff-code-collapsible' : '') + '">' + truncatedHtml + '</div><div class="ai-diff-actions">' + applyBtn + '<button class="btn btn-copy-ai-code">复制</button></div>';
+        // FIX 15: expand/collapse for long code
+        if (isLong) {
+            const codeEl = card.querySelector('.ai-diff-code');
+            let expanded = false;
+            codeEl.style.cursor = 'pointer';
+            codeEl.title = '点击展开/折叠';
+            codeEl.addEventListener('click', () => {
+                expanded = !expanded;
+                codeEl.innerHTML = expanded ? fullHtml : truncatedHtml;
+            });
+        }
         const applyEl = card.querySelector('.btn-apply-ai-code');
         if (applyEl && !autoApplied) {
             applyEl.addEventListener('click', () => {
@@ -5312,18 +5401,28 @@ ${techSpec}
             }
             case 'edit_code': {
                 const blocks = [];
+                let lineDelta = 0;
                 if (args.operation === 'replace') {
                     blocks.push({ type: 'replace', startLine: args.startLine, endLine: args.endLine || args.startLine, content: args.code });
+                    const oldLineCount = (args.endLine || args.startLine) - args.startLine + 1;
+                    const newLineCount = (args.code || '').split('\n').length;
+                    lineDelta = newLineCount - oldLineCount;
                 } else if (args.operation === 'insert') {
                     blocks.push({ type: 'insert', afterLine: args.afterLine, content: args.code });
+                    lineDelta = (args.code || '').split('\n').length;
                 } else if (args.operation === 'delete') {
                     blocks.push({ type: 'delete', startLine: args.startLine, endLine: args.endLine || args.startLine });
+                    lineDelta = -((args.endLine || args.startLine) - args.startLine + 1);
                 }
                 const result = applyEditBlocks(blocks);
                 if (result.success) {
                     updatePreview();
                     highlightChangedLines(result.changedLines);
-                    return '[OK] 修改成功，共修改 ' + result.changedLines.length + ' 行';
+                    let msg = '[OK] 修改成功，共修改 ' + result.changedLines.length + ' 行';
+                    if (lineDelta !== 0) {
+                        msg += '\n【注意】行号已偏移 ' + (lineDelta > 0 ? '+' : '') + lineDelta + ' 行，后续行号请相应调整。';
+                    }
+                    return msg;
                 }
                 return '[ERR] 修改失败: ' + (result.reason || '未知错误');
             }
@@ -5333,29 +5432,36 @@ ${techSpec}
             }
             case 'search_web': {
                 try {
-                    // Try multiple search endpoints for robustness
-                    const endpoints = [
-                        'https://api.duckduckgo.com/?q=' + encodeURIComponent(args.query) + '&format=json&no_html=1',
-                        'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(args.query)
-                    ];
-                    let lastErr = '';
-                    for (const url of endpoints) {
-                        const searchCtrl = new AbortController();
-                        const searchTimeout = setTimeout(() => searchCtrl.abort(), 8000);
-                        try {
-                            const res = await fetch(url, { signal: searchCtrl.signal });
-                            clearTimeout(searchTimeout);
-                            if (res.ok) {
-                                const text = await res.text();
-                                // Try to extract some text from HTML or JSON
-                                const snippets = text.match(/class="result__snippet"[^>]*>([^<]+)/g);
-                                if (snippets && snippets.length > 0) {
-                                    return snippets.slice(0, 3).map(s => s.replace(/<[^>]+>/g, '').trim()).join('\n');
+                    // Use CORS proxy to avoid browser CORS restrictions
+                    const ddgUrl = 'https://api.duckduckgo.com/?q=' + encodeURIComponent(args.query) + '&format=json&no_html=1';
+                    const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(ddgUrl);
+                    const searchCtrl = new AbortController();
+                    const searchTimeout = setTimeout(() => searchCtrl.abort(), 10000);
+                    try {
+                        const res = await fetch(proxyUrl, { signal: searchCtrl.signal });
+                        clearTimeout(searchTimeout);
+                        if (res.ok) {
+                            const text = await res.text();
+                            // Try JSON parse first
+                            try {
+                                const data = JSON.parse(text);
+                                const results = [];
+                                if (data.AbstractText) results.push(data.AbstractText);
+                                if (data.RelatedTopics) {
+                                    for (const t of data.RelatedTopics.slice(0, 3)) {
+                                        if (t.Text) results.push(t.Text);
+                                    }
                                 }
-                                return '搜索完成，未获取到详细结果。请基于已有知识回答。';
+                                if (results.length > 0) return results.join('\n');
+                            } catch(e2) { /* not JSON, try HTML extraction */ }
+                            // Try to extract some text from HTML
+                            const snippets = text.match(/class="result__snippet"[^>]*>([^<]+)/g);
+                            if (snippets && snippets.length > 0) {
+                                return snippets.slice(0, 3).map(s => s.replace(/<[^>]+>/g, '').trim()).join('\n');
                             }
-                        } catch(e) { clearTimeout(searchTimeout); lastErr = e.message; }
-                    }
+                            return '搜索完成，未获取到详细结果。请基于已有知识回答。';
+                        }
+                    } catch(e) { clearTimeout(searchTimeout); }
                     return '[WARN] 搜索暂时不可用。请基于已有知识回答。';
                 } catch(e) { return '[WARN] 搜索暂时不可用。请基于已有知识回答。'; }
             }
@@ -5449,49 +5555,15 @@ ${techSpec}
         }).join('\n');
 
         const systemPrompt =
-            '你是 Werkstatt AI Agent — 一个专业的全栈前端开发助手，运行在实时预览编辑器中。\n\n' +
-            '【核心工作流 — ReAct 循环】\n' +
-            '1. 思考（Think）：分析用户需求，判断需要的工具和设计方向\n' +
-            '2. 行动（Act）：调用最必要的工具（每次最多 1-2 个）\n' +
-            '3. 观察（Observe）：查看工具返回结果\n' +
-            '4. 循环：如有需要继续执行，直到任务完成\n' +
-            '5. 完成：调用 complete 工具总结所做修改\n\n' +
-            '【代码修改规范 — 必须使用行号编辑】\n' +
-            '- 编辑代码时通过 edit_code 工具操作，使用行号定位（1-based）\n' +
-            '- replace: 替换从 startLine 到 endLine 的内容\n' +
-            '- insert: 在 afterLine 后插入新代码\n' +
-            '- delete: 删除从 startLine 到 endLine 的内容\n' +
-            '- 修改前必须先 analyze_code 了解代码结构\n' +
-            '- 每次修改范围尽量小且精确（3-15 行为佳）\n' +
-            '- 修改后必须调用 preview_code 验证效果\n\n' +
-            '【内置设计模板库 — 可根据需求自动选择】\n' +
-            dsNames + '\n\n' +
-            '【内置技术能力】\n' +
-            '- GSAP 3.x 动画：ScrollTrigger、MotionPath、Flip、Observer、Draggable 等全套插件可用（预览已适配 CDN 镜像）\n' +
-            '- API 数据源：JSONPlaceholder、TheCatAPI、PokéAPI、OpenWeatherMap、Unsplash、GitHub API 等\n' +
-            '- 代码片段：按钮、卡片、导航栏、Hero、Footer、表单、模态框、加载动画、粒子背景、3D翻转、视差滚动\n' +
-            '- 如需添加外部库，使用 add_dependency 工具引入 CDN（首选 cdnjs，预览已内置镜像适配）\n\n' +
-            '【深度思考模式】\n' +
-            '在 <thinking> 标签内进行多维度分析：\n' +
-            '- 结构分析：页面 DOM 结构是否合理，语义化标签使用是否正确\n' +
-            '- 视觉设计：色彩对比度、间距节奏、排版层次、品牌一致性\n' +
-            '- 交互体验：动画流畅度、响应式适配、无障碍访问（ARIA标签、焦点管理）\n' +
-            '- 代码质量：重复代码、性能优化机会、潜在 Bug、CSS 特异性问题\n' +
-            '- 可维护性：命名规范、注释完整性、HTML 结构清晰度\n' +
-            '分析完成后在 thinking 标签外给出具体修改方案。\n\n' +
-            '【自检要求】\n' +
-            '每次修改前自检：\n' +
-            '- 是否只修改了必要的行？\n' +
-            '- 是否有遗漏的闭合标签？\n' +
-            '- CSS 选择器是否可能误伤其他元素？\n' +
-            '- 修改后是否破坏原有功能？\n' +
-            '- 新增 JS 变量是否已用 let/const/var 显式声明？\n' +
-            '- 新增的 CDN 库调用前是否判空（typeof xxx !== \'undefined\'）？\n' +
-            '- 是否检查了 CDN 脚本加载顺序（gsap 先于 ScrollTrigger）？\n\n' +
+            '你是 Werkstatt AI Agent — 专业的全栈前端开发助手，运行在实时预览编辑器中。\n\n' +
+            '【ReAct 工作流】思考→行动（调用工具）→观察→循环→完成（调用 complete）\n\n' +
+            '【代码修改规范】通过 edit_code 工具用行号编辑（1-based）：replace/insert/delete。修改前先 analyze_code，每次改动 3-15 行，改后 preview_code 验证。\n\n' +
+            '【设计模板】' + dsNames + '\n可用 get_skill 工具按需获取详细规范。\n\n' +
+            '【技术能力】GSAP 3.x 全套插件（预览已适配 CDN 镜像）；API 数据源（JSONPlaceholder/PokéAPI/Unsplash 等）；代码片段库；add_dependency 引入外部 CDN（首选 cdnjs）。\n\n' +
+            '【深度思考】在 <thinking> 标签内分析：结构、视觉、交互、代码质量、可维护性，标签外给出修改方案。\n\n' +
+            '【自检】只改必要行？标签闭合？CSS 选择器误伤？JS 变量已声明？CDN 调用前判空？脚本加载顺序正确？\n\n' +
             imgCapabilityNote + '\n' +
-            '\n如果用户需求涉及最新信息，使用 search_web 工具搜索。' +
-            '\n如果用户需要图片且图片生成可用，使用 generate_image 工具。' +
-            '\n如果用户提到特定设计系统（如"做成 Apple 风格"），自动应用对应模板规范。';
+            '\n需要最新信息用 search_web，需要图片用 generate_image，提到设计风格自动应用对应模板。';
 
         const messages = [
             { role: 'system', content: systemPrompt },
@@ -5521,10 +5593,10 @@ ${techSpec}
             try {
                 let payload;
                 if (toolsSupported) {
-                    payload = { model, messages, tools: AGENT_TOOLS, tool_choice: 'auto' };
+                    payload = { model, messages, tools: AGENT_TOOLS, tool_choice: 'auto', stream: true };
                 } else {
                     // Fallback: no tools, just regular chat with enhanced system prompt
-                    payload = { model, messages };
+                    payload = { model, messages, stream: true };
                 }
                 const controller = new AbortController();
                 activeAbortController = controller;
@@ -5537,8 +5609,8 @@ ${techSpec}
                 if (!res.ok) {
                     const errText = await res.text();
                     // Detect API that doesn't support tools (400/404 with tool-related error, or any 400/404 on first turn)
-                    const isToolError = errText.includes('tool') || errText.includes('function') || errText.includes('不支持') || errText.includes('not supported') || errText.includes('tool_choice') || errText.includes('invalid');
-                    if (toolsSupported && (isToolError || res.status === 404 || (res.status === 400 && totalTurns <= 2))) {
+                    const isToolError = (errText.includes('tool_choice') || errText.includes('tools') && (errText.includes('not support') || errText.includes('不支持')) || errText.includes('function calling') && errText.includes('not'));
+                    if (toolsSupported && (isToolError || (res.status === 404 && totalTurns <= 2))) {
                         toolsSupported = false;
                         totalTurns--; // retry this turn without tools
                         addChatMessage('assistant', '当前 API 不支持工具调用格式，已降级为智能对话模式', ICONS.info);
@@ -5548,10 +5620,79 @@ ${techSpec}
                     addChatMessage('assistant', 'Agent 执行出错: HTTP ' + res.status + (errText ? ' — ' + errText.slice(0, 120) : ''), ICONS.error);
                     return;
                 }
-                const data = await res.json();
-                const choice = data.choices?.[0]; if (!choice) break;
-                const msg = choice.message;
+                // SSE streaming parse with non-SSE JSON fallback
+                let msg = { role: 'assistant', content: '', tool_calls: [] };
+                const ct = res.headers.get('Content-Type') || '';
+                if (!ct.includes('text/event-stream')) {
+                    // Non-SSE JSON fallback
+                    const data = await res.json();
+                    const choice = data.choices?.[0]; if (!choice) break;
+                    msg = choice.message;
+                    if (!msg.tool_calls) msg.tool_calls = [];
+                } else {
+                    const reader = res.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+                    let agentStreamText = '';
+                    let agentStreamMsg = null;
+                    try {
+                        while (true) {
+                            const { done, value } = await reader.read();
+                            if (done) break;
+                            buffer += decoder.decode(value, { stream: true });
+                            const lines = buffer.split('\n');
+                            buffer = lines.pop();
+                            for (const line of lines) {
+                                const trimmed = line.trim();
+                                if (!trimmed.startsWith('data:')) continue;
+                                const dataStr = trimmed.slice(5).trim();
+                                if (dataStr === '[DONE]') continue;
+                                try {
+                                    const chunk = JSON.parse(dataStr);
+                                    const delta = chunk.choices?.[0]?.delta;
+                                    if (!delta) continue;
+                                    if (delta.content) {
+                                        msg.content += delta.content;
+                                        // Show streaming content
+                                        if (!agentStreamMsg) {
+                                            agentStreamMsg = addChatMessage('assistant', '', ICONS.agent);
+                                        }
+                                        const textSpan = agentStreamMsg.querySelector('.msg-text');
+                                        if (textSpan) {
+                                            const parsed = parseThinkingResponse(msg.content);
+                                            if (parsed.answer) textSpan.textContent = parsed.answer;
+                                        }
+                                    }
+                                    if (delta.tool_calls) {
+                                        for (const tc of delta.tool_calls) {
+                                            if (!msg.tool_calls[tc.index]) {
+                                                msg.tool_calls[tc.index] = { id: tc.id || '', function: { name: '', arguments: '' } };
+                                            }
+                                            if (tc.id) msg.tool_calls[tc.index].id = tc.id;
+                                            if (tc.function?.name) msg.tool_calls[tc.index].function.name += tc.function.name;
+                                            if (tc.function?.arguments) msg.tool_calls[tc.index].function.arguments += tc.function.arguments;
+                                        }
+                                    }
+                                } catch (e) { /* ignore malformed lines */ }
+                            }
+                        }
+                    } finally {
+                        reader.releaseLock();
+                    }
+                }
+                // Clean up empty tool_calls
+                msg.tool_calls = (msg.tool_calls || []).filter(tc => tc && tc.function && tc.function.name);
+                if (msg.tool_calls.length === 0) delete msg.tool_calls;
                 messages.push(msg);
+
+                // FIX 12: Context window management — truncate old tool results
+                if (messages.length > 20) {
+                    for (let mi = 0; mi < messages.length - 6; mi++) {
+                        if (messages[mi].role === 'tool' && typeof messages[mi].content === 'string' && messages[mi].content.length > 200) {
+                            messages[mi].content = messages[mi].content.slice(0, 100) + '\n…（已截断，' + messages[mi].content.length + ' 字）';
+                        }
+                    }
+                }
 
                 // Fallback mode: no tool_calls from API, treat content as final answer
                 if (!toolsSupported) {
@@ -5654,6 +5795,7 @@ ${techSpec}
                 if (deepThinkingToggle && deepThinkingToggle.checked) {
                     deepThinkingToggle.checked = false;
                     saveDeepThinking(false);
+                    showToast('Agent 模式与深度思考互斥，已关闭深度思考', 'info');
                 }
             } else {
                 document.querySelector('.ai-panel')?.classList.remove('agent-mode-active');
@@ -5673,6 +5815,7 @@ ${techSpec}
                 saveAgentMode(false);
                 document.querySelector('.ai-panel')?.classList.remove('agent-mode-active');
                 setAgentStatus('', '');
+                showToast('Agent 模式与深度思考互斥，已关闭 Agent 模式', 'info');
             }
         });
     }
