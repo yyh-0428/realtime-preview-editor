@@ -2597,6 +2597,9 @@ html, body {
     // Global abort controller for canceling ongoing AI requests
     let activeAbortController = null;
     let isAiGenerating = false;
+    // AI multi-turn conversation history (stores recent user+assistant exchanges)
+    let aiChatHistory = [];
+    const AI_HISTORY_MAX = 6; // Keep last 6 exchanges (12 messages)
 
     function setAiGenerating(generating) {
         isAiGenerating = generating;
@@ -4829,6 +4832,14 @@ ${techSpec}
             }
 
             await handleParsedResponse(parsed, assistantMsgEl, codeFence);
+
+            // Save to multi-turn conversation history
+            aiChatHistory.push({ role: 'user', content: instruction });
+            aiChatHistory.push({ role: 'assistant', thinking: parsed.thinking || '', answer: parsed.answer || '', content: fullText });
+            // Trim history to prevent unbounded growth
+            if (aiChatHistory.length > AI_HISTORY_MAX * 2) {
+                aiChatHistory = aiChatHistory.slice(-AI_HISTORY_MAX * 2);
+            }
         } catch (err) {
             // Ignore AbortError (user clicked stop)
             if (err.name === 'AbortError') return;
@@ -4999,6 +5010,13 @@ ${techSpec}
             const systemPrompt = '你是实时预览编辑器内置的资深前端开发工程师。用户正在编辑 ' + langLabel + ' 代码。\n\n' + designSystemPrompt + '\n\n' + outputFormatRule + '\n\n' + techSpec + '\n\n工作规则：\n1. 【用户指令绝对优先】用户明确要求的颜色、尺寸、布局等必须执行。用户说红色就是红色\n2. 保持原有代码风格和缩进，只做必要的修改，不改动无关代码\n3. 所有 CSS/HTML/JS 必须语法正确，属性值符合 W3C 规范\n4. 用户未指定样式时才使用设计规范作为默认填充，禁止为规范覆盖用户明确要求\n5. 组件代码必须完整可运行（display、padding、border、background、color 等属性齐全）\n6. 动效代码使用标准 CSS，禁止无效语法如 transition: all ease\n7. 颜色值使用规范色值或用户指定色值，禁止编造颜色';
             messages = [
                 { role: 'system', content: systemPrompt },
+                // Inject multi-turn conversation history (excluding system)
+                ...aiChatHistory.slice(-AI_HISTORY_MAX * 2).map(m => ({
+                    role: m.role,
+                    content: m.role === 'assistant'
+                        ? (m.thinking ? '<thinking>' + m.thinking + '</thinking>\n' : '') + (m.answer || m.content || '')
+                        : m.content
+                })),
                 { role: 'user', content: '当前代码（共 ' + totalLines + ' 行，每行左侧标注了行号）：\n```' + codeFence + '\n' + currentCodeWithLines + '\n```\n\n指令：' + instruction + '\n\n⚠️ 你必须使用行号编辑格式（REPLACE X-Y / INSERT after X / DELETE X-Y）输出修改，禁止输出完整代码文件。行号参考上面代码左侧的数字。' }
             ];
         }
@@ -5384,6 +5402,24 @@ ${techSpec}
             }, required: ['domain'] }
         }},
         { type: 'function', function: {
+            name: 'undo_edit', description: '撤销上一步代码编辑操作（CodeMirror undo）',
+            parameters: { type: 'object', properties: {}, required: [] }
+        }},
+        { type: 'function', function: {
+            name: 'get_selection', description: '获取编辑器中当前选中的代码文本及行号范围',
+            parameters: { type: 'object', properties: {}, required: [] }
+        }},
+        { type: 'function', function: {
+            name: 'run_code_check', description: '对当前代码运行安全检查（函数完整性、标签闭合、潜在问题）',
+            parameters: { type: 'object', properties: {}, required: [] }
+        }},
+        { type: 'function', function: {
+            name: 'get_console', description: '获取预览 iframe 的最近控制台日志（console.log/warn/error）',
+            parameters: { type: 'object', properties: {
+                lines: { type: 'number', description: '获取最近几条日志（默认 20）' }
+            }, required: [] }
+        }},
+        { type: 'function', function: {
             name: 'complete', description: '标记任务完成，总结所做修改',
             parameters: { type: 'object', properties: {
                 summary: { type: 'string', description: '完成总结' }
@@ -5528,6 +5564,72 @@ ${techSpec}
                 return '未知技能领域: ' + args.domain;
             }
             case 'complete': return '[OK] 任务完成: ' + (args.summary || '无总结');
+            case 'undo_edit': {
+                try {
+                    editor.undo();
+                    updatePreview();
+                    return '[OK] 已撤销上一步编辑';
+                } catch(e) { return '[ERR] 撤销失败: ' + e.message; }
+            }
+            case 'get_selection': {
+                try {
+                    const sel = editor.getSelection();
+                    if (!sel) return '[INFO] 当前没有选中文本';
+                    const from = editor.getCursor('from'), to = editor.getCursor('to');
+                    return '选中内容（第 ' + (from.line + 1) + ' 行到第 ' + (to.line + 1) + ' 行）：\n```\n' + sel + '\n```';
+                } catch(e) { return '[ERR] 获取选区失败: ' + e.message; }
+            }
+            case 'run_code_check': {
+                try {
+                    const code = getCode();
+                    const issues = [];
+                    // HTML 标签闭合检查
+                    if (currentLang === 'html') {
+                        const openTags = (code.match(/<(?!\/)(?!!)(?!meta)(?!link)(?!br)(?!hr)(?!img)(?!input)(\w+)/g) || []).length;
+                        const closeTags = (code.match(/<\/(\w+)>/g) || []).length;
+                        if (openTags !== closeTags) issues.push('HTML 标签可能不匹配：开标签 ' + openTags + ' 个，闭标签 ' + closeTags + ' 个');
+                        if (code.includes('<script') && !code.includes('</script>')) issues.push('存在未闭合的 <script> 标签');
+                        if (code.includes('<style') && !code.includes('</style>')) issues.push('存在未闭合的 <style> 标签');
+                    }
+                    // JS 函数完整性检查
+                    if (currentLang === 'javascript' || currentLang === 'html') {
+                        const codeToCheck = currentLang === 'html' ? code.replace(/<script[^>]*>([\s\S]*?)<\/script>/g, (m, c) => c) : code;
+                        function extractFnNames(checkCode) {
+                            const names = new Set(); let m;
+                            const re1 = /function\s+(\w+)\s*\(/g;
+                            while ((m = re1.exec(checkCode)) !== null) names.add(m[1]);
+                            const re2 = /(?:const|let|var)\s+(\w+)\s*=\s*(?:\([^)]*\)\s*=>|function)/g;
+                            while ((m = re2.exec(checkCode)) !== null) names.add(m[1]);
+                            return names;
+                        }
+                        const fns = extractFnNames(codeToCheck);
+                        const braceBalance = (codeToCheck.match(/\{/g) || []).length - (codeToCheck.match(/\}/g) || []).length;
+                        if (braceBalance !== 0) issues.push('JS 大括号不匹配：差 ' + braceBalance + ' 个');
+                        const parenBalance = (codeToCheck.match(/\(/g) || []).length - (codeToCheck.match(/\)/g) || []).length;
+                        if (parenBalance !== 0) issues.push('JS 圆括号不匹配：差 ' + parenBalance + ' 个');
+                        // 检查常见问题
+                        if (/\beval\s*\(/.test(codeToCheck)) issues.push('使用了 eval()，存在安全风险');
+                        if (/document\.write\s*\(/.test(codeToCheck)) issues.push('使用了 document.write()，可能影响页面加载');
+                    }
+                    if (issues.length === 0) return '[OK] 代码安全检查通过，未发现明显问题';
+                    return '[WARN] 发现 ' + issues.length + ' 个潜在问题：\n' + issues.map((s, i) => (i + 1) + '. ' + s).join('\n');
+                } catch(e) { return '[ERR] 代码检查失败: ' + e.message; }
+            }
+            case 'get_console': {
+                try {
+                    const maxLines = args.lines || 20;
+                    const iframe = document.getElementById('previewFrame');
+                    if (!iframe || !iframe.contentWindow) return '[INFO] 预览未运行';
+                    // Try to read console logs from iframe
+                    const logs = iframe.contentWindow.__consoleLogs;
+                    if (!logs || logs.length === 0) return '[INFO] 预览控制台暂无日志输出';
+                    const recent = logs.slice(-maxLines);
+                    return '最近 ' + recent.length + ' 条控制台日志：\n' + recent.map(l => '[' + l.level + '] ' + l.text).join('\n');
+                } catch(e) {
+                    // Cross-origin fallback
+                    return '[INFO] 无法读取预览控制台（跨域限制）。请检查预览页面是否有报错。';
+                }
+            }
             default: return '未知工具: ' + toolName;
         }
     }
@@ -5557,11 +5659,13 @@ ${techSpec}
         const systemPrompt =
             '你是 Werkstatt AI Agent — 专业的全栈前端开发助手，运行在实时预览编辑器中。\n\n' +
             '【ReAct 工作流】思考→行动（调用工具）→观察→循环→完成（调用 complete）\n\n' +
-            '【代码修改规范】通过 edit_code 工具用行号编辑（1-based）：replace/insert/delete。修改前先 analyze_code，每次改动 3-15 行，改后 preview_code 验证。\n\n' +
+            '【任务规划】复杂任务先在 <thinking> 中制定步骤计划，再逐步执行。简单任务直接行动。\n\n' +
+            '【代码修改规范】通过 edit_code 工具用行号编辑（1-based）：replace/insert/delete。修改前先 analyze_code，每次改动 3-15 行，改后 preview_code 验证。可用 run_code_check 做安全检查，undo_edit 撤销上一步。\n\n' +
             '【设计模板】' + dsNames + '\n可用 get_skill 工具按需获取详细规范。\n\n' +
             '【技术能力】GSAP 3.x 全套插件（预览已适配 CDN 镜像）；API 数据源（JSONPlaceholder/PokéAPI/Unsplash 等）；代码片段库；add_dependency 引入外部 CDN（首选 cdnjs）。\n\n' +
             '【深度思考】在 <thinking> 标签内分析：结构、视觉、交互、代码质量、可维护性，标签外给出修改方案。\n\n' +
             '【自检】只改必要行？标签闭合？CSS 选择器误伤？JS 变量已声明？CDN 调用前判空？脚本加载顺序正确？\n\n' +
+            '【调试能力】get_console 获取预览控制台日志，run_code_check 检查代码安全，get_selection 获取选中文本。\n\n' +
             imgCapabilityNote + '\n' +
             '\n需要最新信息用 search_web，需要图片用 generate_image，提到设计风格自动应用对应模板。';
 
@@ -5762,10 +5866,32 @@ ${techSpec}
                         addChatMessage('assistant', '工具参数解析失败，跳过此步骤', ICONS.warn);
                         continue;
                     }
-                    setAgentStatus('执行: ' + toolName, toolArgs.query || toolArgs.operation || '');
-                    addChatMessage('assistant', '调用 ' + toolName + '…', ICONS.tool);
+                    setAgentStatus('执行: ' + toolName + ' (步骤 ' + totalTurns + ')', toolArgs.query || toolArgs.operation || '');
+                    addChatMessage('assistant', '▶ 步骤 ' + totalTurns + ': 调用 ' + toolName + '…', ICONS.tool);
 
-                    const result = await executeAgentTool(toolName, toolArgs);
+                    // Tool execution with retry on failure
+                    let result = null;
+                    let retryCount = 0;
+                    const maxRetries = 2;
+                    while (retryCount <= maxRetries) {
+                        try {
+                            result = await executeAgentTool(toolName, toolArgs);
+                            if (result && result.startsWith('[ERR]') && retryCount < maxRetries) {
+                                retryCount++;
+                                addChatMessage('assistant', '⚠ 工具执行失败，重试 ' + retryCount + '/' + maxRetries + '…', ICONS.warn);
+                                continue;
+                            }
+                            break;
+                        } catch(toolErr) {
+                            if (retryCount < maxRetries) {
+                                retryCount++;
+                                addChatMessage('assistant', '⚠ 工具异常，重试 ' + retryCount + '/' + maxRetries + '…', ICONS.warn);
+                                continue;
+                            }
+                            result = '[ERR] 工具执行异常: ' + toolErr.message;
+                            break;
+                        }
+                    }
                     messages.push({ role: 'tool', tool_call_id: tc.id, content: result });
                 }
             } catch(e) {
