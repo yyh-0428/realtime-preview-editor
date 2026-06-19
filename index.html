@@ -1450,7 +1450,7 @@ html, body {
                         </div>
                     </div>
                     <div class="ai-input-bar">
-                        <textarea class="ai-chat-input" id="aiChatInput" placeholder="描述你想要修改的内容…" rows="1"></textarea>
+                        <textarea class="ai-chat-input" id="aiChatInput" placeholder="描述修改需求，或输入 / 查看快捷指令…" rows="1"></textarea>
                         <button class="btn btn-accent" id="btnAiSend" disabled>
                             <svg class="btn-icon"><use href="#icon-lightning"></use></svg> 发送
                         </button>
@@ -4592,10 +4592,21 @@ ${techSpec}
             return;
         }
 
-        const instruction = aiChatInput.value.trim();
-        if (!instruction) return;
+        const rawInput = aiChatInput.value.trim();
+        if (!rawInput) return;
         const apiKey = loadAiKey();
         if (!apiKey) { showToast('请先设置 API Key', ''); return; }
+
+        // ===== Quick Command System =====
+        if (rawInput.startsWith('/')) {
+            const parts = rawInput.split(/\s+/);
+            const cmd = parts[0].toLowerCase();
+            const extra = parts.slice(1).join(' ');
+            const handled = handleQuickCommand(cmd, extra);
+            if (handled) { aiChatInput.value = ''; autoResizeTextarea(); return; }
+        }
+
+        const instruction = rawInput;
 
         // Agent Mode
         if (agentModeToggle && agentModeToggle.checked) {
@@ -4957,6 +4968,165 @@ ${techSpec}
         aiChatInput.style.height = 'auto';
         aiChatInput.rows = 1;
     });
+
+    // ===== Quick Command System =====
+    const QUICK_COMMANDS = {
+        '/explain': { desc: '解释当前选中的代码或整个文件', mode: 'explain' },
+        '/fix': { desc: '诊断代码中的错误并给出修复方案', mode: 'fix' },
+        '/refactor': { desc: '给出代码重构建议', mode: 'refactor' },
+        '/optimize': { desc: '分析性能瓶颈并给出优化建议', mode: 'optimize' },
+        '/test': { desc: '为当前代码生成测试用例', mode: 'test' },
+        '/help': { desc: '显示快捷指令帮助', mode: 'help' }
+    };
+
+    function handleQuickCommand(cmd, extra) {
+        const qc = QUICK_COMMANDS[cmd];
+        if (!qc) {
+            // Not a known command, check if it's a typo
+            const suggestions = Object.keys(QUICK_COMMANDS).filter(k => k.startsWith(cmd.slice(0, 2)));
+            if (suggestions.length > 0) {
+                showToast('未知指令。可用: ' + Object.keys(QUICK_COMMANDS).join(' '), '');
+            }
+            return false; // Not a command, treat as normal input
+        }
+
+        if (qc.mode === 'help') {
+            let helpText = '快捷指令列表：\n';
+            for (const [k, v] of Object.entries(QUICK_COMMANDS)) {
+                helpText += k + ' — ' + v.desc + '\n';
+            }
+            helpText += '\n用法示例：\n/explain\n/fix 变量未定义\n/refactor 提取公共函数';
+            hideAiEmptyState();
+            addChatMessage('user', '/help');
+            addChatMessage('assistant', helpText, ICONS.info);
+            return true;
+        }
+
+        // Build specialized instruction for the command
+        const selection = editor ? editor.getSelection() : '';
+        const code = getCode();
+        const langLabel = LANG_CONFIG[currentLang]?.label || '代码';
+        let specializedInstruction;
+
+        switch (qc.mode) {
+            case 'explain':
+                specializedInstruction = '请解释以下' + langLabel + '代码的功能、逻辑和关键点' + (extra ? '，重点关注：' + extra : '') + '。用通俗易懂的语言，适合初学者理解。只输出解释文本，不要修改代码。\n\n' + (selection ? '选中的代码：\n```\n' + selection + '\n```' : '完整代码（共' + code.split('\n').length + '行）：\n```\n' + code + '\n```');
+                break;
+            case 'fix':
+                specializedInstruction = '请诊断以下' + langLabel + '代码中的错误、bug 和潜在问题，并给出修复方案。列出每个问题及其修复方法' + (extra ? '，特别关注：' + extra : '') + '。用 ```edit 格式输出修复后的代码。\n\n当前代码：\n```\n' + (selection || code) + '\n```';
+                break;
+            case 'refactor':
+                specializedInstruction = '请分析以下' + langLabel + '代码并给出重构建议，提升代码质量、可读性和可维护性' + (extra ? '，重点：' + extra : '') + '。用 ```edit 格式输出重构后的代码。\n\n当前代码：\n```\n' + (selection || code) + '\n```';
+                break;
+            case 'optimize':
+                specializedInstruction = '请分析以下' + langLabel + '代码的性能瓶颈，并给出优化建议（渲染性能、内存使用、加载速度等）' + (extra ? '，重点：' + extra : '') + '。用 ```edit 格式输出优化后的代码。\n\n当前代码：\n```\n' + (selection || code) + '\n```';
+                break;
+            case 'test':
+                specializedInstruction = '请为以下' + langLabel + '代码生成测试用例' + (extra ? '，测试框架：' + extra : '，使用合适的测试框架') + '。输出完整的测试代码。\n\n需要测试的代码：\n```\n' + (selection || code) + '\n```';
+                break;
+            default:
+                return false;
+        }
+
+        // Execute as normal AI request with specialized instruction
+        hideAiEmptyState();
+        addChatMessage('user', cmd + (extra ? ' ' + extra : ''));
+        aiChatInput.value = '';
+        autoResizeTextarea();
+
+        const deepThinking = deepThinkingToggle && deepThinkingToggle.checked;
+        if (deepThinking && thinkingBadge) {
+            const c = detectComplexity(specializedInstruction);
+            thinkingBadge.textContent = c.label;
+            thinkingBadge.style.display = 'inline';
+        }
+        setAiGenerating(true);
+        aiStatusDot.classList.add('loading');
+        addTypingIndicator();
+        highlightSelectionForAi();
+
+        const assistantMsgEl = addChatMessage('assistant', '', ICONS.ai);
+        let thinkingCardEl = null;
+        let thinkingBuffer = '';
+        let streamTextBuf = '';
+        let streamEnded = false;
+        let streamError = null;
+        const startTime = Date.now();
+        const onStreamChunk = (chunk, fullText) => {
+            // Same streaming logic as main send
+            if (streamEnded) return;
+            const parsed = parseThinkingResponse(fullText);
+            if (parsed.thinking) {
+                thinkingBuffer = parsed.thinking;
+                if (!thinkingCardEl && assistantMsgEl) {
+                    thinkingCardEl = addThinkingCard(assistantMsgEl, parsed.thinking, 0);
+                } else if (thinkingCardEl) {
+                    const body = thinkingCardEl.querySelector('.thinking-body');
+                    if (body) body.textContent = parsed.thinking;
+                }
+            }
+            if (parsed.answer) {
+                streamTextBuf = parsed.answer;
+                if (assistantMsgEl) {
+                    const textSpan = assistantMsgEl.querySelector('.msg-text');
+                    if (textSpan) {
+                        const cleanAnswer = parsed.answer.replace(/```[\s\S]*?```/g, '[代码块生成中…]').replace(/REPLACE\s+\d+/g, 'REPLACE …').replace(/INSERT\s+after\s+\d+/g, 'INSERT …').replace(/DELETE\s+\d+/g, 'DELETE …');
+                        textSpan.textContent = cleanAnswer.slice(-200);
+                    }
+                }
+            }
+        };
+
+        (async () => {
+            try {
+                const { fullText, codeFence, currentCode, aborted } = await callAiApiStream(apiKey, aiModelSelect.value, specializedInstruction, deepThinking, onStreamChunk);
+                streamEnded = true;
+                if (aborted) {
+                    removeTypingIndicator();
+                    if (assistantMsgEl) {
+                        const preserved = streamTextBuf.trim();
+                        if (preserved) {
+                            const partialParsed = parseThinkingResponse(thinkingBuffer + '\n' + streamTextBuf);
+                            if (partialParsed.answer) handleParsedResponse(partialParsed, assistantMsgEl, codeFence);
+                        } else {
+                            setAssistantMsgText(assistantMsgEl, '已停止生成');
+                        }
+                    }
+                    return;
+                }
+                const duration = Date.now() - startTime;
+                removeTypingIndicator();
+                const parsed = parseThinkingResponse(fullText);
+                const hasThinking = !!parsed.thinking;
+                if (hasThinking && assistantMsgEl) {
+                    if (!thinkingCardEl) addThinkingCard(assistantMsgEl, parsed.thinking, duration);
+                }
+                if (assistantMsgEl) {
+                    setAssistantMsgText(assistantMsgEl, parsed.thinking ? '分析完成' : (parsed.answer.trim() || '完成'));
+                }
+                if (assistantMsgEl && parsed.answer && !parsed.answer.includes('NOT_CODE_TASK') && !parsed.answer.match(/(REPLACE|INSERT|DELETE|```)/)) {
+                    const textSpan = assistantMsgEl.querySelector('.msg-text');
+                    if (textSpan && typeof marked !== 'undefined') {
+                        try { textSpan.innerHTML = marked.parse(parsed.answer); } catch (e) { textSpan.textContent = parsed.answer; }
+                    }
+                }
+                await handleParsedResponse(parsed, assistantMsgEl, codeFence);
+                // Save to history
+                aiChatHistory.push({ role: 'user', content: cmd + ' ' + extra });
+                aiChatHistory.push({ role: 'assistant', thinking: parsed.thinking || '', answer: parsed.answer || '', content: fullText });
+                if (aiChatHistory.length > AI_HISTORY_MAX * 2) aiChatHistory = aiChatHistory.slice(-AI_HISTORY_MAX * 2);
+            } catch (err) {
+                if (err.name === 'AbortError') return;
+                streamError = err;
+                removeTypingIndicator();
+                if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, '出错: ' + err.message);
+            } finally {
+                setAiGenerating(false);
+            }
+        })();
+
+        return true;
+    }
 
     function buildAiPayload(instruction, deepThinking) {
         const currentCode = getCode();
@@ -5406,6 +5576,26 @@ ${techSpec}
             parameters: { type: 'object', properties: {}, required: [] }
         }},
         { type: 'function', function: {
+            name: 'batch_edit', description: '批量执行多个编辑操作（replace/insert/delete），按从后往前的顺序自动处理行号偏移',
+            parameters: { type: 'object', properties: {
+                operations: { type: 'array', description: '编辑操作列表', items: {
+                    type: 'object', properties: {
+                        operation: { type: 'string', enum: ['replace', 'insert', 'delete'] },
+                        startLine: { type: 'number', description: '起始行号（1-based）' },
+                        endLine: { type: 'number', description: '结束行号' },
+                        afterLine: { type: 'number', description: '在此行后插入' },
+                        code: { type: 'string', description: '新代码内容' }
+                    }, required: ['operation']
+                } }
+            }, required: ['operations'] }
+        }},
+        { type: 'function', function: {
+            name: 'format_code', description: '格式化当前代码（统一缩进、清理多余空行、对齐属性）',
+            parameters: { type: 'object', properties: {
+                mode: { type: 'string', enum: ['indent', 'full'], description: 'indent=仅统一缩进，full=完整格式化' }
+            }, required: [] }
+        }},
+        { type: 'function', function: {
             name: 'get_selection', description: '获取编辑器中当前选中的代码文本及行号范围',
             parameters: { type: 'object', properties: {}, required: [] }
         }},
@@ -5571,6 +5761,63 @@ ${techSpec}
                     return '[OK] 已撤销上一步编辑';
                 } catch(e) { return '[ERR] 撤销失败: ' + e.message; }
             }
+            case 'batch_edit': {
+                try {
+                    const ops = args.operations || [];
+                    if (ops.length === 0) return '[ERR] 操作列表为空';
+                    // Convert to blocks and sort from bottom to top to handle line shifts
+                    const blocks = ops.map(op => {
+                        if (op.operation === 'replace') return { type: 'replace', startLine: op.startLine, endLine: op.endLine || op.startLine, content: op.code || '' };
+                        if (op.operation === 'insert') return { type: 'insert', afterLine: op.afterLine, content: op.code || '' };
+                        if (op.operation === 'delete') return { type: 'delete', startLine: op.startLine, endLine: op.endLine || op.startLine };
+                        return null;
+                    }).filter(Boolean);
+                    const result = applyEditBlocks(blocks);
+                    if (result.success) {
+                        updatePreview();
+                        highlightChangedLines(result.changedLines);
+                        return '[OK] 批量修改成功，共 ' + ops.length + ' 个操作，修改 ' + result.changedLines.length + ' 行';
+                    }
+                    return '[ERR] 批量修改失败: ' + (result.reason || '未知错误');
+                } catch(e) { return '[ERR] 批量修改异常: ' + e.message; }
+            }
+            case 'format_code': {
+                try {
+                    const mode = args.mode || 'indent';
+                    const code = getCode();
+                    const lines = code.split('\n');
+                    const formatted = [];
+                    let indentLevel = 0;
+                    const indentStr = '  '; // 2 spaces
+                    for (const line of lines) {
+                        const trimmed = line.trim();
+                        if (!trimmed) { if (mode === 'full') continue; formatted.push(''); continue; }
+                        // Decrease indent for closing tags/braces
+                        if (/^(<\/\w|}|]|\)|\*\/|-->)\s*$/.test(trimmed) || trimmed.startsWith('}') || trimmed.startsWith('</')) {
+                            indentLevel = Math.max(0, indentLevel - 1);
+                        }
+                        // Clean leading whitespace and apply correct indent
+                        const cleanLine = trimmed.replace(/\s+$/, ''); // trim trailing
+                        formatted.push(indentStr.repeat(indentLevel) + cleanLine);
+                        // Increase indent for opening tags/braces
+                        if (/<(div|section|article|header|footer|nav|main|aside|ul|ol|li|table|tbody|thead|tr|td|th|form|fieldset|select|details|dialog|figure|figcaption|body|html|head)\b[^>]*>\s*$/.test(cleanLine) && !/<\/\w/.test(cleanLine)) {
+                            indentLevel++;
+                        } else if (/[{[]\s*$/.test(cleanLine) && !/^[}\]]/.test(cleanLine)) {
+                            indentLevel++;
+                        } else if (cleanLine.endsWith('{') && !cleanLine.endsWith('){')) {
+                            indentLevel++;
+                        }
+                    }
+                    // Remove excessive consecutive blank lines (max 1)
+                    const finalCode = formatted.join('\n').replace(/\n{3,}/g, '\n\n');
+                    const beforeCode = getCode();
+                    setCode(finalCode);
+                    updatePreview();
+                    const diffLines = computeDiffLines(beforeCode, finalCode);
+                    highlightChangedLines(diffLines);
+                    return '[OK] 代码已格式化（' + mode + ' 模式），调整了 ' + diffLines.length + ' 行';
+                } catch(e) { return '[ERR] 格式化失败: ' + e.message; }
+            }
             case 'get_selection': {
                 try {
                     const sel = editor.getSelection();
@@ -5660,12 +5907,13 @@ ${techSpec}
             '你是 Werkstatt AI Agent — 专业的全栈前端开发助手，运行在实时预览编辑器中。\n\n' +
             '【ReAct 工作流】思考→行动（调用工具）→观察→循环→完成（调用 complete）\n\n' +
             '【任务规划】复杂任务先在 <thinking> 中制定步骤计划，再逐步执行。简单任务直接行动。\n\n' +
-            '【代码修改规范】通过 edit_code 工具用行号编辑（1-based）：replace/insert/delete。修改前先 analyze_code，每次改动 3-15 行，改后 preview_code 验证。可用 run_code_check 做安全检查，undo_edit 撤销上一步。\n\n' +
+            '【代码修改规范】通过 edit_code 工具用行号编辑（1-based）：replace/insert/delete。多处修改用 batch_edit 一次性完成。修改前先 analyze_code，每次改动 3-15 行，改后 preview_code 验证。可用 run_code_check 做安全检查，undo_edit 撤销上一步，format_code 格式化代码。\n\n' +
             '【设计模板】' + dsNames + '\n可用 get_skill 工具按需获取详细规范。\n\n' +
             '【技术能力】GSAP 3.x 全套插件（预览已适配 CDN 镜像）；API 数据源（JSONPlaceholder/PokéAPI/Unsplash 等）；代码片段库；add_dependency 引入外部 CDN（首选 cdnjs）。\n\n' +
             '【深度思考】在 <thinking> 标签内分析：结构、视觉、交互、代码质量、可维护性，标签外给出修改方案。\n\n' +
             '【自检】只改必要行？标签闭合？CSS 选择器误伤？JS 变量已声明？CDN 调用前判空？脚本加载顺序正确？\n\n' +
             '【调试能力】get_console 获取预览控制台日志，run_code_check 检查代码安全，get_selection 获取选中文本。\n\n' +
+            '【效率优化】只读工具（analyze_code/get_selection/run_code_check/get_console/search_web/get_skill）可并行调用。写工具必须串行。\n\n' +
             imgCapabilityNote + '\n' +
             '\n需要最新信息用 search_web，需要图片用 generate_image，提到设计风格自动应用对应模板。';
 
@@ -5847,11 +6095,64 @@ ${techSpec}
                             }
                         }
                     }
+                    // ===== Agent Self-Reflection & Summary =====
+                    const toolCallCount = messages.filter(m => m.role === 'tool').length;
+                    const editCount = messages.filter(m => m.role === 'tool' && typeof m.content === 'string' && m.content.includes('[OK] 修改成功')).length;
+                    const summaryMsg = addChatMessage('assistant', '', ICONS.check);
+                    let summaryHtml = '📊 执行摘要\n';
+                    summaryHtml += '─────────────\n';
+                    summaryHtml += '总步骤: ' + totalTurns + '\n';
+                    summaryHtml += '工具调用: ' + toolCallCount + ' 次\n';
+                    summaryHtml += '代码修改: ' + editCount + ' 处\n';
+                    summaryHtml += '执行状态: 已完成\n';
+                    // Run final code check
+                    try {
+                        const finalCode = getCode();
+                        const finalLines = finalCode.split('\n').length;
+                        summaryHtml += '最终代码: ' + finalLines + ' 行\n';
+                        // Quick safety check
+                        if (currentLang === 'html') {
+                            const openTags = (finalCode.match(/<(?!\/)(?!!)(?!meta)(?!link)(?!br)(?!hr)(?!img)(?!input)(\w+)/g) || []).length;
+                            const closeTags = (finalCode.match(/<\/(\w+)>/g) || []).length;
+                            if (openTags !== closeTags) summaryHtml += '⚠ HTML 标签可能不匹配\n';
+                            else summaryHtml += '✓ HTML 标签匹配\n';
+                        }
+                    } catch(e) { /* ignore */ }
+                    setAssistantMsgText(summaryMsg, summaryHtml);
                     return;
                 }
 
-                // Execute tool calls
-                for (const tc of msg.tool_calls) {
+                // Execute tool calls — parallel for read-only tools, serial for write tools
+                const READ_ONLY_TOOLS = new Set(['analyze_code', 'get_selection', 'run_code_check', 'get_console', 'search_web', 'get_skill', 'preview_code']);
+                const toolCalls = msg.tool_calls;
+                // Group: if all are read-only, execute in parallel; otherwise serial
+                const allReadOnly = toolCalls.every(tc => READ_ONLY_TOOLS.has(tc.function?.name || ''));
+                if (allReadOnly && toolCalls.length > 1) {
+                    // Parallel execution for independent read-only tools
+                    setAgentStatus('并行执行 ' + toolCalls.length + ' 个工具 (步骤 ' + totalTurns + ')', '');
+                    addChatMessage('assistant', '⚡ 步骤 ' + totalTurns + ': 并行调用 ' + toolCalls.length + ' 个工具…', ICONS.tool);
+                    const promises = toolCalls.map(async (tc) => {
+                        let toolName, toolArgs;
+                        try {
+                            toolName = tc.function?.name || 'unknown';
+                            toolArgs = JSON.parse(tc.function?.arguments || '{}');
+                        } catch (parseErr) {
+                            return { tc, result: '[ERR] 参数解析失败' };
+                        }
+                        try {
+                            const result = await executeAgentTool(toolName, toolArgs);
+                            return { tc, result };
+                        } catch(toolErr) {
+                            return { tc, result: '[ERR] 工具异常: ' + toolErr.message };
+                        }
+                    });
+                    const results = await Promise.all(promises);
+                    for (const { tc, result } of results) {
+                        messages.push({ role: 'tool', tool_call_id: tc.id, content: result });
+                    }
+                } else {
+                    // Serial execution (original logic with retry)
+                    for (const tc of toolCalls) {
                     // Check abort before each tool
                     if (!isAiGenerating) {
                         setAgentStatus('已停止', '用户中断');
@@ -5893,6 +6194,7 @@ ${techSpec}
                         }
                     }
                     messages.push({ role: 'tool', tool_call_id: tc.id, content: result });
+                    }
                 }
             } catch(e) {
                 if (e.name === 'AbortError' || e.message === 'AbortError') {
