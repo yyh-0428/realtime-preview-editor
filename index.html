@@ -1286,7 +1286,7 @@ html, body {
   /* ── Side Panel: overlay drawer ── */
   .side-panel {
     position: absolute; top: 0; left: 0; bottom: 0;
-    width: 85vw; max-width: 340px;
+    width: 85vw !important; max-width: 340px;
     height: 100% !important;
     border-right: 1px solid var(--border-default);
     border-bottom: none;
@@ -1388,10 +1388,10 @@ html, body {
   .workspace { flex-direction: row; }
   .side-panel {
     position: absolute; top: 0; left: 0; bottom: 0;
-    width: 0; height: auto !important;
+    width: 0 !important; height: auto !important;
     transform: translateX(-105%);
   }
-  .side-panel.mobile-open { width: 320px; transform: translateX(0); }
+  .side-panel.mobile-open { width: 320px !important; transform: translateX(0); }
   .main-content { flex-direction: row; }
   .editor-panel { flex-basis: 50%; height: auto !important; }
   .preview-panel { flex-basis: 50%; height: auto !important; }
@@ -2699,6 +2699,19 @@ html, body {
                 snippetsPanel.classList.remove('mobile-open');
                 if (backdrop) backdrop.classList.remove('active');
             }
+        }
+
+        // Mobile: when toggling editor/preview visibility, reset focused mode to split
+        if ((key === 'editor' || key === 'preview') && window.matchMedia('(max-width: 768px)').matches) {
+            workspace.classList.remove('editor-focused', 'preview-focused');
+            const mobileNavBtns = document.querySelectorAll('#mobileNavBar .mobile-nav-btn');
+            mobileNavBtns.forEach(b => b.classList.remove('active'));
+            const splitBtn = document.querySelector('#mobileNavBar .mobile-nav-btn[data-view="split"]');
+            if (splitBtn) splitBtn.classList.add('active');
+            // Reset inline heights so split ratio works
+            editorPanel.style.height = '';
+            previewPanel.style.height = '';
+            if (!isVisible) applyRatio();
         }
 
         setTimeout(() => editor.refresh(), 100);
@@ -5684,10 +5697,25 @@ ${techSpec}
             mobileNavBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     if (!window.matchMedia('(max-width: 768px)').matches) return;
-                    mobileNavBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
                     const view = btn.dataset.view;
                     workspace.classList.remove('editor-focused', 'preview-focused');
+
+                    // Auto-show hidden panels when focusing them
+                    if (view === 'editor' && workspace.classList.contains('editor-hidden')) {
+                        workspace.classList.remove('editor-hidden');
+                        const editorToggle = document.getElementById('btnToggleEditor');
+                        if (editorToggle) editorToggle.classList.add('active');
+                        const states = loadPanelStates(); states.editor = true; savePanelStates(states);
+                    }
+                    if (view === 'preview' && workspace.classList.contains('preview-hidden')) {
+                        workspace.classList.remove('preview-hidden');
+                        const previewToggle = document.getElementById('btnTogglePreview');
+                        if (previewToggle) previewToggle.classList.add('active');
+                        const states = loadPanelStates(); states.preview = true; savePanelStates(states);
+                    }
+
+                    mobileNavBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
                     if (view === 'editor') {
                         workspace.classList.add('editor-focused');
                     } else if (view === 'preview') {
