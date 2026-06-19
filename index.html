@@ -2796,7 +2796,7 @@ html, body {
 
     function loadAiEndpoint() { return DEFAULT_ENDPOINT; }
     function saveAiEndpoint(ep) { safeStorage.set(AI_ENDPOINT_STORAGE, ep); }
-    function loadAiKey() { return 'sk-mhcBQAj9tVbrJa79aKYT8AhTYCwW3kWWKfA3yvh4DqbxW2xz'; }
+    function loadAiKey() { return safeStorage.get(AI_KEY_STORAGE, ''); }
     function saveAiKey(k) { safeStorage.set(AI_KEY_STORAGE, k); updateAiStatus(); }
     function loadAiModel() { return safeStorage.get(AI_MODEL_STORAGE); }
     function saveAiModel(m) { safeStorage.set(AI_MODEL_STORAGE, m); }
@@ -6210,8 +6210,7 @@ ${techSpec}
             // Check if user requested abort
             if (!isAiGenerating) {
                 setAgentStatus('已停止', '用户中断');
-                addChatMessage('assistant', 'Agent 执行已被用户中断', ICONS.warn);
-                throw new Error('AbortError');
+                return; // Clean exit — outer handler already cleans up
             }
             totalTurns++;
             // Safety: after 50 turns, ask if we should continue (not hard stop)
@@ -6238,12 +6237,16 @@ ${techSpec}
                 });
                 if (!res.ok) {
                     const errText = await res.text();
-                    // Detect API that doesn't support tools (400/404 with tool-related error, or any 400/404 on first turn)
-                    const isToolError = (errText.includes('tool_choice') || errText.includes('tools') && (errText.includes('not support') || errText.includes('不支持')) || errText.includes('function calling') && errText.includes('not'));
+                    // Detect API that doesn't support tools
+                    const isToolError = errText.includes('tool_choice') || errText.includes('tool_calls')
+                        || (errText.includes('tools') && (errText.includes('not support') || errText.includes('不支持') || errText.includes('not supported')))
+                        || (errText.includes('function calling') && errText.includes('not'));
                     if (toolsSupported && (isToolError || (res.status === 404 && totalTurns <= 2))) {
                         toolsSupported = false;
                         totalTurns--; // retry this turn without tools
-                        addChatMessage('assistant', '当前 API 不支持工具调用格式，已降级为智能对话模式', ICONS.info);
+                        addChatMessage('assistant', '当前 API 不支持工具调用，已降级为智能对话模式', ICONS.info);
+                        // Replace system prompt to remove tool references
+                        messages[0] = { role: 'system', content: systemPrompt.replace(/【ReAct 工作流】[\s\S]*?串行。\n\n/g, '').replace(/通过 edit_code 工具[\s\S]*?验证。\n/g, '直接输出修改后的完整代码。\n') };
                         continue;
                     }
                     setAgentStatus('错误', 'API 返回 ' + res.status);
@@ -6315,10 +6318,12 @@ ${techSpec}
                 if (msg.tool_calls.length === 0) delete msg.tool_calls;
                 messages.push(msg);
 
-                // FIX 12: Context window management — truncate old tool results
+                // Context window management — truncate old tool results, preserve analyze_code
                 if (messages.length > 20) {
                     for (let mi = 0; mi < messages.length - 6; mi++) {
                         if (messages[mi].role === 'tool' && typeof messages[mi].content === 'string' && messages[mi].content.length > 200) {
+                            // Never truncate analyze_code results — AI needs complete code with line numbers
+                            if (messages[mi].content.startsWith('代码共')) continue;
                             messages[mi].content = messages[mi].content.slice(0, 100) + '\n…（已截断，' + messages[mi].content.length + ' 字）';
                         }
                     }
@@ -6377,7 +6382,7 @@ ${techSpec}
                     const toolCallCount = messages.filter(m => m.role === 'tool').length;
                     const editCount = messages.filter(m => m.role === 'tool' && typeof m.content === 'string' && m.content.includes('[OK] 修改成功')).length;
                     const summaryMsg = addChatMessage('assistant', '', ICONS.check);
-                    let summaryHtml = '📊 执行摘要\n';
+                    let summaryHtml = '执行摘要\n';
                     summaryHtml += '─────────────\n';
                     summaryHtml += '总步骤: ' + totalTurns + '\n';
                     summaryHtml += '工具调用: ' + toolCallCount + ' 次\n';
@@ -6392,8 +6397,8 @@ ${techSpec}
                         if (currentLang === 'html') {
                             const openTags = (finalCode.match(/<(?!\/)(?!!)(?!meta)(?!link)(?!br)(?!hr)(?!img)(?!input)(\w+)/g) || []).length;
                             const closeTags = (finalCode.match(/<\/(\w+)>/g) || []).length;
-                            if (openTags !== closeTags) summaryHtml += '⚠ HTML 标签可能不匹配\n';
-                            else summaryHtml += '✓ HTML 标签匹配\n';
+                            if (openTags !== closeTags) summaryHtml += 'HTML 标签可能不匹配\n';
+                            else summaryHtml += 'HTML 标签匹配\n';
                         }
                     } catch(e) { /* ignore */ }
                     setAssistantMsgText(summaryMsg, summaryHtml);
@@ -6408,7 +6413,7 @@ ${techSpec}
                 if (allReadOnly && toolCalls.length > 1) {
                     // Parallel execution for independent read-only tools
                     setAgentStatus('并行执行 ' + toolCalls.length + ' 个工具 (步骤 ' + totalTurns + ')', '');
-                    addChatMessage('assistant', '⚡ 步骤 ' + totalTurns + ': 并行调用 ' + toolCalls.length + ' 个工具…', ICONS.tool);
+                    addChatMessage('assistant', '步骤 ' + totalTurns + ': 并行调用 ' + toolCalls.length + ' 个工具…', ICONS.tool);
                     const promises = toolCalls.map(async (tc) => {
                         let toolName, toolArgs;
                         try {
@@ -6434,8 +6439,7 @@ ${techSpec}
                     // Check abort before each tool
                     if (!isAiGenerating) {
                         setAgentStatus('已停止', '用户中断');
-                        addChatMessage('assistant', 'Agent 执行已被用户中断', ICONS.warn);
-                        throw new Error('AbortError');
+                        return;
                     }
                     let toolName, toolArgs;
                     try {
@@ -6446,25 +6450,26 @@ ${techSpec}
                         continue;
                     }
                     setAgentStatus('执行: ' + toolName + ' (步骤 ' + totalTurns + ')', toolArgs.query || toolArgs.operation || '');
-                    addChatMessage('assistant', '▶ 步骤 ' + totalTurns + ': 调用 ' + toolName + '…', ICONS.tool);
+                    addChatMessage('assistant', '步骤 ' + totalTurns + ': 调用 ' + toolName + '…', ICONS.tool);
 
-                    // Tool execution with retry on failure
+                    // Tool execution with retry on failure (read-only tools only)
                     let result = null;
                     let retryCount = 0;
-                    const maxRetries = 2;
+                    const isReadOnly = READ_ONLY_TOOLS.has(toolName);
+                    const maxRetries = isReadOnly ? 2 : 0; // Write tools: no retry
                     while (retryCount <= maxRetries) {
                         try {
                             result = await executeAgentTool(toolName, toolArgs);
                             if (result && result.startsWith('[ERR]') && retryCount < maxRetries) {
                                 retryCount++;
-                                addChatMessage('assistant', '⚠ 工具执行失败，重试 ' + retryCount + '/' + maxRetries + '…', ICONS.warn);
+                                addChatMessage('assistant', '工具执行失败，重试 ' + retryCount + '/' + maxRetries + '…', ICONS.warn);
                                 continue;
                             }
                             break;
                         } catch(toolErr) {
                             if (retryCount < maxRetries) {
                                 retryCount++;
-                                addChatMessage('assistant', '⚠ 工具异常，重试 ' + retryCount + '/' + maxRetries + '…', ICONS.warn);
+                                addChatMessage('assistant', '工具异常，重试 ' + retryCount + '/' + maxRetries + '…', ICONS.warn);
                                 continue;
                             }
                             result = '[ERR] 工具执行异常: ' + toolErr.message;
@@ -6477,7 +6482,7 @@ ${techSpec}
             } catch(e) {
                 if (e.name === 'AbortError' || e.message === 'AbortError') {
                     setAgentStatus('已停止', '用户中断');
-                    throw e; // Let outer handler deal with it
+                    return; // Clean exit — outer handler already cleans up
                 }
                 setAgentStatus('错误', e.message);
                 addChatMessage('assistant', 'Agent 执行出错: ' + e.message, ICONS.error);
