@@ -1,0 +1,1152 @@
+[
+  {
+    "id": "default",
+    "name": "通用现代",
+    "description": "中性白底现代 SaaS 风格，以蓝色 #0070f3 为主色调，Inter 字体贯穿全局。Display 600 配合 -2.4px 负字距营造紧凑有力的标题，Body 400 保持清爽阅读体验。卡片纯白 #ffffff 悬浮于 #fafafa 画布之上，靠 hairline 边框 #ebebeb 分层而非阴影。圆角按 4/8/12/16px 递进，间距基于 4px 网格。整体氛围清爽、商务、可信赖，适合 dashboard、管理后台、landing page 与产品介绍页。",
+    "version": "alpha",
+    "colors": {
+      "primary": "#0070f3",
+      "on-primary": "#ffffff",
+      "canvas": "#fafafa",
+      "surface": "#ffffff",
+      "surface-raised": "#f5f5f5",
+      "ink": "#171717",
+      "body": "#4d4d4d",
+      "muted": "#888888",
+      "hairline": "#ebebeb",
+      "hairline-strong": "#a1a1a1",
+      "primary-hover": "#0761d1",
+      "success": "#0070f3",
+      "error": "#ee0000",
+      "warning": "#f5a623"
+    },
+    "typography": {
+      "display": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "48px", "fontWeight": 600, "lineHeight": 1.1, "letterSpacing": "-2.4px" },
+      "title": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "24px", "fontWeight": 600, "lineHeight": 1.2, "letterSpacing": "-0.6px" },
+      "body": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.5 },
+      "caption": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "12px", "fontWeight": 400, "lineHeight": 1.4 },
+      "button": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": 1.0 },
+      "mono": { "fontFamily": "\"JetBrains Mono\", \"Fira Code\", monospace", "fontSize": "14px", "fontWeight": 400 }
+    },
+    "rounded": { "xs": "4px", "sm": "4px", "md": "8px", "lg": "12px", "xl": "16px", "pill": "9999px" },
+    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "components": {
+      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "10px 20px", "height": "40px" },
+      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "24px" },
+      "input": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px", "height": "40px" },
+      "nav": { "backgroundColor": "{colors.surface}", "textColor": "{colors.body}", "borderBottom": "1px solid {colors.hairline}", "height": "64px" }
+    },
+    "rules": [
+      "使用白底 (#fafafa) 作为页面背景，卡片用纯白 (#ffffff)",
+      "主色调为蓝色 (#0070f3)，用于按钮、链接、焦点状态",
+      "字体使用 Inter，Display 600 负字距，Body 400",
+      "间距基于 4px：4/8/16/24/32/48/96",
+      "圆角分层：4px(小按钮) / 8px(按钮输入框) / 12px(卡片) / 16px(大容器)",
+      "阴影使用三层：flat → hairline边框 → 微阴影 → 提升阴影",
+      "按钮高度 40px，padding 10px×20px",
+      "最大内容宽度 1200px 居中"
+    ],
+    "dos": [
+      "Display 标题使用 weight 600 配合 -2.4px 负字距",
+      "卡片用纯白 #ffffff 悬浮于 #fafafa 画布，靠 hairline 边框分层",
+      "圆角按层级递进：4px 小按钮 → 8px 输入框 → 12px 卡片 → 16px 大容器",
+      "间距严格基于 4px 网格：4/8/16/24/32/48/96",
+      "主色 #0070f3 仅用于按钮、链接、焦点环"
+    ],
+    "donts": [
+      "不要把主色 #0070f3 当作正文颜色",
+      "不要使用超过 16px 的大圆角",
+      "不要给卡片加重阴影，优先用 hairline 边框 #ebebeb",
+      "不要突破 4px 间距网格使用任意值",
+      "不要在 Display 标题使用 400 weight"
+    ],
+    "keywords": ["现代", "简约", "清爽", "SaaS", "商务", "企业", "工具", "平台", "dashboard", "管理后台", "landing page", "官网", "产品介绍", "软件", "app", "应用"],
+    "tone": "brutallyMinimal",
+    "responsive": {
+      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "strategy": "桌面优先，最大内容宽度 1200px 居中；移动端将多列网格降为单列，section 间距从 96px 降至 48px。"
+    }
+  },
+  {
+    "id": "claude",
+    "name": "Claude",
+    "description": "暖奶油色画布 #faf9f5 搭配珊瑚色 #cc785c 点缀，文学编辑风格。Display 使用 Cormorant Garamond 衬线字体 weight 400 配合 -1px 负字距，营造杂志感标题；Body 切换到 Inter 保持温暖可读。奶油色与深色 #181715 表面交替出现形成页面节奏，珊瑚色仅用于主按钮和全宽号召卡片。圆角 6/8/12/16px 分层，96px section 间距与 32px 卡片内边距维持编辑呼吸感。适合文学、博客、文章、出版与内容型产品。",
+    "version": "alpha",
+    "colors": {
+      "primary": "#cc785c",
+      "on-primary": "#ffffff",
+      "canvas": "#faf9f5",
+      "surface": "#efe9de",
+      "surface-dark": "#181715",
+      "ink": "#141413",
+      "body": "#3d3d3a",
+      "muted": "#6c6a64",
+      "hairline": "#e6dfd8",
+      "primary-hover": "#a9583e",
+      "on-dark": "#faf9f5",
+      "on-dark-soft": "#a09d96",
+      "success": "#cc785c",
+      "error": "#c0392b",
+      "warning": "#d4a05a"
+    },
+    "typography": {
+      "display": { "fontFamily": "\"Cormorant Garamond\", Garamond, \"Times New Roman\", serif", "fontSize": "48px", "fontWeight": 400, "lineHeight": 1.1, "letterSpacing": "-1px" },
+      "title": { "fontFamily": "\"Cormorant Garamond\", Garamond, \"Times New Roman\", serif", "fontSize": "24px", "fontWeight": 500, "lineHeight": 1.3 },
+      "body": { "fontFamily": "Inter, -apple-system, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.55 },
+      "caption": { "fontFamily": "Inter, -apple-system, sans-serif", "fontSize": "13px", "fontWeight": 500, "lineHeight": 1.4 },
+      "button": { "fontFamily": "Inter, -apple-system, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": 1.0 },
+      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+    },
+    "rounded": { "xs": "4px", "sm": "6px", "md": "8px", "lg": "12px", "xl": "16px", "pill": "9999px" },
+    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "components": {
+      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "10px 20px" },
+      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "32px" },
+      "input": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px" },
+      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.body}", "borderBottom": "1px solid {colors.hairline}", "height": "64px" }
+    },
+    "rules": [
+      "使用暖奶油色 (#faf9f5) 作为画布背景，不是纯白",
+      "Display 标题使用衬线字体 (Cormorant Garamond) weight 400 负字距",
+      "Body 使用 Inter 或人文字体，保持温暖编辑感",
+      "珊瑚色 (#cc785c) 仅用于主按钮和全宽号召卡片",
+      "深色表面 (#181715) 用于代码编辑器模拟、产品展示卡片",
+      "奶油色和深色交替出现，形成页面节奏",
+      "圆角分层：6px(小) / 8px(标准) / 12px(卡片) / 16px(大容器)",
+      "保持 96px 的 section 间距，卡片内部 32px padding"
+    ],
+    "dos": [
+      "Display 标题使用 Cormorant Garamond 衬线 weight 400 配合 -1px 负字距",
+      "画布用暖奶油 #faf9f5，绝不用纯白",
+      "珊瑚色 #cc785c 仅出现在主按钮和全宽号召卡片",
+      "奶油色与深色 #181715 表面交替形成页面节奏",
+      "section 间距保持 96px，卡片内边距 32px"
+    ],
+    "donts": [
+      "不要用纯白 #ffffff 作为画布背景",
+      "不要把珊瑚色 #cc785c 当作正文或装饰色",
+      "不要在 Body 使用衬线字体，Body 保持 Inter",
+      "不要压缩 section 间距到 96px 以下",
+      "不要使用纯黑文字，用 #141413 保持温暖"
+    ],
+    "keywords": ["文学", "编辑", "温暖", "奶油色", "杂志", "博客", "文章", "阅读", "写作", "出版", "内容", "故事", "散文", "诗集"],
+    "tone": "warmEditorial",
+    "responsive": {
+      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "strategy": "桌面优先的编辑阅读体验；移动端 Display 字号降至 36px，section 间距降至 64px，奶油/深色交替节奏保留。"
+    }
+  },
+  {
+    "id": "vercel",
+    "name": "Vercel",
+    "description": "黑白精确的开发者平台美学。纯白 #ffffff 画布配近黑 #171717 文字与按钮，Geist 字体（或 Inter）Display 600 配 -2.4px 大负字距。Hero 区域使用彩色网格渐变（青/蓝/紫/琥珀）作为装饰，链接色蓝 #0070f3，紫色 #7928ca 与青色 #50e3c2 作为辅助强调。圆角偏小 6/8/12px，阴影极少，主要靠 hairline 边框 #ebebeb 分隔。按钮黑色填充或白色描边，高度 40px。适合开发者、技术、API 文档、开源工具链。",
+    "version": "alpha",
+    "colors": {
+      "primary": "#171717",
+      "on-primary": "#ffffff",
+      "canvas": "#ffffff",
+      "surface": "#fafafa",
+      "surface-2": "#f5f5f5",
+      "ink": "#171717",
+      "body": "#4d4d4d",
+      "muted": "#888888",
+      "hairline": "#ebebeb",
+      "hairline-strong": "#a1a1a1",
+      "primary-hover": "#000000",
+      "link": "#0070f3",
+      "link-deep": "#0761d1",
+      "violet": "#7928ca",
+      "cyan": "#50e3c2",
+      "gradient1": "linear-gradient(135deg, #007cf0, #00dfd8)",
+      "gradient2": "linear-gradient(135deg, #7928ca, #ff0080)",
+      "gradient3": "linear-gradient(135deg, #ff4d4d, #f9cb28)",
+      "success": "#0070f3",
+      "error": "#e00000",
+      "warning": "#f5a623"
+    },
+    "typography": {
+      "display": { "fontFamily": "Geist, Inter, system-ui, -apple-system, sans-serif", "fontSize": "48px", "fontWeight": 600, "lineHeight": "48px", "letterSpacing": "-2.4px" },
+      "title": { "fontFamily": "Geist, Inter, system-ui, -apple-system, sans-serif", "fontSize": "24px", "fontWeight": 600, "lineHeight": "32px", "letterSpacing": "-0.96px" },
+      "body": { "fontFamily": "Geist, Inter, system-ui, -apple-system, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": "24px" },
+      "caption": { "fontFamily": "Geist, Inter, system-ui, -apple-system, sans-serif", "fontSize": "12px", "fontWeight": 400, "lineHeight": "16px" },
+      "button": { "fontFamily": "Geist, Inter, system-ui, -apple-system, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": "20px" },
+      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+    },
+    "rounded": { "xs": "4px", "sm": "4px", "md": "6px", "lg": "8px", "xl": "12px", "pill": "9999px" },
+    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "components": {
+      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "10px 20px", "height": "40px" },
+      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "24px" },
+      "input": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px", "height": "40px" },
+      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "borderBottom": "1px solid {colors.hairline}", "height": "64px" }
+    },
+    "rules": [
+      "白底 (#ffffff) 为主，近黑 (#171717) 为文字和按钮",
+      "使用 Geist 字体（或 Inter），Display 600 大负字距",
+      "Hero 区域使用彩色网格渐变（青/蓝/紫/琥珀）作为装饰",
+      "链接色为蓝色 (#0070f3)，hover 加深",
+      "紫色 (#7928ca) 和青色 (#50e3c2) 作为辅助强调色",
+      "圆角偏小：6px(按钮) / 8px(卡片) / 12px(大容器)",
+      "阴影极少，主要靠 hairline 边框 (#ebebeb) 分隔",
+      "按钮使用黑色填充或白色描边，高度 40px"
+    ],
+    "dos": [
+      "Display 标题使用 Geist/Inter weight 600 配 -2.4px 大负字距",
+      "Hero 区域用彩色网格渐变（青/蓝/紫/琥珀）装饰",
+      "主按钮用黑色 #171717 填充或白色描边，高度 40px",
+      "分隔靠 hairline 边框 #ebebeb，而非阴影",
+      "链接色用蓝 #0070f3，紫色 #7928ca 与青色 #50e3c2 作辅助强调"
+    ],
+    "donts": [
+      "不要给卡片加柔和阴影，用 hairline 边框分隔",
+      "不要使用超过 12px 的圆角",
+      "不要把彩色渐变当正文背景，仅用于 Hero 装饰",
+      "不要用纯黑 #000000，用近黑 #171717",
+      "不要在正文使用 600 weight"
+    ],
+    "keywords": ["开发者", "技术", "精确", "网格", "几何", "现代", "工程", "代码", "API", "文档", "开源", "工具链", "部署", "CLI"],
+    "tone": "brutallyMinimal",
+    "responsive": {
+      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "strategy": "桌面优先；移动端 Hero 渐变保留但 Display 降至 36px，导航折叠为汉堡菜单，网格降为单列。"
+    }
+  },
+  {
+    "id": "linear",
+    "name": "Linear",
+    "description": "极深黑 #010102 画布配薰衣草蓝 #5e6ad2 主色，软件工艺感。卡片用炭灰 #0f1011 带 hairline 边框 #23252a，文字从浅灰 #f7f8f8 到深灰 #62666d 形成层级。Inter 字体 Display 600 配 -1.8px 负字距，紧凑现代。强调色极稀缺，仅用于品牌标记和焦点环。圆角偏小 4/6/8/12px 保持软件工具的精确感，产品截图放在深色面板中展示。适合暗黑、软件、生产力、项目管理、开发者工具。",
+    "version": "alpha",
+    "colors": {
+      "primary": "#5e6ad2",
+      "on-primary": "#ffffff",
+      "canvas": "#010102",
+      "surface": "#0f1011",
+      "surface-2": "#141516",
+      "surface-3": "#18191a",
+      "ink": "#f7f8f8",
+      "body": "#d0d6e0",
+      "muted": "#8a8f98",
+      "hairline": "#23252a",
+      "hairline-strong": "#34343a",
+      "primary-hover": "#828fff",
+      "ink-muted": "#d0d6e0",
+      "ink-subtle": "#8a8f98",
+      "ink-tertiary": "#62666d",
+      "inverse-canvas": "#ffffff",
+      "inverse-surface": "#f5f6f6",
+      "inverse-ink": "#000000",
+      "success": "#5e6ad2",
+      "error": "#eb5757",
+      "warning": "#f2994a"
+    },
+    "typography": {
+      "display": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "56px", "fontWeight": 600, "lineHeight": 1.1, "letterSpacing": "-1.8px" },
+      "title": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "28px", "fontWeight": 600, "lineHeight": 1.2, "letterSpacing": "-0.6px" },
+      "body": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.5, "letterSpacing": "-0.05px" },
+      "caption": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "12px", "fontWeight": 400, "lineHeight": 1.4 },
+      "button": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": 1.2 },
+      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+    },
+    "rounded": { "xs": "4px", "sm": "4px", "md": "6px", "lg": "8px", "xl": "12px", "pill": "9999px" },
+    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "components": {
+      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "8px 16px" },
+      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "24px" },
+      "input": { "backgroundColor": "{colors.surface-2}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "8px 12px" },
+      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.body}", "borderBottom": "1px solid {colors.hairline}", "height": "56px" }
+    },
+    "rules": [
+      "使用极深黑 (#010102) 作为画布，不是纯黑",
+      "卡片使用炭灰色 (#0f1011) 带 hairline 边框 (#23252a)",
+      "主色调为薰衣草蓝 (#5e6ad2)，hover 变亮 (#828fff)",
+      "文字使用浅灰 (#f7f8f8) 到深灰 (#62666d) 的层级",
+      "字体使用 Inter，Display 600 负字距，紧凑现代",
+      "产品截图放在深色面板中展示",
+      "圆角偏小，保持软件工具的精确感",
+      "强调色极稀缺，仅用于品牌标记和焦点环"
+    ],
+    "dos": [
+      "画布用极深黑 #010102，不是纯黑 #000000",
+      "卡片用炭灰 #0f1011 配 hairline 边框 #23252a",
+      "文字层级用 #f7f8f8 → #d0d6e0 → #8a8f98 → #62666d",
+      "Display 用 Inter 600 配 -1.8px 负字距",
+      "强调色 #5e6ad2 极稀缺，仅用于品牌标记和焦点环"
+    ],
+    "donts": [
+      "不要用纯黑 #000000 作为画布",
+      "不要把薰衣草蓝 #5e6ad2 当装饰色滥用",
+      "不要给卡片加亮色阴影，深度来自表面颜色层级",
+      "不要使用超过 12px 的圆角",
+      "不要在深色背景用深灰文字，保持 #f7f8f8 高对比"
+    ],
+    "keywords": ["暗黑", "软件", "工艺", "精确", "工具", "生产力", "效率", "任务", "项目管理", "深色模式", "编辑器", "IDE", "开发者工具"],
+    "tone": "darkTech",
+    "responsive": {
+      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "strategy": "桌面优先深色界面；移动端 Display 降至 40px，导航折叠，产品截图面板保持深色边框。"
+    }
+  },
+  {
+    "id": "stripe",
+    "name": "Stripe",
+    "description": "深海蓝墨水 #0d253d 配电靛蓝 #533afd 主色，金融基础设施美学。白底为主，浅蓝灰 #f6f9fc 作为交替 section 背景。SF Pro Display 字体 Display 使用 weight 300 细体配 -1.4px 负字距，营造编辑密度感。Hero 区域常使用大气渐变网格占据上三分之一，按钮为 tight-radius pill 圆角矩形高度 40px。卡片活在近白表面，阴影柔和，数字使用等宽字体和 tabular-nums。适合金融、支付、B2B、fintech、企业 SaaS。",
+    "version": "alpha",
+    "colors": {
+      "primary": "#533afd",
+      "on-primary": "#ffffff",
+      "canvas": "#ffffff",
+      "surface": "#f6f9fc",
+      "cream": "#f5e9d4",
+      "ink": "#0d253d",
+      "body": "#64748d",
+      "muted": "#8898aa",
+      "hairline": "#e3e8ee",
+      "hairline-input": "#a8c3de",
+      "ink-secondary": "#273951",
+      "ink-mute": "#64748d",
+      "primary-deep": "#4434d4",
+      "primary-press": "#2e2b8c",
+      "ruby": "#ea2261",
+      "magenta": "#f96bee",
+      "lemon": "#9b6829",
+      "shadow-blue": "#003770",
+      "success": "#00875a",
+      "error": "#df1b41",
+      "warning": "#cc8e00"
+    },
+    "typography": {
+      "display": { "fontFamily": "\"SF Pro Display\", system-ui, -apple-system, sans-serif", "fontSize": "56px", "fontWeight": 300, "lineHeight": 1.03, "letterSpacing": "-1.4px" },
+      "title": { "fontFamily": "\"SF Pro Display\", system-ui, -apple-system, sans-serif", "fontSize": "26px", "fontWeight": 300, "lineHeight": 1.12, "letterSpacing": "-0.26px" },
+      "body": { "fontFamily": "\"SF Pro Display\", system-ui, -apple-system, sans-serif", "fontSize": "16px", "fontWeight": 300, "lineHeight": 1.4 },
+      "caption": { "fontFamily": "\"SF Pro Display\", system-ui, -apple-system, sans-serif", "fontSize": "12px", "fontWeight": 400, "lineHeight": 1.4 },
+      "button": { "fontFamily": "\"SF Pro Display\", system-ui, -apple-system, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": 1.0 },
+      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+    },
+    "rounded": { "xs": "4px", "sm": "4px", "md": "6px", "lg": "8px", "xl": "12px", "pill": "9999px" },
+    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "components": {
+      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.pill}", "padding": "10px 20px", "height": "40px" },
+      "card": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "24px", "boxShadow": "0 2px 8px rgba(0,0,0,0.06)" },
+      "input": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline-input}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px", "height": "40px" },
+      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "borderBottom": "1px solid {colors.hairline}", "height": "64px" }
+    },
+    "rules": [
+      "白底为主，浅蓝灰 (#f6f9fc) 作为交替 section 背景",
+      "墨水色 (#0d253d) 为标题，中灰 (#64748d) 为正文",
+      "Display 使用 weight 300 (细体) 负字距，营造编辑密度",
+      "主色为电靛蓝 (#533afd)，用于按钮和关键 CTA",
+      "Hero 区域常使用大气渐变网格占据上三分之一",
+      "按钮为圆角矩形 (tight-radius pill)，高度 40px",
+      "卡片活在近白表面，阴影柔和",
+      "数字使用等宽字体和 tabular-nums 特性"
+    ],
+    "dos": [
+      "Display 标题使用 weight 300 细体配 -1.4px 负字距",
+      "标题用墨水色 #0d253d，正文用中灰 #64748d",
+      "主按钮用电靛蓝 #533afd 填充，tight-radius pill 圆角",
+      "数字使用等宽字体配合 tabular-nums",
+      "Hero 区域用大气渐变网格占据上三分之一"
+    ],
+    "donts": [
+      "不要在 Display 标题使用 600 weight，保持 300 细体",
+      "不要把电靛蓝 #533afd 当正文颜色",
+      "不要给卡片加硬阴影，用柔和阴影 0 2px 8px",
+      "不要用纯黑文字，用墨水色 #0d253d",
+      "不要在数字排版省略 tabular-nums"
+    ],
+    "keywords": ["金融", "支付", "专业", "商务", "基础设施", "银行", "交易", "账单", "企业", "B2B", "SaaS", "fintech", "数据"],
+    "tone": "luxuryRefined",
+    "responsive": {
+      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "strategy": "桌面优先；移动端 Hero 渐变网格保留但 Display 降至 40px，section 交替背景节奏保留，数字仍用 tabular-nums。"
+    }
+  },
+  {
+    "id": "magicui",
+    "name": "Magic UI",
+    "description": "深锌色 #09090b 画布配青色 #22d3ee 到紫色 #a855f7 渐变，开发者动画组件库美学。卡片用 zinc-900 #18181b 带 hairline 边框，Hero 标题使用青到紫的渐变填充（background-clip: text）。Inter 字体 Headline 600-700，Body 400。组件演示卡片是核心，每个都带代码块，使用 Lucide 图标集。动画效果包括 Border Beam、Orb、Shimmer、Meteors。适合动画、开发者、炫酷、组件库、特效展示。",
+    "version": "alpha",
+    "colors": {
+      "primary": "#22d3ee",
+      "on-primary": "#000000",
+      "canvas": "#09090b",
+      "surface": "#18181b",
+      "surface-elevated": "#27272a",
+      "surface-overlay": "#3f3f46",
+      "ink": "#fafafa",
+      "body": "#d4d4d8",
+      "muted": "#a1a1aa",
+      "hairline": "#27272a",
+      "hairline-soft": "#18181b",
+      "primary-soft": "#06b6d4",
+      "muted-soft": "#71717a",
+      "accent-purple": "#a855f7",
+      "accent-purple-deep": "#7c3aed",
+      "gradient": "linear-gradient(135deg, #22d3ee, #a855f7)",
+      "success": "#22d3ee",
+      "error": "#ef4444",
+      "warning": "#f59e0b"
+    },
+    "typography": {
+      "display": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "56px", "fontWeight": 700, "lineHeight": 1.05, "letterSpacing": "-1px" },
+      "title": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "32px", "fontWeight": 600, "lineHeight": 1.15, "letterSpacing": "-0.3px" },
+      "body": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.6 },
+      "caption": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "13px", "fontWeight": 400, "lineHeight": 1.4 },
+      "button": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": 1.0 },
+      "mono": { "fontFamily": "\"JetBrains Mono\", \"Fira Code\", monospace", "fontSize": "14px", "fontWeight": 400 }
+    },
+    "rounded": { "xs": "4px", "sm": "4px", "md": "6px", "lg": "8px", "xl": "12px", "pill": "9999px" },
+    "spacing": { "xxs": "4px", "xs": "8px", "sm": "12px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "components": {
+      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "10px 20px" },
+      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "24px" },
+      "input": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px" },
+      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.body}", "borderBottom": "1px solid {colors.hairline}", "height": "64px" }
+    },
+    "rules": [
+      "深暖黑 (#09090b, zinc-950) 作为画布，不是纯黑",
+      "卡片使用 zinc-900 (#18181b) 带 hairline 边框",
+      "主色调为亮青色 (#22d3ee)，紫色 (#a855f7) 为辅助",
+      "Hero 标题使用青到紫的渐变填充 (background-clip: text)",
+      "字体使用 Inter，Headline 600-700，Body 400",
+      "组件演示卡片是核心，每个都带代码块",
+      "使用 Lucide 图标集",
+      "动画效果：Border Beam、Orb、Shimmer、Meteors"
+    ],
+    "dos": [
+      "Hero 标题用青到紫渐变填充 background-clip: text",
+      "画布用 zinc-950 #09090b，不是纯黑",
+      "组件演示卡片每个都配代码块",
+      "使用 Lucide 图标集保持视觉统一",
+      "动画用 Border Beam、Orb、Shimmer、Meteors 等组件库特效"
+    ],
+    "donts": [
+      "不要用纯黑 #000000 作为画布",
+      "不要把青紫渐变用在正文文字上",
+      "不要省略组件演示卡片的代码块",
+      "不要使用非 Lucide 的图标集",
+      "不要在 Body 使用 700 weight，保持 400"
+    ],
+    "keywords": ["动画", "开发者", "炫酷", "渐变", "组件", "特效", "展示", "演示", "粒子", "霓虹", "科技感", "未来", "创意"],
+    "tone": "darkTech",
+    "responsive": {
+      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "strategy": "桌面优先；移动端 Display 降至 40px，动画特效降级为静态以保证性能，组件演示网格降为单列。"
+    }
+  },
+  {
+    "id": "lamborghini",
+    "name": "兰博基尼",
+    "description": "纯黑 #000000 画布配金色 #ffc000 主色，暗黑豪华力量感。所有 Display 标题使用大写 UPPERCASE 配合极致尺度 80px+，tight line-height 0.92-1.15 创造密集建筑感文本块。按钮和卡片使用 0px 圆角——锐利、无妥协的矩形。金色仅用于主 CTA 按钮永不用于装饰，次要按钮使用透明幽灵样式白色边框 50% 透明度。UI 元素不使用阴影，深度来自表面颜色层级 #000 → #181818 → #202020。适合豪华、汽车、运动、高端品牌、赛车。",
+    "version": "alpha",
+    "colors": {
+      "primary": "#ffc000",
+      "on-primary": "#000000",
+      "canvas": "#000000",
+      "surface": "#202020",
+      "surface-dark": "#181818",
+      "ink": "#ffffff",
+      "body": "#f5f5f5",
+      "muted": "#7d7d7d",
+      "hairline": "#202020",
+      "primary-hover": "#917300",
+      "muted-soft": "#969696",
+      "gold-text": "#ffce3e",
+      "cyan-pulse": "#29abe2",
+      "link-blue": "#3860be",
+      "overlay": "rgba(0,0,0,0.7)",
+      "success": "#ffc000",
+      "error": "#cc0000",
+      "warning": "#ff8800"
+    },
+    "typography": {
+      "display": { "fontFamily": "Roboto, \"Helvetica Neue\", Arial, sans-serif", "fontSize": "80px", "fontWeight": 400, "lineHeight": 0.92, "letterSpacing": "normal", "textTransform": "uppercase" },
+      "title": { "fontFamily": "Roboto, \"Helvetica Neue\", Arial, sans-serif", "fontSize": "40px", "fontWeight": 400, "lineHeight": 1.15, "letterSpacing": "normal", "textTransform": "uppercase" },
+      "body": { "fontFamily": "Roboto, \"Helvetica Neue\", Arial, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.5 },
+      "caption": { "fontFamily": "Roboto, \"Helvetica Neue\", Arial, sans-serif", "fontSize": "12px", "fontWeight": 500, "lineHeight": 1.4, "letterSpacing": "0.225px", "textTransform": "uppercase" },
+      "button": { "fontFamily": "Roboto, \"Helvetica Neue\", Arial, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.5, "textTransform": "uppercase" },
+      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+    },
+    "rounded": { "xs": "0px", "sm": "0px", "md": "0px", "lg": "0px", "xl": "0px", "pill": "2px" },
+    "spacing": { "xxs": "2px", "xs": "2px", "sm": "4px", "md": "8px", "lg": "16px", "xl": "24px", "xxl": "32px", "section": "48px" },
+    "components": {
+      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "16px 32px", "textTransform": "uppercase" },
+      "card": { "backgroundColor": "{colors.surface-dark}", "textColor": "{colors.ink}", "rounded": "{rounded.lg}", "padding": "32px" },
+      "input": { "backgroundColor": "{colors.surface-dark}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "12px 16px" },
+      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "height": "64px" }
+    },
+    "rules": [
+      "使用纯黑 (#000000) 作为主背景，不是深灰",
+      "金色 (#ffc000) 仅用于主 CTA 按钮，永不用于装饰",
+      "所有 Display 标题使用大写 (UPPERCASE)，极致尺度 (80px+)",
+      "tight line-height (0.92-1.19)，创造密集建筑感文本块",
+      "按钮和卡片使用 0px 圆角 — 锐利、无妥协的矩形",
+      "次要按钮使用透明幽灵样式：白色边框 50% 透明度",
+      "黑暗即留白：黑色空间本身就是设计",
+      "UI 元素不使用阴影，深度来自表面颜色层级 (#000 → #181818 → #202020)"
+    ],
+    "dos": [
+      "Display 标题使用大写 UPPERCASE 配 80px+ 极致尺度",
+      "金色 #ffc000 仅用于主 CTA 按钮",
+      "所有圆角用 0px，保持锐利矩形",
+      "次要按钮用透明幽灵样式：白色边框 50% 透明度",
+      "深度靠表面颜色层级 #000 → #181818 → #202020，不用阴影"
+    ],
+    "donts": [
+      "不要把金色 #ffc000 当装饰色或背景色",
+      "不要使用任何圆角，连 2px 都不要",
+      "不要给 UI 元素加阴影",
+      "不要在 Display 标题使用小写或低于 40px 的字号",
+      "不要用深灰代替纯黑 #000000 作为主背景"
+    ],
+    "keywords": ["豪华", "力量", "汽车", "运动", "黑色", "金色", "高端", "品牌", "奢侈", "速度", "激情", "性能", "赛车"],
+    "tone": "brutalistRaw",
+    "responsive": {
+      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "strategy": "桌面优先全幅影像；移动端 Display 降至 48px 但保持大写，金色 CTA 保持锐利矩形，黑色留白节奏保留。"
+    }
+  },
+  {
+    "id": "apple",
+    "name": "Apple",
+    "description": "纯白空间 #ffffff 配 SF Pro 字体，极简摄影驱动美学。浅灰 #f5f5f7 为交替 section，Display 600 配 -0.005em 精确字距，Body 400 用 SF Pro Text 17px。大量留白，产品摄影为核心视觉元素。主色为苹果蓝 #0071e3 用于按钮和链接，圆角偏大 8/12/18/980px pill。按钮蓝色填充或透明描边高度 36-44px，排版是隐形的基础设施让产品说话，段落宽度控制在 75ch 以内。适合极简、留白、摄影、产品展示、高端科技产品。",
+    "version": "alpha",
+    "colors": {
+      "primary": "#0071e3",
+      "on-primary": "#ffffff",
+      "canvas": "#ffffff",
+      "surface": "#f5f5f7",
+      "surface-dark": "#1d1d1f",
+      "ink": "#1d1d1f",
+      "body": "#86868b",
+      "muted": "#6e6e73",
+      "hairline": "#d2d2d7",
+      "primary-hover": "#0077ed",
+      "overlay": "rgba(0,0,0,0.4)",
+      "success": "#0071e3",
+      "error": "#e30000",
+      "warning": "#f5a623"
+    },
+    "typography": {
+      "display": { "fontFamily": "\"SF Pro Display\", -apple-system, BlinkMacSystemFont, sans-serif", "fontSize": "56px", "fontWeight": 600, "lineHeight": 1.07, "letterSpacing": "-0.005em" },
+      "title": { "fontFamily": "\"SF Pro Display\", -apple-system, BlinkMacSystemFont, sans-serif", "fontSize": "28px", "fontWeight": 600, "lineHeight": 1.14, "letterSpacing": "-0.021em" },
+      "body": { "fontFamily": "\"SF Pro Text\", -apple-system, BlinkMacSystemFont, sans-serif", "fontSize": "17px", "fontWeight": 400, "lineHeight": 1.47, "letterSpacing": "-0.022em" },
+      "caption": { "fontFamily": "\"SF Pro Text\", -apple-system, BlinkMacSystemFont, sans-serif", "fontSize": "12px", "fontWeight": 400, "lineHeight": 1.33, "letterSpacing": "-0.01em" },
+      "button": { "fontFamily": "\"SF Pro Text\", -apple-system, BlinkMacSystemFont, sans-serif", "fontSize": "14px", "fontWeight": 400, "lineHeight": 1.0 },
+      "mono": { "fontFamily": "\"SF Mono\", \"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+    },
+    "rounded": { "xs": "4px", "sm": "4px", "md": "8px", "lg": "12px", "xl": "18px", "pill": "980px" },
+    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "components": {
+      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.pill}", "padding": "12px 24px", "height": "44px" },
+      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "rounded": "{rounded.xl}", "padding": "32px" },
+      "input": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "12px 16px", "height": "44px" },
+      "nav": { "backgroundColor": "rgba(255,255,255,0.8)", "textColor": "{colors.ink}", "backdropFilter": "blur(20px)", "height": "48px" }
+    },
+    "rules": [
+      "纯白 (#ffffff) 为主背景，浅灰 (#f5f5f7) 为交替 section",
+      "SF Pro 字体，Display 600，Body 400，精确的字距跟踪",
+      "大量留白，产品摄影为核心视觉元素",
+      "主色为苹果蓝 (#0071e3)，用于按钮和链接",
+      "圆角偏大：8px(小) / 12px(中) / 18px(大) / 980px(pill)",
+      "按钮使用蓝色填充或透明描边，高度 36-44px",
+      "排版是隐形的基础设施，让产品说话",
+      "段落宽度控制在 75ch 以内，保证阅读舒适度"
+    ],
+    "dos": [
+      "Display 用 SF Pro Display 600 配 -0.005em 精确字距",
+      "大量留白，产品摄影为核心视觉",
+      "圆角偏大：8px 小 / 12px 中 / 18px 大 / 980px pill",
+      "段落宽度控制在 75ch 以内",
+      "导航栏用毛玻璃 backdrop-filter: blur(20px)"
+    ],
+    "donts": [
+      "不要用非 SF Pro 字体",
+      "不要压缩留白，留白本身就是设计",
+      "不要把苹果蓝 #0071e3 当装饰色",
+      "不要使用小于 8px 的圆角",
+      "不要让段落超过 75ch 宽度"
+    ],
+    "keywords": ["极简", "留白", "摄影", "产品", "展示", "干净", "优雅", "科技产品", "设备", "iPhone", "Mac", "简约", "高端"],
+    "tone": "brutallyMinimal",
+    "responsive": {
+      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "strategy": "桌面优先；移动端 Display 降至 40px，留白节奏保留，产品摄影保持全幅，导航栏毛玻璃保留。"
+    }
+  },
+  {
+    "id": "awwwards",
+    "name": "awwwards",
+    "description": "深黑画廊 #0d0d0d 画布配电青色 #00e5ff 强调，设计奖平台美学。避免纯 #000 的临床感，使用深暖黑。电青色仅用于评分徽章、投票按钮、活跃导航。Inter 几何无衬线字体 tight tracking，masonry 网格画廊卡片间距 16px 营造密集展览墙感。评分徽章是标志性元素：40px 圆形 2px 色环。卡片用 1px hairline 边框 #2a2a2a 不用阴影，三个表面层级：黑画布 → 提升卡片 → 活跃表面。适合设计、画廊、作品集、创意、获奖展示。",
+    "version": "alpha",
+    "colors": {
+      "primary": "#00e5ff",
+      "on-primary": "#000000",
+      "canvas": "#0d0d0d",
+      "surface": "#141414",
+      "surface-elevated": "#1a1a1a",
+      "surface-active": "#222222",
+      "ink": "#ffffff",
+      "body": "#cccccc",
+      "muted": "#888888",
+      "hairline": "#2a2a2a",
+      "hairline-soft": "#1f1f1f",
+      "primary-muted": "#003d4d",
+      "muted-soft": "#666666",
+      "score-high": "#00e5ff",
+      "score-mid": "#e5a800",
+      "score-low": "#888888",
+      "success": "#00e5ff",
+      "error": "#ff4d4d",
+      "warning": "#e5a800"
+    },
+    "typography": {
+      "display": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "36px", "fontWeight": 600, "lineHeight": 1.1, "letterSpacing": "-0.5px" },
+      "title": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "22px", "fontWeight": 600, "lineHeight": 1.2, "letterSpacing": "-0.2px" },
+      "body": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "15px", "fontWeight": 400, "lineHeight": 1.55 },
+      "caption": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "12px", "fontWeight": 500, "lineHeight": 1.4, "letterSpacing": "0.5px" },
+      "button": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": 1.0 },
+      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+    },
+    "rounded": { "xs": "4px", "sm": "4px", "md": "8px", "lg": "12px", "xl": "16px", "pill": "9999px" },
+    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "80px" },
+    "components": {
+      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "10px 20px" },
+      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "16px" },
+      "input": { "backgroundColor": "{colors.surface-elevated}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px" },
+      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "borderBottom": "1px solid {colors.hairline}", "height": "64px" }
+    },
+    "rules": [
+      "深暖黑 (#0d0d0d) 作为画布，避免纯 #000 的临床感",
+      "电青色 (#00e5ff) 仅用于评分徽章、投票按钮、活跃导航",
+      "字体使用 Inter，几何无衬线，tight tracking",
+      "masonry 网格画廊，卡片间距 16px，密集展览墙感",
+      "评分徽章是标志性元素：40px 圆形，2px 色环",
+      "卡片使用 1px hairline 边框 (#2a2a2a)，不用阴影",
+      "导航最小化：深色顶栏 + 白色文字 + 青色下划线",
+      "三个表面层级：黑画布 → 提升卡片 → 活跃表面"
+    ],
+    "dos": [
+      "画布用深暖黑 #0d0d0d，避免纯 #000 临床感",
+      "电青色 #00e5ff 仅用于评分徽章、投票按钮、活跃导航",
+      "评分徽章用 40px 圆形配 2px 色环",
+      "masonry 网格画廊卡片间距 16px 营造密集展览墙感",
+      "卡片用 1px hairline 边框 #2a2a2a，不用阴影"
+    ],
+    "donts": [
+      "不要用纯 #000000 作为画布",
+      "不要把电青色 #00e5ff 当装饰色滥用",
+      "不要给卡片加阴影，用 hairline 边框",
+      "不要使用超过 16px 的圆角",
+      "不要突破三个表面层级：黑画布 → 提升卡片 → 活跃表面"
+    ],
+    "keywords": ["设计", "画廊", "展示", "作品集", "创意", "艺术", "获奖", "portfolio", "设计师", "摄影", "视觉", "展览"],
+    "tone": "darkTech",
+    "responsive": {
+      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "strategy": "桌面优先 masonry 画廊；移动端网格降为单列，评分徽章缩小至 32px，电青色强调保留。"
+    }
+  },
+  {
+    "id": "spotify",
+    "name": "Spotify",
+    "description": "沉浸式暗黑音乐 #121212 画布配翠绿 #1ed760 主色，药丸按钮内容优先美学。UI 退到阴影后，内容成为颜色来源。翠绿仅用于播放按钮、活跃状态、CTA 永不装饰。按钮使用 500px 全药丸半径，标签大写配 1.4px 宽字距。阴影使用沉重感 rgba(0,0,0,0.5) 0px 8px 24px，输入框使用内阴影边框组合 inset 1px。专辑封面/图片是主要视觉焦点，UI 保持单色。适合音乐、播放器、沉浸、专辑、流媒体、娱乐。",
+    "version": "alpha",
+    "colors": {
+      "primary": "#1ed760",
+      "on-primary": "#000000",
+      "canvas": "#121212",
+      "surface": "#181818",
+      "surface-raised": "#1f1f1f",
+      "surface-card": "#252525",
+      "ink": "#ffffff",
+      "body": "#b3b3b3",
+      "muted": "#7c7c7c",
+      "hairline": "#4d4d4d",
+      "hairline-soft": "#2a2a2a",
+      "primary-hover": "#1db954",
+      "negative": "#f3727f",
+      "warning": "#ffa42b",
+      "info": "#539df5",
+      "success": "#1ed760",
+      "error": "#f3727f"
+    },
+    "typography": {
+      "display": { "fontFamily": "Inter, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "24px", "fontWeight": 700, "lineHeight": "normal" },
+      "title": { "fontFamily": "Inter, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "18px", "fontWeight": 600, "lineHeight": 1.3 },
+      "body": { "fontFamily": "Inter, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": "normal" },
+      "caption": { "fontFamily": "Inter, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "14px", "fontWeight": 400, "lineHeight": 1.5 },
+      "button": { "fontFamily": "Inter, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "14px", "fontWeight": 600, "lineHeight": 1.0, "letterSpacing": "1.4px", "textTransform": "uppercase" },
+      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+    },
+    "rounded": { "xs": "8px", "sm": "500px", "md": "500px", "lg": "8px", "xl": "12px", "pill": "9999px" },
+    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "components": {
+      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.pill}", "padding": "12px 32px", "textTransform": "uppercase", "letterSpacing": "1.4px" },
+      "card": { "backgroundColor": "{colors.surface-card}", "textColor": "{colors.ink}", "rounded": "{rounded.lg}", "padding": "16px" },
+      "input": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "boxShadow": "inset 0 1px 0 rgba(0,0,0,0.5)", "typography": "{typography.body}", "rounded": "{rounded.sm}", "padding": "12px 16px" },
+      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.body}", "height": "64px" }
+    },
+    "rules": [
+      "近黑 (#121212) 沉浸式画布，UI 退到阴影后，内容成为颜色来源",
+      "翠绿 (#1ed760) 仅用于播放按钮、活跃状态、CTA，永不装饰",
+      "按钮使用 500px 全药丸半径，圆形控制用 50%",
+      "按钮标签大写 + 宽字距 (1.4px)",
+      "阴影使用沉重感：rgba(0,0,0,0.5) 0px 8px 24px",
+      "输入框使用内阴影边框组合：inset 1px 边框",
+      "专辑封面/图片是主要视觉焦点，UI 保持单色"
+    ],
+    "dos": [
+      "画布用近黑 #121212 沉浸式背景，UI 退到阴影后",
+      "翠绿 #1ed760 仅用于播放按钮、活跃状态、CTA",
+      "按钮用 500px 全药丸半径，标签大写配 1.4px 宽字距",
+      "阴影用沉重感 rgba(0,0,0,0.5) 0px 8px 24px",
+      "输入框用内阴影边框组合 inset 1px"
+    ],
+    "donts": [
+      "不要把翠绿 #1ed760 当装饰色",
+      "不要让 UI 抢夺专辑封面的视觉焦点",
+      "不要使用直角矩形按钮，必须药丸形",
+      "不要在按钮标签省略大写和 1.4px 宽字距",
+      "不要用轻量阴影，保持沉重感"
+    ],
+    "keywords": ["音乐", "播放器", "暗黑", "沉浸", "专辑", "列表", "歌手", "播客", "娱乐", "音频", "媒体", "流媒体"],
+    "tone": "darkTech",
+    "responsive": {
+      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "strategy": "桌面优先沉浸式；移动端导航降为底部 tab bar，专辑网格降为 2 列，翠绿 CTA 保持药丸形。"
+    }
+  },
+  {
+    "id": "tesla",
+    "name": "Tesla",
+    "description": "极简摄影驱动 #FFFFFF 画布配电蓝 #3e6ae1 主色，零装饰全幅影像美学。摄影是全部情感重量，零装饰：无阴影、无渐变、无图案、无圆角装饰。电蓝是唯一强调色仅用于主 CTA，全视口 100vh Hero 区域产品影像占满。导航栏悬浮无背景、无边框、无阴影，所有过渡统一 0.33s cubic-bezier。排版极简只使用 500 和 400 两种 weight。适合汽车、电动车、极简、摄影、未来科技、能源。",
+    "version": "alpha",
+    "colors": {
+      "primary": "#3e6ae1",
+      "on-primary": "#ffffff",
+      "canvas": "#ffffff",
+      "surface": "#f4f4f4",
+      "surface-dark": "#171a20",
+      "ink": "#171a20",
+      "body": "#393c41",
+      "muted": "#5c5e62",
+      "hairline": "#eeeeee",
+      "hairline-soft": "#d0d1d2",
+      "primary-hover": "#2e50b0",
+      "muted-soft": "#8e8e8e",
+      "frosted": "rgba(255,255,255,0.75)",
+      "success": "#3e6ae1",
+      "error": "#d00000",
+      "warning": "#f5a623"
+    },
+    "typography": {
+      "display": { "fontFamily": "Inter, -apple-system, Arial, sans-serif", "fontSize": "40px", "fontWeight": 500, "lineHeight": "48px" },
+      "title": { "fontFamily": "Inter, -apple-system, Arial, sans-serif", "fontSize": "22px", "fontWeight": 400, "lineHeight": "20px" },
+      "body": { "fontFamily": "Inter, -apple-system, Arial, sans-serif", "fontSize": "14px", "fontWeight": 400, "lineHeight": "20px" },
+      "caption": { "fontFamily": "Inter, -apple-system, Arial, sans-serif", "fontSize": "14px", "fontWeight": 400, "lineHeight": "20px" },
+      "button": { "fontFamily": "Inter, -apple-system, Arial, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": "16.8px" },
+      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+    },
+    "rounded": { "xs": "4px", "sm": "4px", "md": "4px", "lg": "4px", "xl": "4px", "pill": "4px" },
+    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "components": {
+      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "10px 24px" },
+      "card": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "rounded": "{rounded.md}", "padding": "24px" },
+      "input": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px" },
+      "nav": { "backgroundColor": "transparent", "textColor": "{colors.ink}", "height": "56px", "position": "fixed" }
+    },
+    "rules": [
+      "纯白 (#ffffff) 为主背景，摄影是全部情感重量",
+      "零装饰：无阴影、无渐变、无图案、无圆角装饰",
+      "电蓝 (#3e6ae1) 是唯一强调色，仅用于主 CTA",
+      "全视口 (100vh) Hero 区域，产品影像占满",
+      "导航栏悬浮无背景、无边框、无阴影",
+      "所有过渡统一 0.33s cubic-bezier",
+      "排版极简：只使用 500 和 400 两种 weight"
+    ],
+    "dos": [
+      "Hero 区域用全视口 100vh，产品影像占满",
+      "零装饰：无阴影、无渐变、无图案、无圆角装饰",
+      "电蓝 #3e6ae1 仅用于主 CTA",
+      "导航栏悬浮无背景、无边框、无阴影",
+      "所有过渡统一 0.33s cubic-bezier",
+      "排版只用 500 和 400 两种 weight"
+    ],
+    "donts": [
+      "不要加任何阴影、渐变或图案装饰",
+      "不要使用超过 4px 的圆角",
+      "不要把电蓝 #3e6ae1 当装饰色或链接色",
+      "不要使用 500 和 400 以外的 weight",
+      "不要让导航栏有背景或边框"
+    ],
+    "keywords": ["汽车", "电动车", "极简", "摄影", "产品", "未来", "科技", "环保", "能源", "太空", "马斯克", "创新"],
+    "tone": "brutallyMinimal",
+    "responsive": {
+      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "strategy": "桌面优先全幅影像；移动端 Hero 保持 100vh，Display 降至 28px，导航栏保持悬浮无背景。"
+    }
+  },
+  {
+    "id": "nike",
+    "name": "Nike",
+    "description": "运动编辑风 #111111 配纯黑，Futura 大写 96px 药丸 CTA 美学。Display 使用 72px+ 大写配合 tight line-height 0.9，towering 大写标题 burned into 影像。纯黑 #111111 为文字和主按钮，纯白背景，药丸形黑色 CTA 圆角 9999px。灰色搜索和标签药丸，8px 网格产品卡片密集零售感。影像占主导，色彩留给摄影和促销信号（sale 红 #d30005、info 蓝 #1151ff）。适合运动、健身、潮流、品牌、跑步、篮球、训练。",
+    "version": "alpha",
+    "colors": {
+      "primary": "#111111",
+      "on-primary": "#ffffff",
+      "canvas": "#ffffff",
+      "surface": "#f5f5f5",
+      "ink": "#111111",
+      "body": "#39393b",
+      "muted": "#707072",
+      "hairline": "#cacacb",
+      "hairline-soft": "#e5e5e5",
+      "primary-hover": "#000000",
+      "muted-soft": "#9e9ea0",
+      "sale": "#d30005",
+      "success": "#007d48",
+      "info": "#1151ff",
+      "accent-pink": "#ed1aa0",
+      "accent-teal": "#0a7281",
+      "error": "#d30005",
+      "warning": "#ffa42b"
+    },
+    "typography": {
+      "display": { "fontFamily": "Inter, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "72px", "fontWeight": 500, "lineHeight": 0.9, "letterSpacing": "0", "textTransform": "uppercase" },
+      "title": { "fontFamily": "Inter, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "32px", "fontWeight": 500, "lineHeight": 1.2, "letterSpacing": "0" },
+      "body": { "fontFamily": "Inter, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.5, "letterSpacing": "0" },
+      "caption": { "fontFamily": "Inter, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "14px", "fontWeight": 400, "lineHeight": 1.4, "letterSpacing": "0" },
+      "button": { "fontFamily": "Inter, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "16px", "fontWeight": 500, "lineHeight": 1.5, "letterSpacing": "0" },
+      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+    },
+    "rounded": { "xs": "8px", "sm": "9999px", "md": "9999px", "lg": "8px", "xl": "12px", "pill": "9999px" },
+    "spacing": { "xxs": "4px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "80px" },
+    "components": {
+      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.pill}", "padding": "12px 32px" },
+      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "rounded": "{rounded.lg}", "padding": "16px" },
+      "input": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.sm}", "padding": "12px 20px" },
+      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "height": "64px" }
+    },
+    "rules": [
+      "运动编辑风：towering 大写标题 burned into 影像",
+      "Display 使用 72px+ 大写，tight line-height (0.9)",
+      "纯黑 (#111111) 为文字和主按钮，纯白背景",
+      "药丸形黑色 CTA，圆角 9999px",
+      "灰色搜索和标签药丸",
+      "8px 网格产品卡片，密集零售感",
+      "影像占主导，色彩留给摄影和促销信号"
+    ],
+    "dos": [
+      "Display 用 72px+ 大写配 tight line-height 0.9",
+      "主 CTA 用药丸形黑色 #111111 填充，圆角 9999px",
+      "产品卡片用 8px 网格密集零售感",
+      "色彩留给摄影和促销信号（sale 红、info 蓝）",
+      "towering 大写标题 burned into 影像"
+    ],
+    "donts": [
+      "不要在 Display 标题使用小写",
+      "不要把促销色（sale 红、info 蓝）当装饰色",
+      "不要使用直角矩形 CTA，必须药丸形",
+      "不要压缩 Display 字号到 72px 以下",
+      "不要让 UI 抢夺影像的视觉主导地位"
+    ],
+    "keywords": ["运动", "健身", "潮流", "品牌", "跑步", "篮球", "训练", "鞋", "服装", "能量", "动力", "年轻"],
+    "tone": "maximalistChaos",
+    "responsive": {
+      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "strategy": "桌面优先；移动端 Display 降至 48px 保持大写，产品卡片网格降为 2 列，药丸 CTA 保留。"
+    }
+  },
+  {
+    "id": "supabase",
+    "name": "Supabase",
+    "description": "开发者翡翠绿 #3ecf8e 配近黑 #171717，技术极简产品截图为主美学。白底为主，翡翠绿为唯一主色，近黑为标题，中灰为正文。Display 使用 weight 500 配 -1.92px 负字距，产品 UI 截图作为 Hero 核心元素。按钮使用翡翠绿填充或白色描边，保持技术工具的安静和精确感。圆角偏小 6/8/12px，辅助色有紫 #6b01c2、黄 #ffdb13、番茄红 #ff2201。适合数据库、后端、开发者、开源、API、PostgreSQL、BaaS。",
+    "version": "alpha",
+    "colors": {
+      "primary": "#3ecf8e",
+      "on-primary": "#171717",
+      "canvas": "#ffffff",
+      "surface": "#fafafa",
+      "surface-night": "#1c1c1c",
+      "surface-night-soft": "#202020",
+      "ink": "#171717",
+      "body": "#212121",
+      "muted": "#707070",
+      "hairline": "#dfdfdf",
+      "hairline-strong": "#c7c7c7",
+      "primary-deep": "#24b47e",
+      "primary-soft": "#4ade80",
+      "muted-soft": "#9a9a9a",
+      "accent-purple": "#6b01c2",
+      "accent-yellow": "#ffdb13",
+      "accent-tomato": "#ff2201",
+      "success": "#3ecf8e",
+      "error": "#ff2201",
+      "warning": "#ffdb13"
+    },
+    "typography": {
+      "display": { "fontFamily": "Inter, \"Helvetica Neue\", Helvetica, Arial, sans-serif", "fontSize": "64px", "fontWeight": 500, "lineHeight": 1.1, "letterSpacing": "-1.92px" },
+      "title": { "fontFamily": "Inter, \"Helvetica Neue\", Helvetica, Arial, sans-serif", "fontSize": "36px", "fontWeight": 500, "lineHeight": 1.15, "letterSpacing": "-0.72px" },
+      "body": { "fontFamily": "Inter, \"Helvetica Neue\", Helvetica, Arial, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.55 },
+      "caption": { "fontFamily": "Inter, \"Helvetica Neue\", Helvetica, Arial, sans-serif", "fontSize": "14px", "fontWeight": 400, "lineHeight": 1.4 },
+      "button": { "fontFamily": "Inter, \"Helvetica Neue\", Helvetica, Arial, sans-serif", "fontSize": "16px", "fontWeight": 500, "lineHeight": 1.5 },
+      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+    },
+    "rounded": { "xs": "4px", "sm": "4px", "md": "6px", "lg": "8px", "xl": "12px", "pill": "9999px" },
+    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "components": {
+      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "10px 20px" },
+      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "24px" },
+      "input": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline-strong}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px" },
+      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "borderBottom": "1px solid {colors.hairline}", "height": "64px" }
+    },
+    "rules": [
+      "白底为主，翡翠绿 (#3ecf8e) 为唯一主色",
+      "近黑 (#171717) 为标题，中灰为正文",
+      "Display 使用 weight 500 负字距",
+      "产品 UI 截图作为 Hero 核心元素",
+      "按钮使用翡翠绿填充或白色描边",
+      "保持技术工具的安静和精确感",
+      "圆角偏小：6px(标准) / 8px(卡片)"
+    ],
+    "dos": [
+      "Display 用 weight 500 配 -1.92px 负字距",
+      "翡翠绿 #3ecf8e 为唯一主色",
+      "产品 UI 截图作为 Hero 核心元素",
+      "按钮用翡翠绿填充或白色描边",
+      "保持技术工具的安静和精确感"
+    ],
+    "donts": [
+      "不要使用多个主色，翡翠绿 #3ecf8e 是唯一主色",
+      "不要在 Display 使用 600 weight，保持 500",
+      "不要给卡片加重阴影，保持安静精确",
+      "不要使用超过 12px 的圆角",
+      "不要让 UI 喧宾夺主，产品截图是核心"
+    ],
+    "keywords": ["数据库", "后端", "开发者", "开源", "工具", "API", "PostgreSQL", "实时", "BaaS", "基础设施", "技术"],
+    "tone": "brutallyMinimal",
+    "responsive": {
+      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "strategy": "桌面优先；移动端 Display 降至 40px，产品截图面板保持边框，翡翠绿 CTA 保留。"
+    }
+  },
+  {
+    "id": "cyberpunk",
+    "name": "Cyberpunk",
+    "description": "赛博朋克霓虹 #0a0a0f 画布配电粉 #ff00ff 主色与电青 #00ffff 辅助，故障效果美学。深空黑带微蓝紫 undertone，使用霓虹发光效果 text-shadow / box-shadow 模拟霓虹管。故障效果 glitch：hover 时轻微位移 + 颜色分离。字体使用 Rajdhani/Orbitron 科技字体大写宽字距，网格线/扫描线背景装饰增强赛博感。边框使用锐利角度圆角极小 0-4px，组件动效包括快速闪烁、扫描线、数据流动画。适合赛博、霓虹、未来、黑客、科幻、游戏、元宇宙。",
+    "version": "alpha",
+    "colors": {
+      "primary": "#ff00ff",
+      "on-primary": "#000000",
+      "canvas": "#0a0a0f",
+      "surface": "#111118",
+      "surface-elevated": "#1a1a24",
+      "ink": "#e0e0ff",
+      "body": "#a0a0cc",
+      "muted": "#606080",
+      "hairline": "#2a2a40",
+      "hairline-soft": "#1a1a30",
+      "primary-hover": "#ff44ff",
+      "muted-soft": "#404060",
+      "accent-cyan": "#00ffff",
+      "accent-yellow": "#ffee00",
+      "accent-red": "#ff2244",
+      "glow-pink": "rgba(255,0,255,0.4)",
+      "glow-cyan": "rgba(0,255,255,0.3)",
+      "success": "#00ffff",
+      "error": "#ff2244",
+      "warning": "#ffee00"
+    },
+    "typography": {
+      "display": { "fontFamily": "\"Rajdhani\", \"Orbitron\", Inter, sans-serif", "fontSize": "56px", "fontWeight": 700, "lineHeight": 1.05, "letterSpacing": "2px", "textTransform": "uppercase" },
+      "title": { "fontFamily": "\"Rajdhani\", \"Orbitron\", Inter, sans-serif", "fontSize": "28px", "fontWeight": 600, "lineHeight": 1.2, "letterSpacing": "1px", "textTransform": "uppercase" },
+      "body": { "fontFamily": "\"Rajdhani\", \"Orbitron\", Inter, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.6, "letterSpacing": "0.5px" },
+      "caption": { "fontFamily": "\"Rajdhani\", \"Orbitron\", Inter, sans-serif", "fontSize": "12px", "fontWeight": 500, "lineHeight": 1.4, "letterSpacing": "1px", "textTransform": "uppercase" },
+      "button": { "fontFamily": "\"Rajdhani\", \"Orbitron\", Inter, sans-serif", "fontSize": "14px", "fontWeight": 600, "lineHeight": 1.0, "letterSpacing": "2px", "textTransform": "uppercase" },
+      "mono": { "fontFamily": "\"JetBrains Mono\", \"Share Tech Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+    },
+    "rounded": { "xs": "0px", "sm": "0px", "md": "2px", "lg": "4px", "xl": "8px", "pill": "2px" },
+    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "components": {
+      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "12px 24px", "boxShadow": "0 0 20px {colors.glow-pink}", "textTransform": "uppercase" },
+      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "24px", "boxShadow": "0 0 15px {colors.glow-cyan}" },
+      "input": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.accent-cyan}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px" },
+      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "borderBottom": "1px solid {colors.hairline}", "height": "64px" }
+    },
+    "rules": [
+      "深空黑 (#0a0a0f) 画布，带微蓝紫 undertone",
+      "电粉色 (#ff00ff) 为主色，电青色 (#00ffff) 为辅助",
+      "使用霓虹发光效果：text-shadow / box-shadow 模拟霓虹管",
+      "故障效果 (glitch)：hover 时轻微位移 + 颜色分离",
+      "字体使用 Rajdhani/Orbitron 等科技字体，大写宽字距",
+      "网格线/扫描线背景装饰增强赛博感",
+      "边框使用锐利角度，圆角极小（0-4px）",
+      "组件动效：快速闪烁、扫描线、数据流动画"
+    ],
+    "dos": [
+      "画布用深空黑 #0a0a0f 带微蓝紫 undertone",
+      "用 text-shadow / box-shadow 模拟霓虹管发光",
+      "字体用 Rajdhani/Orbitron 科技字体大写宽字距",
+      "hover 时加故障效果：轻微位移 + 颜色分离",
+      "背景加网格线/扫描线装饰增强赛博感"
+    ],
+    "donts": [
+      "不要使用超过 8px 的圆角，保持锐利角度",
+      "不要把霓虹发光用在所有元素，稀缺才有冲击",
+      "不要使用非科技字体如 Inter 作为 Display",
+      "不要省略大写和宽字距，这是赛博朋克标识",
+      "不要用纯黑 #000000，用 #0a0a0f 带蓝紫 undertone"
+    ],
+    "keywords": ["赛博", "霓虹", "未来", "科技", "黑客", "科幻", "游戏", "像素", "故障", "电子", "虚拟", "元宇宙"],
+    "tone": "retroFuturistic",
+    "responsive": {
+      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "strategy": "桌面优先；移动端 Display 降至 40px 保持大写宽字距，霓虹发光降级以保证性能，扫描线背景保留。"
+    }
+  },
+  {
+    "id": "neobrutalism",
+    "name": "Neobrutalism",
+    "description": "新粗野主义 #ffde00 亮黄画布配纯黑粗边框，大胆高对比原始质感美学。亮黄作为主背景或纯白/纯黑，纯黑 #000000 粗边框 2-4px 定义所有元素。高饱和强调色：红 #ff4433、蓝 #0082f3、绿 #00c853。0px 圆角——锐利、无妥协的矩形。Display 使用 900 weight 超大尺度 64px+ 紧凑行高，卡片/按钮有硬阴影偏移 4px 4px 0 #000。排版大胆直接，无渐变、无模糊、无圆角，hover 时元素反向位移阴影消失元素平移。适合粗野、大胆、高对比、Memphis 孟菲斯、前卫实验。",
+    "version": "alpha",
+    "colors": {
+      "primary": "#ff4433",
+      "on-primary": "#ffffff",
+      "canvas": "#ffde00",
+      "surface": "#ffffff",
+      "surface-dark": "#000000",
+      "ink": "#000000",
+      "body": "#1a1a1a",
+      "muted": "#333333",
+      "hairline": "#000000",
+      "hairline-soft": "#000000",
+      "primary-hover": "#cc3322",
+      "accent-blue": "#0082f3",
+      "accent-green": "#00c853",
+      "accent-pink": "#ff66cc",
+      "success": "#00c853",
+      "error": "#ff4433",
+      "warning": "#ffde00"
+    },
+    "typography": {
+      "display": { "fontFamily": "Inter, Arial Black, \"Helvetica Neue\", sans-serif", "fontSize": "64px", "fontWeight": 900, "lineHeight": 1.0, "letterSpacing": "-2px" },
+      "title": { "fontFamily": "Inter, Arial Black, \"Helvetica Neue\", sans-serif", "fontSize": "32px", "fontWeight": 800, "lineHeight": 1.1, "letterSpacing": "-1px" },
+      "body": { "fontFamily": "Inter, Arial Black, \"Helvetica Neue\", sans-serif", "fontSize": "18px", "fontWeight": 400, "lineHeight": 1.5 },
+      "caption": { "fontFamily": "Inter, Arial Black, \"Helvetica Neue\", sans-serif", "fontSize": "14px", "fontWeight": 700, "lineHeight": 1.3 },
+      "button": { "fontFamily": "Inter, Arial Black, \"Helvetica Neue\", sans-serif", "fontSize": "18px", "fontWeight": 700, "lineHeight": 1.0 },
+      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+    },
+    "rounded": { "xs": "0px", "sm": "0px", "md": "0px", "lg": "0px", "xl": "0px", "pill": "0px" },
+    "spacing": { "xxs": "4px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "80px" },
+    "components": {
+      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "12px 24px", "border": "3px solid {colors.ink}", "boxShadow": "4px 4px 0 {colors.ink}" },
+      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "3px solid {colors.ink}", "rounded": "{rounded.lg}", "padding": "24px", "boxShadow": "4px 4px 0 {colors.ink}" },
+      "input": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "3px solid {colors.ink}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "12px 16px", "boxShadow": "4px 4px 0 {colors.ink}" },
+      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "borderBottom": "4px solid {colors.ink}", "height": "64px" }
+    },
+    "rules": [
+      "亮黄 (#ffde00) 作为主背景，或纯白/纯黑",
+      "纯黑 (#000000) 粗边框 (2-4px) 定义所有元素",
+      "高饱和强调色：红 (#ff4433)、蓝 (#0082f3)、绿 (#00c853)",
+      "0px 圆角 — 锐利、无妥协的矩形",
+      "Display 使用 900 weight，超大尺度 (64px+)，紧凑行高",
+      "卡片/按钮有硬阴影偏移 (4px 4px 0 #000)",
+      "排版大胆直接，无渐变、无模糊、无圆角",
+      "hover 时元素反向位移，阴影消失，元素平移"
+    ],
+    "dos": [
+      "亮黄 #ffde00 作为主背景，或纯白/纯黑",
+      "所有元素用纯黑 #000000 粗边框 2-4px 定义",
+      "圆角全部 0px，保持锐利无妥协矩形",
+      "Display 用 900 weight 超大尺度 64px+ 紧凑行高",
+      "卡片/按钮用硬阴影偏移 4px 4px 0 #000",
+      "hover 时元素反向位移，阴影消失，元素平移"
+    ],
+    "donts": [
+      "不要使用任何圆角，连 2px 都不要",
+      "不要使用渐变、模糊或柔和阴影",
+      "不要用细边框，必须 2-4px 粗边框",
+      "不要在 Display 使用低于 800 的 weight",
+      "不要用低饱和度色彩，强调色必须高饱和"
+    ],
+    "keywords": ["粗野", "大胆", "高对比", "黄色", "黑色", "边框", "Memphis", "孟菲斯", "艺术", "前卫", "实验", "激进"],
+    "tone": "brutalistRaw",
+    "responsive": {
+      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "strategy": "桌面优先；移动端 Display 降至 48px 保持 900 weight，粗边框和硬阴影保留，亮黄画布保留。"
+    }
+  },
+  {
+    "id": "glassmorphism",
+    "name": "Glassmorphism",
+    "description": "玻璃拟态透明配背景模糊与微边框，现代悬浮层次感美学。使用鲜艳渐变背景（紫 #8b5cf6 / 粉 #ec4899 / 青 #06b6d4），玻璃卡片悬浮其上。卡片背景 rgba(255,255,255,0.1) 配 backdrop-filter: blur(20px) saturate(180%)，微边框 rgba(255,255,255,0.2) 勾勒玻璃边缘。文字纯白，secondary 文字带透明度，圆角偏大 16-32px 营造柔和现代感。多层玻璃叠加创造深度：不同透明度层级，按钮使用纯白填充或玻璃样式，hover 时玻璃层亮度提升微缩放 scale(1.02)。适合玻璃、透明、模糊、现代悬浮、仪表板、后台。",
+    "version": "alpha",
+    "colors": {
+      "primary": "#ffffff",
+      "on-primary": "#8b5cf6",
+      "canvas": "#8b5cf6",
+      "surface": "rgba(255,255,255,0.1)",
+      "surface-elevated": "rgba(255,255,255,0.15)",
+      "ink": "#ffffff",
+      "body": "rgba(255,255,255,0.85)",
+      "muted": "rgba(255,255,255,0.6)",
+      "hairline": "rgba(255,255,255,0.2)",
+      "hairline-soft": "rgba(255,255,255,0.1)",
+      "primary-hover": "rgba(255,255,255,0.9)",
+      "bg-gradient1": "#8b5cf6",
+      "bg-gradient2": "#ec4899",
+      "bg-gradient3": "#06b6d4",
+      "success": "#06b6d4",
+      "error": "#ef4444",
+      "warning": "#f59e0b"
+    },
+    "typography": {
+      "display": { "fontFamily": "Inter, -apple-system, sans-serif", "fontSize": "48px", "fontWeight": 600, "lineHeight": 1.1, "letterSpacing": "-1px" },
+      "title": { "fontFamily": "Inter, -apple-system, sans-serif", "fontSize": "24px", "fontWeight": 500, "lineHeight": 1.2 },
+      "body": { "fontFamily": "Inter, -apple-system, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.5 },
+      "caption": { "fontFamily": "Inter, -apple-system, sans-serif", "fontSize": "12px", "fontWeight": 400, "lineHeight": 1.4 },
+      "button": { "fontFamily": "Inter, -apple-system, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": 1.0 },
+      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+    },
+    "rounded": { "xs": "8px", "sm": "12px", "md": "16px", "lg": "24px", "xl": "32px", "pill": "9999px" },
+    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "components": {
+      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.pill}", "padding": "12px 24px" },
+      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "24px", "backdropFilter": "blur(20px) saturate(180%)" },
+      "input": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "12px 16px", "backdropFilter": "blur(20px) saturate(180%)" },
+      "nav": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "borderBottom": "1px solid {colors.hairline}", "backdropFilter": "blur(20px) saturate(180%)", "height": "64px" }
+    },
+    "rules": [
+      "使用鲜艳渐变背景（紫/粉/青），玻璃卡片悬浮其上",
+      "卡片背景 rgba(255,255,255,0.1) + backdrop-filter: blur(20px) saturate(180%)",
+      "微边框 rgba(255,255,255,0.2) 勾勒玻璃边缘",
+      "文字纯白，secondary 文字带透明度",
+      "圆角偏大 (16-32px)，营造柔和现代感",
+      "多层玻璃叠加创造深度：不同透明度层级",
+      "按钮使用纯白填充或玻璃样式",
+      "hover 时玻璃层亮度提升，微缩放 scale(1.02)"
+    ],
+    "dos": [
+      "用鲜艳渐变背景（紫 #8b5cf6 / 粉 #ec4899 / 青 #06b6d4）",
+      "玻璃卡片用 rgba(255,255,255,0.1) + backdrop-filter: blur(20px) saturate(180%)",
+      "微边框 rgba(255,255,255,0.2) 勾勒玻璃边缘",
+      "圆角偏大 16-32px 营造柔和现代感",
+      "多层玻璃叠加创造深度：不同透明度层级",
+      "hover 时玻璃层亮度提升微缩放 scale(1.02)"
+    ],
+    "donts": [
+      "不要用纯色背景，必须鲜艳渐变托底",
+      "不要省略 backdrop-filter: blur(20px) saturate(180%)",
+      "不要使用小圆角，保持 16-32px 柔和感",
+      "不要用深色文字，文字必须纯白带透明度",
+      "不要用实色卡片背景，必须半透明玻璃"
+    ],
+    "keywords": ["玻璃", "透明", "模糊", "现代", "悬浮", "层次", "渐变", "UI", "卡片", "仪表板", "后台", "dashboard"],
+    "tone": "luxuryRefined",
+    "responsive": {
+      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "strategy": "桌面优先；移动端 Display 降至 36px，玻璃模糊保留但 saturate 降至 150% 保证性能，渐变背景保留。"
+    }
+  }
+]

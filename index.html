@@ -1436,6 +1436,14 @@ html, body {
                                 <option value="glassmorphism">Glassmorphism · 玻璃拟态</option>
                             </select>
                             <span class="design-badge" id="designBadge">默认规范</span>
+                            <button class="btn-icon-only" id="btnMcpManage" title="MCP 服务器管理（连接外部工具扩展 Agent 能力）" aria-label="MCP 管理" style="padding:4px 6px;opacity:0.7;font-size:11px;border:1px solid var(--hairline);border-radius:var(--radius-sm);background:transparent;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;gap:4px;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                                <span id="mcpBadge">MCP</span>
+                            </button>
+                            <button class="btn-icon-only" id="btnProjectContext" title="项目上下文（PRODUCT.md / DESIGN.md —— 锚定产品定位与设计规范）" aria-label="项目上下文" style="padding:4px 6px;opacity:0.7;font-size:11px;border:1px solid var(--hairline);border-radius:var(--radius-sm);background:transparent;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;gap:4px;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+                                <span id="ctxBadge">CTX</span>
+                            </button>
                         </div>
                     </div>
                     <div class="agent-status-bar" id="agentStatusBar">
@@ -1447,6 +1455,14 @@ html, body {
                         <div class="ai-empty-state" id="aiEmptyState">
                             <svg class="big-icon"><use href="#icon-sparkle"></use></svg>
                             <span>输入自然语言指令<br>AI 将帮你修改代码</span>
+                            <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:280px;" id="aiEmptyHints">
+                                <button class="empty-hint-chip" data-cmd="/audit" style="padding:3px 10px;font-size:11px;border:1px solid var(--hairline);border-radius:12px;background:transparent;color:var(--text-secondary);cursor:pointer;transition:all 0.15s;">/audit 设计审计</button>
+                                <button class="empty-hint-chip" data-cmd="/polish" style="padding:3px 10px;font-size:11px;border:1px solid var(--hairline);border-radius:12px;background:transparent;color:var(--text-secondary);cursor:pointer;transition:all 0.15s;">/polish 打磨</button>
+                                <button class="empty-hint-chip" data-cmd="/critique" style="padding:3px 10px;font-size:11px;border:1px solid var(--hairline);border-radius:12px;background:transparent;color:var(--text-secondary);cursor:pointer;transition:all 0.15s;">/critique 评审</button>
+                                <button class="empty-hint-chip" data-cmd="/bolder" style="padding:3px 10px;font-size:11px;border:1px solid var(--hairline);border-radius:12px;background:transparent;color:var(--text-secondary);cursor:pointer;transition:all 0.15s;">/bolder 加强</button>
+                                <button class="empty-hint-chip" data-cmd="/quieter" style="padding:3px 10px;font-size:11px;border:1px solid var(--hairline);border-radius:12px;background:transparent;color:var(--text-secondary);cursor:pointer;transition:all 0.15s;">/quieter 收敛</button>
+                                <button class="empty-hint-chip" data-cmd="/help" style="padding:3px 10px;font-size:11px;border:1px solid var(--hairline);border-radius:12px;background:transparent;color:var(--text-secondary);cursor:pointer;transition:all 0.15s;">/help 全部指令</button>
+                            </div>
                         </div>
                     </div>
                     <div class="ai-input-bar">
@@ -1521,6 +1537,76 @@ html, body {
         </div>
     </div>
 
+    <!-- MCP 服务器管理模态框 -->
+    <div class="modal-overlay" id="mcpModal" role="dialog" aria-modal="true" aria-labelledby="mcpModalTitle">
+        <div class="modal-box" style="max-width:520px;">
+            <h3 id="mcpModalTitle" style="display:flex;align-items:center;justify-content:space-between;">
+                MCP 服务器管理
+                <button class="btn-icon-only" id="btnCloseMcp" aria-label="关闭" style="padding:4px;font-size:18px;line-height:1;">×</button>
+            </h3>
+            <p style="color:var(--text-muted);font-size:12px;margin:4px 0 12px;">连接外部 MCP 服务器，扩展 Agent 的工具能力。支持 SSE 和 HTTP 传输。</p>
+
+            <!-- 添加服务器表单 -->
+            <div style="border:1px solid var(--hairline);border-radius:var(--radius-md);padding:12px;margin-bottom:12px;">
+                <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text-secondary);">添加新服务器</div>
+                <input type="text" class="modal-input" id="mcpServerName" placeholder="服务器名称（如：GitHub MCP）" maxlength="40" style="margin-bottom:6px;">
+                <input type="text" class="modal-input" id="mcpServerUrl" placeholder="服务器 URL（如：http://localhost:3001）" style="margin-bottom:6px;">
+                <div style="display:flex;gap:6px;margin-bottom:6px;">
+                    <select id="mcpServerTransport" style="flex:1;padding:6px 8px;border:1px solid var(--hairline);border-radius:var(--radius-sm);font-size:12px;background:var(--surface);">
+                        <option value="sse">SSE 传输（推荐）</option>
+                        <option value="http">HTTP 传输</option>
+                    </select>
+                    <input type="password" class="modal-input" id="mcpServerKey" placeholder="API Key（可选）" style="flex:1;padding:6px 8px;font-size:12px;">
+                </div>
+                <button class="btn btn-accent" id="btnAddMcpServer" style="width:100%;padding:6px;font-size:12px;">连接服务器</button>
+            </div>
+
+            <!-- 已连接服务器列表 -->
+            <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--text-secondary);">已连接服务器</div>
+            <div id="mcpServerList" style="max-height:200px;overflow-y:auto;border:1px solid var(--hairline);border-radius:var(--radius-md);padding:8px;min-height:60px;">
+                <div style="color:var(--text-muted);font-size:12px;text-align:center;padding:16px 0;">暂无已连接的服务器</div>
+            </div>
+
+            <!-- 工具统计 -->
+            <div id="mcpToolStats" style="margin-top:8px;font-size:11px;color:var(--text-muted);text-align:center;"></div>
+        </div>
+    </div>
+
+    <!-- 项目上下文模态框（PRODUCT.md / DESIGN.md） -->
+    <div class="modal-overlay" id="ctxModal" role="dialog" aria-modal="true" aria-labelledby="ctxModalTitle">
+        <div class="modal-box" style="max-width:560px;">
+            <h3 id="ctxModalTitle" style="display:flex;align-items:center;justify-content:space-between;">
+                项目上下文
+                <button class="btn-icon-only" id="btnCloseCtx" aria-label="关闭" style="padding:4px;font-size:18px;line-height:1;">×</button>
+            </h3>
+            <p style="color:var(--text-muted);font-size:12px;margin:4px 0 12px;">定义产品定位与设计规范，Agent 将以此为锚点生成更贴合的界面。缺失时 Agent 会主动访谈生成。</p>
+
+            <!-- Tab 切换 -->
+            <div style="display:flex;gap:4px;margin-bottom:8px;border-bottom:1px solid var(--hairline);">
+                <button class="btn" id="ctxTabProduct" style="padding:4px 12px;font-size:12px;border:none;border-bottom:2px solid var(--accent);border-radius:0;background:transparent;color:var(--accent);">PRODUCT.md</button>
+                <button class="btn" id="ctxTabDesign" style="padding:4px 12px;font-size:12px;border:none;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--text-muted);">DESIGN.md</button>
+            </div>
+
+            <!-- PRODUCT.md 编辑区 -->
+            <div id="ctxPanelProduct">
+                <textarea id="ctxProductInput" class="modal-input" placeholder="# 产品定位&#10;&#10;## 这是什么产品？&#10;一句话描述产品定位与核心价值。&#10;&#10;## 目标用户&#10;谁会使用这个产品？&#10;&#10;## 核心功能&#10;- 功能1&#10;- 功能2&#10;&#10;## 品牌调性&#10;专业 / 活泼 / 极简 / 科技感…" style="width:100%;min-height:200px;font-family:var(--font-mono,monospace);font-size:12px;resize:vertical;line-height:1.5;"></textarea>
+            </div>
+
+            <!-- DESIGN.md 编辑区 -->
+            <div id="ctxPanelDesign" style="display:none;">
+                <textarea id="ctxDesignInput" class="modal-input" placeholder="# 设计规范&#10;&#10;## 色彩&#10;- 主色: #&#10;- 背景: #&#10;- 文字: #&#10;&#10;## 字体&#10;- 标题:&#10;- 正文:&#10;&#10;## 间距&#10;- 基准: 8px&#10;&#10;## 原则&#10;- 克制、留白、层级清晰" style="width:100%;min-height:200px;font-family:var(--font-mono,monospace);font-size:12px;resize:vertical;line-height:1.5;"></textarea>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div style="display:flex;gap:6px;margin-top:8px;">
+                <button class="btn btn-accent" id="btnSaveCtx" style="flex:1;padding:6px;font-size:12px;">保存上下文</button>
+                <button class="btn" id="btnClearCtx" style="padding:6px 12px;font-size:12px;">清空</button>
+                <button class="btn" id="btnAiGenCtx" style="padding:6px 12px;font-size:12px;">AI 生成</button>
+            </div>
+            <div id="ctxStatus" style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:4px;"></div>
+        </div>
+    </div>
+
     <!-- Dependencies & Script (preserved from original) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
@@ -1540,6 +1626,9 @@ html, body {
     <script src="https://unpkg.com/prettier@3.4.2/plugins/postcss.js"></script>
     <script src="https://unpkg.com/prettier@3.4.2/plugins/markdown.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- 本地扩展模块：反模式检测器 + MCP桥接（借鉴 Impeccable A+ 与 MCP 协议） -->
+    <script src="lib/antipatterns.js"></script>
+    <script src="lib/mcp-bridge.js"></script>
 
 <script>
 (function() {
@@ -2250,8 +2339,36 @@ html, body {
         updatePreview();
         showStatus('就绪', 'ready');
         initSnippets();
+        initMCPBridge();          // 初始化 MCP 桥接（支持外部工具服务器扩展）
+        initMcpUI();              // 初始化 MCP 管理面板 UI（按钮/模态框/事件）
+        initCtxUI();              // 初始化项目上下文 UI（PRODUCT.md / DESIGN.md）
+        loadExternalDesignSystems(); // 加载外部 DESIGN.md 格式设计系统（数据外置）
         editor.refresh();
         editor.focus();
+    }
+
+    // ==================== 外部设计系统加载（数据外置） ====================
+    // 尝试加载 data/design-systems.json（DESIGN.md 标准格式），失败则回退到内联 DESIGN_SYSTEMS
+    let externalDesignSystems = null;
+    function loadExternalDesignSystems() {
+        if (_isFileProtocol) return; // file:// 下 fetch 受 CORS 限制，跳过
+        fetch('data/design-systems.json')
+            .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+                    externalDesignSystems = data;
+                    console.log('[Werkstatt] 已加载外部设计系统: ' + data.length + ' 套（DESIGN.md 格式）');
+                }
+            })
+            .catch(() => { /* 静默失败，使用内联数据 */ });
+    }
+    // 获取设计系统的 DESIGN.md 格式数据（供 get_skill 工具返回给 AI）
+    function getDesignSystemMdFormat(systemId) {
+        if (externalDesignSystems) {
+            const found = externalDesignSystems.find(s => s.id === systemId);
+            if (found) return JSON.stringify(found, null, 2);
+        }
+        return null;
     }
 
     const _isFileProtocol = location.protocol === 'file:';
@@ -2575,7 +2692,7 @@ html, body {
 
     function loadAiEndpoint() { return DEFAULT_ENDPOINT; }
     function saveAiEndpoint(ep) { safeStorage.set(AI_ENDPOINT_STORAGE, ep); }
-    function loadAiKey() { return 'sk-mhcBQAj9tVbrJa79aKYT8AhTYCwW3kWWKfA3yvh4DqbxW2xz'; }
+    function loadAiKey() { return safeStorage.get(AI_KEY_STORAGE) || ''; }
     function saveAiKey(k) { safeStorage.set(AI_KEY_STORAGE, k); updateAiStatus(); }
     function loadAiModel() { return safeStorage.get(AI_MODEL_STORAGE); }
     function saveAiModel(m) { safeStorage.set(AI_MODEL_STORAGE, m); }
@@ -4969,6 +5086,88 @@ ${techSpec}
         aiChatInput.rows = 1;
     });
 
+    // ===== 命令建议浮层（输入 / 时弹出，提升设计命令可发现性）=====
+    let cmdSuggestEl = null;
+    let cmdSuggestItems = [];
+    let cmdSuggestIndex = -1;
+    function ensureCmdSuggestEl() {
+        if (cmdSuggestEl) return cmdSuggestEl;
+        cmdSuggestEl = document.createElement('div');
+        cmdSuggestEl.id = 'cmdSuggest';
+        cmdSuggestEl.style.cssText = 'position:absolute;bottom:100%;left:0;right:0;background:var(--bg-surface);border:1px solid var(--border-default);border-radius:var(--radius-md);box-shadow:var(--shadow-lg);max-height:240px;overflow-y:auto;z-index:50;display:none;margin-bottom:4px;';
+        aiChatInput.parentElement.style.position = 'relative';
+        aiChatInput.parentElement.appendChild(cmdSuggestEl);
+        cmdSuggestEl.addEventListener('click', (e) => {
+            const item = e.target.closest('[data-cmd]');
+            if (!item) return;
+            aiChatInput.value = item.dataset.cmd + ' ';
+            autoResizeTextarea();
+            hideCmdSuggest();
+            aiChatInput.focus();
+        });
+        return cmdSuggestEl;
+    }
+    function showCmdSuggest(query) {
+        const el = ensureCmdSuggestEl();
+        const q = query.toLowerCase();
+        const matches = Object.entries(QUICK_COMMANDS).filter(([k]) => k.toLowerCase().startsWith(q));
+        if (matches.length === 0) { hideCmdSuggest(); return; }
+        el.innerHTML = matches.map(([k, v], i) => {
+            const isDesign = v.mode === 'design';
+            const tag = isDesign ? '<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:var(--accent-subtle);color:var(--accent);margin-left:6px;">设计</span>' : '';
+            return '<div data-cmd="' + k + '" style="padding:7px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--hairline);display:flex;align-items:center;gap:4px;" data-idx="' + i + '">' +
+                '<span style="font-weight:600;color:var(--accent);min-width:64px;">' + k + '</span>' +
+                '<span style="color:var(--text-secondary);flex:1;">' + v.desc + '</span>' + tag + '</div>';
+        }).join('');
+        cmdSuggestItems = el.querySelectorAll('[data-cmd]');
+        cmdSuggestIndex = -1;
+        el.style.display = 'block';
+    }
+    function hideCmdSuggest() { if (cmdSuggestEl) cmdSuggestEl.style.display = 'none'; cmdSuggestIndex = -1; }
+    function moveCmdSuggest(dir) {
+        if (!cmdSuggestEl || cmdSuggestEl.style.display === 'none' || cmdSuggestItems.length === 0) return;
+        cmdSuggestIndex = (cmdSuggestIndex + dir + cmdSuggestItems.length) % cmdSuggestItems.length;
+        cmdSuggestItems.forEach((it, i) => { it.style.background = i === cmdSuggestIndex ? 'var(--bg-surface-raised)' : ''; });
+    }
+    aiChatInput.addEventListener('input', () => {
+        const val = aiChatInput.value;
+        if (val.startsWith('/') && !val.includes(' ')) { showCmdSuggest(val); }
+        else { hideCmdSuggest(); }
+    });
+    aiChatInput.addEventListener('keydown', (e) => {
+        if (!cmdSuggestEl || cmdSuggestEl.style.display === 'none') return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); moveCmdSuggest(1); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); moveCmdSuggest(-1); }
+        else if (e.key === 'Enter' || e.key === 'Tab') {
+            if (cmdSuggestIndex >= 0 && cmdSuggestItems[cmdSuggestIndex]) {
+                e.preventDefault();
+                aiChatInput.value = cmdSuggestItems[cmdSuggestIndex].dataset.cmd + ' ';
+                autoResizeTextarea();
+                hideCmdSuggest();
+                aiChatInput.focus();
+            }
+        } else if (e.key === 'Escape') { e.preventDefault(); hideCmdSuggest(); }
+    });
+    aiChatInput.addEventListener('blur', () => { setTimeout(hideCmdSuggest, 150); });
+
+    // 空状态提示芯片点击 → 填入命令并发送
+    document.addEventListener('click', (e) => {
+        const chip = e.target.closest('.empty-hint-chip');
+        if (!chip || !chip.dataset.cmd) return;
+        aiChatInput.value = chip.dataset.cmd;
+        autoResizeTextarea();
+        if (!btnAiSend.disabled) btnAiSend.click();
+    });
+    // 提示芯片 hover 效果（用 JS 避免新增 CSS）
+    document.addEventListener('mouseover', (e) => {
+        const chip = e.target.closest('.empty-hint-chip');
+        if (chip) { chip.style.borderColor = 'var(--accent)'; chip.style.color = 'var(--accent)'; }
+    });
+    document.addEventListener('mouseout', (e) => {
+        const chip = e.target.closest('.empty-hint-chip');
+        if (chip) { chip.style.borderColor = 'var(--hairline)'; chip.style.color = 'var(--text-secondary)'; }
+    });
+
     // ===== Quick Command System =====
     const QUICK_COMMANDS = {
         '/explain': { desc: '解释当前选中的代码或整个文件', mode: 'explain' },
@@ -4976,7 +5175,96 @@ ${techSpec}
         '/refactor': { desc: '给出代码重构建议', mode: 'refactor' },
         '/optimize': { desc: '分析性能瓶颈并给出优化建议', mode: 'optimize' },
         '/test': { desc: '为当前代码生成测试用例', mode: 'test' },
-        '/help': { desc: '显示快捷指令帮助', mode: 'help' }
+        '/help': { desc: '显示快捷指令帮助', mode: 'help' },
+        // ===== 设计命令词汇表（借鉴 Impeccable A+ 设计命令体系）=====
+        '/audit': { desc: '设计审计：扫描 AI 劣习、对比度、反模式', mode: 'design', action: 'audit' },
+        '/polish': { desc: '设计打磨：精修间距/字体/细节质感', mode: 'design', action: 'polish' },
+        '/critique': { desc: '设计评审：诚实指出视觉与体验问题', mode: 'design', action: 'critique' },
+        '/distill': { desc: '设计提纯：去除多余卡片/装饰/复杂度', mode: 'design', action: 'distill' },
+        '/bolder': { desc: '加强视觉：更强层级、更大对比、更果断', mode: 'design', action: 'bolder' },
+        '/quieter': { desc: '收敛视觉：更克制、更留白、更安静', mode: 'design', action: 'quieter' }
+    };
+
+    // 设计命令词汇表：每个命令展开为结构化的设计指令（驱动 Agent 用工具执行）
+    // 借鉴 Impeccable 的"设计命令"理念 —— 用一个词触发一整套设计行为
+    const DESIGN_COMMANDS = {
+        audit: {
+            label: '设计审计',
+            instruction: '执行设计审计（Design Audit）。步骤：\n' +
+                '1. 调用 analyze_code 获取当前代码\n' +
+                '2. 调用 run_code_check 运行反模式检测，逐条审视报告中的 AI 劣习\n' +
+                '3. 调用 preview_code 刷新预览，调用 get_console 检查报错\n' +
+                '4. 输出审计报告：分「严重问题」「建议改进」「已达标」三类，每条附行号与修复建议\n' +
+                '5. 询问用户是否要自动修复严重问题，确认后用 edit_code 逐条修复\n' +
+                '审计维度：AI 味（Inter 字体/紫蓝渐变/卡片嵌套/em-dash）、对比度（WCAG AA）、语义化 HTML、间距节奏、视觉层级、focus 状态。'
+        },
+        polish: {
+            label: '设计打磨',
+            instruction: '执行设计打磨（Design Polish）。在不改变整体结构的前提下，精修细节质感：\n' +
+                '1. 调用 analyze_code 理解当前结构\n' +
+                '2. 逐项精修并用 edit_code 落地：\n' +
+                '   • 字体：行高/字间距/字重梯度是否合理（标题与正文要有明确区分）\n' +
+                '   • 间距：建立节奏感（section 64-96px，组件内 16-24px，元素间 8-12px）\n' +
+                '   • 圆角：统一圆角语言（不要混用 4px/8px/12px/16px，选一个主值+一个强调值）\n' +
+                '   • 阴影：层级要清晰（hover 态阴影要加深，不要所有卡片同一阴影）\n' +
+                '   • 过渡：transition 时长与缓动要一致（200-300ms，ease-out 为主）\n' +
+                '   • 边框：1px hairline 要够淡但不消失\n' +
+                '3. 每改 2-3 处调用 preview_code 验证，最后 run_code_check 确认无反模式\n' +
+                '打磨原则：克制，只改质感不改结构，不引入新设计系统。'
+        },
+        critique: {
+            label: '设计评审',
+            instruction: '执行诚实的设计评审（Design Critique）。要求：\n' +
+                '1. 调用 analyze_code 和 preview_code 完整理解当前设计\n' +
+                '2. 从以下维度给出诚实评价（不要客套，指出真问题）：\n' +
+                '   • 第一印象：打开页面 3 秒内能记住什么？有视觉锚点吗？\n' +
+                '   • 信息层级：扫一眼标题能否理解页面主旨？H1-H3 层级清晰吗？\n' +
+                '   • 视觉平衡：是否有某个区域过重或过轻？留白是否呼吸？\n' +
+                '   • 一致性：颜色/字体/间距/圆角是否成体系，还是随意堆砌？\n' +
+                '   • AI 味：是否有模板感？像不像 AI 默认产物？\n' +
+                '   • 可用性：交互元素是否清晰可点？对比度是否达标？\n' +
+                '3. 输出：3 个最严重的问题（附修复方向）+ 2 个做得好的地方 + 1 个"如果只改一处"的建议\n' +
+                '4. 不修改代码，只输出评审报告。等用户确认后再执行修复。'
+        },
+        distill: {
+            label: '设计提纯',
+            instruction: '执行设计提纯（Design Distillation）—— 做减法。原则：移除后不影响理解的，就不该存在。\n' +
+                '1. 调用 analyze_code 审视当前设计\n' +
+                '2. 识别并移除多余元素：\n' +
+                '   • 不必要的卡片容器（若移除卡片样式不影响理解，就去掉）\n' +
+                '   • 装饰性渐变/阴影/边框（纯装饰无功能的删掉）\n' +
+                '   • 冗余的图标（每个图标都要有信息价值，纯装饰的删掉）\n' +
+                '   • 重复的眉标/标签（SECTION 01 之类删掉）\n' +
+                '   • 过度的动效（只保留改善层级的动效）\n' +
+                '3. 用 edit_code 逐项精简，每删一处 preview_code 验证不破坏布局\n' +
+                '4. 目标：代码行数减少，视觉更聚焦，信息更清晰。少即是多。'
+        },
+        bolder: {
+            label: '加强视觉',
+            instruction: '执行视觉加强（Make it Bolder）—— 让设计更有冲击力和果断感：\n' +
+                '1. 调用 analyze_code 理解当前设计\n' +
+                '2. 加强方向（用 edit_code 落地，每改 2-3 处 preview_code 验证）：\n' +
+                '   • 字号：H1 放大到 48-72px，建立更强的字号梯度（H1→H2→正文至少 2x 跳跃）\n' +
+                '   • 字重：标题用 700-800，正文用 400-500，拉开对比\n' +
+                '   • 颜色对比：加深标题色、提亮背景或反之，让文字"跳"出来\n' +
+                '   • 留白：关键 section 间距加大到 96-128px，让内容呼吸\n' +
+                '   • 强调色：引入一个果断的强调色用于 CTA/关键元素\n' +
+                '   • 尺寸对比：让最重要的元素物理上更大\n' +
+                '3. 注意：加强不等于花哨，是让层级更清晰、重点更突出。最后 run_code_check 确认无反模式。'
+        },
+        quieter: {
+            label: '收敛视觉',
+            instruction: '执行视觉收敛（Make it Quieter）—— 让设计更克制、更安静、更高级：\n' +
+                '1. 调用 analyze_code 理解当前设计\n' +
+                '2. 收敛方向（用 edit_code 落地，每改 2-3 处 preview_code 验证）：\n' +
+                '   • 降字号：H1 收到 32-40px，整体字号梯度更平缓\n' +
+                '   • 降饱和度：鲜艳色降为低饱和（往灰里调 10-20%），用中性色为主\n' +
+                '   • 减阴影：去掉多层阴影，只用极淡的单层或不用阴影\n' +
+                '   • 减边框：能用留白分隔就不用边框\n' +
+                '   • 统一间距：用更规律的间距网格（8px 倍数），减少不规则间距\n' +
+                '   • 降动效幅度：transition 改为更微妙的 150-200ms\n' +
+                '3. 目标：像 Linear/Vercel 那种"安静的高级感"。最后 run_code_check 确认无反模式。'
+        }
     };
 
     function handleQuickCommand(cmd, extra) {
@@ -4991,11 +5279,14 @@ ${techSpec}
         }
 
         if (qc.mode === 'help') {
-            let helpText = '快捷指令列表：\n';
-            for (const [k, v] of Object.entries(QUICK_COMMANDS)) {
-                helpText += k + ' — ' + v.desc + '\n';
-            }
-            helpText += '\n用法示例：\n/explain\n/fix 变量未定义\n/refactor 提取公共函数';
+            let helpText = '快捷指令列表：\n\n【代码指令】\n';
+            const codeCmds = ['/explain', '/fix', '/refactor', '/optimize', '/test'];
+            for (const k of codeCmds) { if (QUICK_COMMANDS[k]) helpText += k + ' — ' + QUICK_COMMANDS[k].desc + '\n'; }
+            helpText += '\n【设计指令】（自动走 Agent 模式，用工具执行）\n';
+            const designCmds = ['/audit', '/polish', '/critique', '/distill', '/bolder', '/quieter'];
+            for (const k of designCmds) { if (QUICK_COMMANDS[k]) helpText += k + ' — ' + QUICK_COMMANDS[k].desc + '\n'; }
+            helpText += '\n【其他】\n/help — 显示本帮助\n';
+            helpText += '\n用法示例：\n/explain\n/fix 变量未定义\n/audit\n/polish 加强标题层级\n/bolder';
             hideAiEmptyState();
             addChatMessage('user', '/help');
             addChatMessage('assistant', helpText, ICONS.info);
@@ -5024,6 +5315,21 @@ ${techSpec}
             case 'test':
                 specializedInstruction = '请为以下' + langLabel + '代码生成测试用例' + (extra ? '，测试框架：' + extra : '，使用合适的测试框架') + '。输出完整的测试代码。\n\n需要测试的代码：\n```\n' + (selection || code) + '\n```';
                 break;
+            case 'design': {
+                // 设计命令走 Agent 模式（需要 edit_code/preview_code/run_code_check 等工具）
+                const dc = DESIGN_COMMANDS[qc.action];
+                if (!dc) return false;
+                const designInstruction = dc.instruction + (extra ? '\n\n用户补充要求：' + extra : '');
+                hideAiEmptyState();
+                addChatMessage('user', cmd + (extra ? ' ' + extra : ''));
+                aiChatInput.value = '';
+                autoResizeTextarea();
+                setAiGenerating(true);
+                try { runAgentLoop(designInstruction); }
+                catch (e) { if (e.name !== 'AbortError') addChatMessage('assistant', '设计命令执行中断: ' + e.message, ICONS.error); }
+                finally { setAiGenerating(false); }
+                return true;
+            }
             default:
                 return false;
         }
@@ -5565,9 +5871,9 @@ ${techSpec}
             }, required: ['url', 'type'] }
         }},
         { type: 'function', function: {
-            name: 'get_skill', description: '获取内置技能知识（GSAP 动画、设计系统、代码片段）',
+            name: 'get_skill', description: '获取内置技能知识（GSAP 动画、设计系统DESIGN.md、代码片段、API数据源、MCP服务器状态）',
             parameters: { type: 'object', properties: {
-                domain: { type: 'string', enum: ['gsap', 'design', 'snippet', 'api'], description: '技能领域' },
+                domain: { type: 'string', enum: ['gsap', 'design', 'snippet', 'api', 'mcp'], description: '技能领域' },
                 query: { type: 'string', description: '具体查询内容' }
             }, required: ['domain'] }
         }},
@@ -5600,7 +5906,7 @@ ${techSpec}
             parameters: { type: 'object', properties: {}, required: [] }
         }},
         { type: 'function', function: {
-            name: 'run_code_check', description: '对当前代码运行安全检查（函数完整性、标签闭合、潜在问题）',
+            name: 'run_code_check', description: '对当前代码运行安全检查（函数完整性、标签闭合）+ 反模式检测（AI劣习识别+设计教导，如禁用Inter字体/紫蓝渐变/卡片嵌套等）',
             parameters: { type: 'object', properties: {}, required: [] }
         }},
         { type: 'function', function: {
@@ -5610,12 +5916,421 @@ ${techSpec}
             }, required: [] }
         }},
         { type: 'function', function: {
+            name: 'visual_verify', description: '视觉验证：刷新预览后检查控制台错误+内容完整性+反模式+视觉指标（对比度/溢出/空元素），返回验证报告与修复建议（借鉴Frontend Design Skill的Visual Verification闭环）',
+            parameters: { type: 'object', properties: {
+                checks: { type: 'array', description: '可选：指定要检查的项（console/content/antipattern/visual/litmus/all），默认all', items: { type: 'string' } }
+            }, required: [] }
+        }},
+        { type: 'function', function: {
+            name: 'get_project_context', description: '获取项目上下文（PRODUCT.md 产品定位 + DESIGN.md 设计规范）。若返回空，说明用户尚未定义，应主动访谈引导填写。',
+            parameters: { type: 'object', properties: {}, required: [] }
+        }},
+        { type: 'function', function: {
+            name: 'set_project_context', description: '保存项目上下文（PRODUCT.md / DESIGN.md）。用于访谈生成后持久化，或用户要求更新上下文时。',
+            parameters: { type: 'object', properties: {
+                product_md: { type: 'string', description: 'PRODUCT.md 内容（产品定位、目标用户、核心功能、品牌调性）' },
+                design_md: { type: 'string', description: 'DESIGN.md 内容（色彩色值、字体、间距、圆角、设计原则）' }
+            }, required: [] }
+        }},
+        { type: 'function', function: {
             name: 'complete', description: '标记任务完成，总结所做修改',
             parameters: { type: 'object', properties: {
                 summary: { type: 'string', description: '完成总结' }
             }, required: ['summary'] }
         }}
     ];
+
+    // ==================== MCP 桥接初始化 ====================
+    // 将内置工具注册到 MCPBridge，支持后续连接外部 MCP 服务器扩展工具
+    let mcpBridgeReady = false;
+    function initMCPBridge() {
+        if (mcpBridgeReady || typeof MCPBridge === 'undefined') return;
+        try {
+            MCPBridge.init();
+            // 注册内置工具的 handler（实际执行仍由 executeAgentTool 处理）
+            const handlerMap = {};
+            AGENT_TOOLS.forEach(t => {
+                const name = t.function.name;
+                handlerMap[name] = function(args) { return executeAgentTool(name, args || {}); };
+            });
+            MCPBridge.registerBuiltinHandlers(handlerMap);
+            // 自动重连已保存的外部服务器
+            MCPBridge.refreshTools().catch(() => {});
+            mcpBridgeReady = true;
+        } catch(e) { console.warn('MCPBridge 初始化失败:', e); }
+    }
+    // 获取所有可用工具（内置 + 外部 MCP 服务器）
+    function getAllAvailableTools() {
+        if (mcpBridgeReady && typeof MCPBridge !== 'undefined') {
+            const all = MCPBridge.getAllTools();
+            if (all && all.length > 0) return all;
+        }
+        return AGENT_TOOLS;
+    }
+    // 统一工具调用入口（内置走 executeAgentTool，外部走 MCPBridge）
+    async function callToolUnified(toolName, args) {
+        if (mcpBridgeReady && typeof MCPBridge !== 'undefined') {
+            const allTools = MCPBridge.getAllTools();
+            const isBuiltin = allTools.some(t => (t.function?.name || t.name) === toolName && (t._source === 'builtin' || !t._source));
+            if (isBuiltin) {
+                return await executeAgentTool(toolName, args || {});
+            }
+            // 外部工具走 MCPBridge
+            try {
+                const result = await MCPBridge.callTool(toolName, args || {});
+                if (result && result.content && result.content[0]) return result.content[0].text;
+                return JSON.stringify(result);
+            } catch(e) { return '[ERR] MCP工具调用失败: ' + e.message; }
+        }
+        return await executeAgentTool(toolName, args || {});
+    }
+
+    // ==================== MCP 服务器管理 UI ====================
+    // 把 MCPBridge 的能力暴露成好用的可视化管理面板（用户要求"要好用一点"）
+    let mcpModalEl = null, mcpServerListEl = null, mcpToolStatsEl = null, mcpBadgeEl = null;
+    let mcpBtnManage = null, mcpBtnClose = null, mcpBtnAdd = null;
+    let mcpInputName = null, mcpInputUrl = null, mcpInputTransport = null, mcpInputKey = null;
+
+    function initMcpUI() {
+        mcpModalEl = document.getElementById('mcpModal');
+        mcpServerListEl = document.getElementById('mcpServerList');
+        mcpToolStatsEl = document.getElementById('mcpToolStats');
+        mcpBadgeEl = document.getElementById('mcpBadge');
+        mcpBtnManage = document.getElementById('btnMcpManage');
+        mcpBtnClose = document.getElementById('btnCloseMcp');
+        mcpBtnAdd = document.getElementById('btnAddMcpServer');
+        mcpInputName = document.getElementById('mcpServerName');
+        mcpInputUrl = document.getElementById('mcpServerUrl');
+        mcpInputTransport = document.getElementById('mcpServerTransport');
+        mcpInputKey = document.getElementById('mcpServerKey');
+        if (!mcpModalEl || !mcpBtnManage) return; // 元素缺失则跳过
+
+        // 打开/关闭
+        mcpBtnManage.addEventListener('click', () => { openMcpModal(); });
+        mcpBtnClose.addEventListener('click', () => { closeMcpModal(); });
+        mcpModalEl.addEventListener('click', (e) => { if (e.target === mcpModalEl) closeMcpModal(); });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && mcpModalEl.classList.contains('active')) closeMcpModal();
+        });
+
+        // 添加服务器
+        mcpBtnAdd.addEventListener('click', () => { handleAddMcpServer(); });
+        mcpInputUrl.addEventListener('keydown', (e) => { if (e.key === 'Enter') mcpBtnAdd.click(); });
+        mcpInputName.addEventListener('keydown', (e) => { if (e.key === 'Enter') mcpInputUrl.focus(); });
+
+        // 服务器列表事件委托（断开连接按钮）
+        mcpServerListEl.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-action="disconnect"]');
+            if (!btn) return;
+            const id = btn.dataset.id;
+            if (!id) return;
+            openConfirm('断开服务器', '确定要断开此 MCP 服务器连接吗？配置将被移除。', () => {
+                try {
+                    MCPBridge.disconnectServer(id);
+                    showToast('已断开服务器', '');
+                } catch(err) { showToast('断开失败: ' + err.message, 'error'); }
+                renderMcpServerList();
+                updateMcpToolStats();
+                updateMcpBadge();
+            });
+        });
+
+        // 订阅 MCPBridge 事件，实时刷新 UI
+        if (typeof MCPBridge !== 'undefined') {
+            MCPBridge.onServerConnect(() => {
+                renderMcpServerList(); updateMcpToolStats(); updateMcpBadge();
+                if (mcpModalEl.classList.contains('active')) showToast('服务器已连接', '');
+            });
+            MCPBridge.onServerDisconnect(() => {
+                renderMcpServerList(); updateMcpToolStats(); updateMcpBadge();
+            });
+            MCPBridge.onError((info) => {
+                const msg = (info && info.error) ? (info.error.message || String(info.error)) : '未知错误';
+                showToast('MCP 错误: ' + msg, 'error');
+                renderMcpServerList(); updateMcpToolStats();
+            });
+        }
+
+        // 首次渲染
+        renderMcpServerList();
+        updateMcpToolStats();
+        updateMcpBadge();
+    }
+
+    function openMcpModal() {
+        if (!mcpModalEl) return;
+        renderMcpServerList();
+        updateMcpToolStats();
+        mcpModalEl.classList.add('active');
+        setTimeout(() => { if (mcpInputName) mcpInputName.focus(); }, 50);
+    }
+    function closeMcpModal() {
+        if (!mcpModalEl) return;
+        mcpModalEl.classList.remove('active');
+    }
+
+    function handleAddMcpServer() {
+        const name = (mcpInputName.value || '').trim();
+        const url = (mcpInputUrl.value || '').trim();
+        const transport = mcpInputTransport ? mcpInputTransport.value : 'sse';
+        const apiKey = (mcpInputKey.value || '').trim();
+        if (!url) { showToast('请填写服务器 URL', 'error'); mcpInputUrl.focus(); return; }
+        if (!/^https?:\/\//i.test(url)) { showToast('URL 需以 http:// 或 https:// 开头', 'error'); mcpInputUrl.focus(); return; }
+
+        mcpBtnAdd.disabled = true;
+        const originalText = mcpBtnAdd.textContent;
+        mcpBtnAdd.textContent = '连接中…';
+        const cfg = { name: name || url, url, transport, apiKey: apiKey || undefined };
+        MCPBridge.connectServer(cfg).then((res) => {
+            showToast('已连接: ' + (res.name || url) + '（' + (res.tools ? res.tools.length : 0) + ' 个工具）', '');
+            mcpInputName.value = ''; mcpInputUrl.value = ''; mcpInputKey.value = '';
+            renderMcpServerList(); updateMcpToolStats(); updateMcpBadge();
+        }).catch((err) => {
+            showToast('连接失败: ' + (err.message || err), 'error');
+            renderMcpServerList(); // 显示错误状态
+        }).finally(() => {
+            mcpBtnAdd.disabled = false;
+            mcpBtnAdd.textContent = originalText;
+        });
+    }
+
+    function renderMcpServerList() {
+        if (!mcpServerListEl) return;
+        if (typeof MCPBridge === 'undefined') {
+            mcpServerListEl.innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:16px 0;">MCP 模块未加载</div>';
+            return;
+        }
+        const list = MCPBridge.listServers();
+        if (!list || list.length === 0) {
+            mcpServerListEl.innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:16px 0;">暂无已连接的服务器</div>';
+            return;
+        }
+        const statusLabel = { connected: '已连接', connecting: '连接中', error: '错误', disconnected: '已断开' };
+        const statusColor = { connected: 'var(--semantic-success, #16a34a)', connecting: 'var(--semantic-warning, #d97706)', error: 'var(--semantic-error, #dc2626)', disconnected: 'var(--text-muted)' };
+        mcpServerListEl.innerHTML = list.map(s => {
+            const color = statusColor[s.status] || 'var(--text-muted)';
+            const label = statusLabel[s.status] || s.status;
+            const errLine = (s.status === 'error' && s.lastError) ? `<div style="font-size:10px;color:var(--semantic-error);margin-top:2px;word-break:break-all;">${escapeHtml(s.lastError)}</div>` : '';
+            return `<div style="padding:8px;border-bottom:1px solid var(--hairline);font-size:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:600;color:var(--text-primary);word-break:break-all;">${escapeHtml(s.name)}</div>
+                        <div style="color:var(--text-muted);font-size:10px;word-break:break-all;margin-top:1px;">${escapeHtml(s.url)}</div>
+                        <div style="margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                            <span style="display:inline-flex;align-items:center;gap:3px;color:${color};font-size:10px;">
+                                <span style="width:6px;height:6px;border-radius:50%;background:${color};display:inline-block;"></span>${label}
+                            </span>
+                            <span style="color:var(--text-muted);font-size:10px;">${s.toolCount} 工具</span>
+                            <span style="color:var(--text-muted);font-size:10px;">${s.transport.toUpperCase()}</span>
+                        </div>
+                        ${errLine}
+                    </div>
+                    <button data-action="disconnect" data-id="${escapeHtml(s.id)}" class="btn" style="padding:2px 8px;font-size:10px;flex-shrink:0;">断开</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function updateMcpToolStats() {
+        if (!mcpToolStatsEl) return;
+        if (typeof MCPBridge === 'undefined') { mcpToolStatsEl.textContent = ''; return; }
+        const stats = MCPBridge.getToolStats();
+        mcpToolStatsEl.textContent = `内置工具 ${stats.builtin} · 外部工具 ${stats.external} · 共 ${stats.total} 个可用`;
+    }
+
+    function updateMcpBadge() {
+        if (!mcpBadgeEl) return;
+        if (typeof MCPBridge === 'undefined') { mcpBadgeEl.textContent = 'MCP'; return; }
+        const stats = MCPBridge.getToolStats();
+        if (stats.external > 0) {
+            mcpBadgeEl.textContent = 'MCP · ' + stats.external;
+            mcpBadgeEl.parentElement.style.opacity = '1';
+            mcpBadgeEl.parentElement.style.color = 'var(--accent)';
+        } else {
+            mcpBadgeEl.textContent = 'MCP';
+            mcpBadgeEl.parentElement.style.opacity = '0.7';
+            mcpBadgeEl.parentElement.style.color = 'var(--text-muted)';
+        }
+    }
+
+    // ==================== 项目上下文（PRODUCT.md / DESIGN.md）====================
+    // 借鉴 awesome-design-md 的 DESIGN.md 标准 + Frontend Design Skill 的上下文锚定
+    // 会话加载时注入系统提示词；缺失时 Agent 主动访谈生成
+    const CTX_PRODUCT_KEY = 'werkstatt_product_md';
+    const CTX_DESIGN_KEY = 'werkstatt_design_md';
+    let ctxModalEl = null, ctxProductInput = null, ctxDesignInput = null, ctxBadgeEl = null;
+    let ctxPanelProduct = null, ctxPanelDesign = null, ctxStatusEl = null;
+
+    function loadProductMd() { try { return localStorage.getItem(CTX_PRODUCT_KEY) || ''; } catch(e) { return ''; } }
+    function loadDesignMd() { try { return localStorage.getItem(CTX_DESIGN_KEY) || ''; } catch(e) { return ''; } }
+    function saveProductMd(v) { try { localStorage.setItem(CTX_PRODUCT_KEY, v || ''); } catch(e) {} }
+    function saveDesignMd(v) { try { localStorage.setItem(CTX_DESIGN_KEY, v || ''); } catch(e) {} }
+    function hasProjectContext() { return !!(loadProductMd().trim() || loadDesignMd().trim()); }
+
+    // 构建注入系统提示词的上下文片段
+    function buildContextPrompt() {
+        const product = loadProductMd().trim();
+        const design = loadDesignMd().trim();
+        if (!product && !design) {
+            return '【项目上下文·缺失】当前未定义 PRODUCT.md / DESIGN.md。若用户开始新项目，主动用简短访谈引导填写（产品定位？目标用户？品牌调性？），再用 get_project_context 工具保存。';
+        }
+        let ctx = '【项目上下文·已锚定】以下为用户定义的产品与设计规范，生成界面时必须遵循：\n';
+        if (product) ctx += '--- PRODUCT.md ---\n' + product.slice(0, 1500) + '\n';
+        if (design) ctx += '--- DESIGN.md ---\n' + design.slice(0, 1500) + '\n';
+        ctx += '--- 上下文结束 ---\n以上规范优先级高于设计模板默认值，但低于用户当次显式指令。';
+        return ctx;
+    }
+
+    function initCtxUI() {
+        ctxModalEl = document.getElementById('ctxModal');
+        ctxProductInput = document.getElementById('ctxProductInput');
+        ctxDesignInput = document.getElementById('ctxDesignInput');
+        ctxBadgeEl = document.getElementById('ctxBadge');
+        ctxPanelProduct = document.getElementById('ctxPanelProduct');
+        ctxPanelDesign = document.getElementById('ctxPanelDesign');
+        ctxStatusEl = document.getElementById('ctxStatus');
+        const btnOpen = document.getElementById('btnProjectContext');
+        const btnClose = document.getElementById('btnCloseCtx');
+        const btnSave = document.getElementById('btnSaveCtx');
+        const btnClear = document.getElementById('btnClearCtx');
+        const btnAiGen = document.getElementById('btnAiGenCtx');
+        const tabProduct = document.getElementById('ctxTabProduct');
+        const tabDesign = document.getElementById('ctxTabDesign');
+        if (!ctxModalEl || !btnOpen) return;
+
+        btnOpen.addEventListener('click', () => { openCtxModal(); });
+        btnClose.addEventListener('click', () => { closeCtxModal(); });
+        ctxModalEl.addEventListener('click', (e) => { if (e.target === ctxModalEl) closeCtxModal(); });
+
+        // Tab 切换
+        tabProduct.addEventListener('click', () => {
+            ctxPanelProduct.style.display = 'block';
+            ctxPanelDesign.style.display = 'none';
+            tabProduct.style.borderBottomColor = 'var(--accent)';
+            tabProduct.style.color = 'var(--accent)';
+            tabDesign.style.borderBottomColor = 'transparent';
+            tabDesign.style.color = 'var(--text-muted)';
+        });
+        tabDesign.addEventListener('click', () => {
+            ctxPanelProduct.style.display = 'none';
+            ctxPanelDesign.style.display = 'block';
+            tabDesign.style.borderBottomColor = 'var(--accent)';
+            tabDesign.style.color = 'var(--accent)';
+            tabProduct.style.borderBottomColor = 'transparent';
+            tabProduct.style.color = 'var(--text-muted)';
+        });
+
+        // 保存
+        btnSave.addEventListener('click', () => {
+            saveProductMd(ctxProductInput.value);
+            saveDesignMd(ctxDesignInput.value);
+            updateCtxBadge();
+            ctxStatusEl.textContent = '已保存 · ' + new Date().toLocaleTimeString();
+            ctxStatusEl.style.color = 'var(--semantic-success, #16a34a)';
+            showToast('项目上下文已保存', '');
+        });
+
+        // 清空
+        btnClear.addEventListener('click', () => {
+            openConfirm('清空上下文', '确定要清空 PRODUCT.md 和 DESIGN.md 吗？', () => {
+                ctxProductInput.value = '';
+                ctxDesignInput.value = '';
+                saveProductMd('');
+                saveDesignMd('');
+                updateCtxBadge();
+                ctxStatusEl.textContent = '已清空';
+                showToast('项目上下文已清空', '');
+            });
+        });
+
+        // AI 生成（通过 Agent 访谈生成）
+        btnAiGen.addEventListener('click', () => {
+            const code = getCode();
+            const instruction = '请分析当前编辑器中的代码，推断产品定位与设计规范，自动生成 PRODUCT.md 和 DESIGN.md。\n\n' +
+                '要求：\n' +
+                '1. 分析代码中的配色、字体、布局、组件，推断产品类型与目标用户\n' +
+                '2. 生成 PRODUCT.md：产品定位、目标用户、核心功能、品牌调性\n' +
+                '3. 生成 DESIGN.md：色彩（含色值）、字体、间距、圆角、阴影、设计原则\n' +
+                '4. 用 set_project_context 工具保存生成结果\n' +
+                '5. 简要说明你的推断依据\n\n' +
+                '当前代码（前 200 行）：\n```\n' + code.split('\n').slice(0, 200).join('\n') + '\n```';
+            closeCtxModal();
+            if (agentModeToggle && !agentModeToggle.checked) agentModeToggle.checked = true;
+            showToast('正在用 AI 分析代码生成上下文…', '');
+            setAiGenerating(true);
+            try { runAgentLoop(instruction); }
+            catch (e) { if (e.name !== 'AbortError') addChatMessage('assistant', '生成失败: ' + e.message, ICONS.error); }
+            finally { setAiGenerating(false); }
+        });
+
+        updateCtxBadge();
+    }
+
+    function openCtxModal() {
+        if (!ctxModalEl) return;
+        ctxProductInput.value = loadProductMd();
+        ctxDesignInput.value = loadDesignMd();
+        ctxStatusEl.textContent = hasProjectContext() ? '上下文已加载' : '尚未定义上下文';
+        ctxStatusEl.style.color = 'var(--text-muted)';
+        ctxModalEl.classList.add('active');
+    }
+    function closeCtxModal() { if (ctxModalEl) ctxModalEl.classList.remove('active'); }
+
+    function updateCtxBadge() {
+        if (!ctxBadgeEl) return;
+        if (hasProjectContext()) {
+            ctxBadgeEl.textContent = 'CTX ✓';
+            ctxBadgeEl.parentElement.style.opacity = '1';
+            ctxBadgeEl.parentElement.style.color = 'var(--accent)';
+        } else {
+            ctxBadgeEl.textContent = 'CTX';
+            ctxBadgeEl.parentElement.style.opacity = '0.7';
+            ctxBadgeEl.parentElement.style.color = 'var(--text-muted)';
+        }
+    }
+
+    // ==================== 视觉验证辅助函数（对比度计算）====================
+    // 解析颜色字符串为 {r,g,b,a}
+    function parseColor(str) {
+        if (!str) return null;
+        str = str.trim();
+        if (str.startsWith('#')) {
+            let hex = str.slice(1);
+            if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+            if (hex.length === 6) return { r: parseInt(hex.slice(0,2),16), g: parseInt(hex.slice(2,4),16), b: parseInt(hex.slice(4,6),16), a: 1 };
+            if (hex.length === 8) return { r: parseInt(hex.slice(0,2),16), g: parseInt(hex.slice(2,4),16), b: parseInt(hex.slice(4,6),16), a: parseInt(hex.slice(6,8),16)/255 };
+        }
+        const m = str.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+))?\s*\)/);
+        if (m) return { r: +m[1], g: +m[2], b: +m[3], a: m[4] !== undefined ? +m[4] : 1 };
+        return null;
+    }
+    // 相对亮度（WCAG 2.1）
+    function relativeLuminance(c) {
+        if (!c) return 0;
+        const ch = v => { v /= 255; return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); };
+        return 0.2126 * ch(c.r) + 0.7152 * ch(c.g) + 0.0722 * ch(c.b);
+    }
+    // 对比度比
+    function contrastRatio(color1, color2) {
+        const c1 = parseColor(color1), c2 = parseColor(color2);
+        if (!c1 || !c2) return 21; // 无法解析时假设达标
+        const l1 = relativeLuminance(c1), l2 = relativeLuminance(c2);
+        return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    }
+    // 获取元素的有效背景色（向上遍历直到找到不透明背景）
+    function getEffectiveBg(el, win) {
+        let node = el;
+        let depth = 0;
+        while (node && depth < 10) {
+            const style = win.getComputedStyle(node);
+            const bg = style.backgroundColor;
+            const c = parseColor(bg);
+            if (c && c.a >= 0.9) return bg;
+            node = node.parentElement;
+            depth++;
+        }
+        return '#ffffff'; // 默认白色背景
+    }
 
     async function executeAgentTool(toolName, args) {
         switch (toolName) {
@@ -5743,6 +6458,11 @@ ${techSpec}
                 }
                 if (args.domain === 'design') {
                     const ds = autoSelectDesignSystems(args.query || '');
+                    // 优先返回 DESIGN.md 格式数据（含 token 引用 + dos/donts 护栏）
+                    const mdData = getDesignSystemMdFormat(ds[0]);
+                    if (mdData) {
+                        return '推荐设计系统: ' + ds.join(', ') + '\n【DESIGN.md 标准格式·含 token 引用与护栏】\n' + mdData.slice(0, 2000);
+                    }
                     return '推荐设计系统: ' + ds.join(', ') + '\n规范: ' + getDesignSystemPrompt(ds).slice(0, 500);
                 }
                 if (args.domain === 'snippet') {
@@ -5751,7 +6471,196 @@ ${techSpec}
                 if (args.domain === 'api') {
                     return '内置 API 数据源：JSONPlaceholder、TheCatAPI、TheDogAPI、PokéAPI、OpenWeatherMap、Unsplash、GitHub API、REST Countries 等。可用 get_skill domain=api 查询具体 API。';
                 }
+                if (args.domain === 'mcp') {
+                    // 返回已连接的 MCP 服务器和可用工具
+                    if (typeof MCPBridge !== 'undefined' && mcpBridgeReady) {
+                        const stats = MCPBridge.getToolStats();
+                        const servers = MCPBridge.listServers();
+                        return 'MCP 状态：内置工具 ' + stats.builtin + ' 个，外部工具 ' + stats.external + ' 个，已连接服务器 ' + servers.length + ' 个。' +
+                            (servers.length > 0 ? '\n服务器列表：' + servers.map(s => s.name + '(' + s.toolCount + '工具)').join(', ') : '');
+                    }
+                    return 'MCP 桥接未就绪';
+                }
                 return '未知技能领域: ' + args.domain;
+            }
+            case 'visual_verify': {
+                try {
+                    const checks = args.checks || ['all'];
+                    const checkAll = checks.includes('all');
+                    const report = [];
+                    // 1. 刷新预览
+                    updatePreview();
+                    await new Promise(r => setTimeout(r, 300)); // 等待渲染
+                    // 2. 控制台错误检查
+                    if (checkAll || checks.includes('console')) {
+                        const iframe = document.getElementById('previewFrame');
+                        if (iframe && iframe.contentWindow) {
+                            const logs = iframe.contentWindow.__consoleLogs || [];
+                            const errors = logs.filter(l => l.level === 'error');
+                            if (errors.length > 0) {
+                                report.push('【控制台错误·需修复】发现 ' + errors.length + ' 个错误：');
+                                errors.slice(-5).forEach(e => report.push('  • ' + e.text.slice(0, 120)));
+                            } else {
+                                report.push('[OK] 控制台无错误');
+                            }
+                        }
+                    }
+                    // 3. 内容完整性检查
+                    if (checkAll || checks.includes('content')) {
+                        const iframe = document.getElementById('previewFrame');
+                        if (iframe && iframe.contentDocument) {
+                            const doc = iframe.contentDocument;
+                            const body = doc.body;
+                            const hasH1 = doc.querySelector('h1');
+                            const hasMain = doc.querySelector('main, [role="main"]');
+                            const textLen = body ? body.innerText.trim().length : 0;
+                            const elemCount = body ? body.querySelectorAll('*').length : 0;
+                            if (elemCount < 3) report.push('[WARN] 页面元素过少（' + elemCount + ' 个），可能渲染失败');
+                            else report.push('[OK] 页面已渲染（' + elemCount + ' 个元素，' + textLen + ' 字符文本）');
+                            if (!hasH1) report.push('[提示] 缺少 H1 标题，影响语义结构和 SEO');
+                            if (!hasMain) report.push('[提示] 缺少 <main> 语义标签');
+                        }
+                    }
+                    // 4. 反模式检测
+                    if (checkAll || checks.includes('antipattern')) {
+                        if (typeof AntipatternDetector !== 'undefined') {
+                            const code = getCode();
+                            const apIssues = AntipatternDetector.detect(code, currentLang);
+                            if (apIssues.length > 0) {
+                                const slop = apIssues.filter(i => i.severity === 'slop').length;
+                                const quality = apIssues.filter(i => i.severity === 'quality').length;
+                                const alwaysAvoid = apIssues.filter(i => i.severity === 'always-avoid').length;
+                                report.push('【反模式检测】发现 ' + apIssues.length + ' 个问题（AI味:' + slop + ' / 质量:' + quality + ' / 底线:' + alwaysAvoid + '）');
+                                report.push(AntipatternDetector.format(apIssues));
+                            } else {
+                                report.push('[OK] 反模式检测通过，未发现 AI 劣习');
+                            }
+                        }
+                    }
+                    // 5. 视觉指标检查（对比度/溢出/空元素/布局）—— 自动化检测，不依赖截图
+                    if (checkAll || checks.includes('visual')) {
+                        const iframe = document.getElementById('previewFrame');
+                        if (iframe && iframe.contentDocument && iframe.contentWindow) {
+                            const doc = iframe.contentDocument;
+                            const win = iframe.contentWindow;
+                            const visualIssues = [];
+                            // 5a. 对比度检查（WCAG AA：正文≥4.5:1，大字≥3:1）
+                            try {
+                                const textElems = doc.querySelectorAll('p, span, a, li, td, label, button, h1, h2, h3, h4, h5, h6');
+                                let contrastChecked = 0, contrastFailed = 0;
+                                const failedSamples = [];
+                                textElems.forEach(el => {
+                                    if (contrastChecked >= 30) return; // 采样前30个
+                                    const text = (el.textContent || '').trim();
+                                    if (!text) return;
+                                    const style = win.getComputedStyle(el);
+                                    if (style.display === 'none' || style.visibility === 'hidden' || parseFloat(style.opacity) < 0.1) return;
+                                    const color = style.color;
+                                    const bg = getEffectiveBg(el, win);
+                                    const ratio = contrastRatio(color, bg);
+                                    contrastChecked++;
+                                    const fontSize = parseFloat(style.fontSize);
+                                    const isLarge = fontSize >= 18 || (fontSize >= 14 && parseInt(style.fontWeight) >= 700);
+                                    const threshold = isLarge ? 3.0 : 4.5;
+                                    if (ratio < threshold) {
+                                        contrastFailed++;
+                                        if (failedSamples.length < 3) {
+                                            failedSamples.push('"' + text.slice(0, 30) + '" 对比度 ' + ratio.toFixed(1) + ':1（需≥' + threshold + '）');
+                                        }
+                                    }
+                                });
+                                if (contrastFailed > 0) {
+                                    visualIssues.push('【对比度不达标·' + contrastFailed + '/' + contrastChecked + '】' + failedSamples.join('；'));
+                                } else if (contrastChecked > 0) {
+                                    report.push('[OK] 对比度检查通过（' + contrastChecked + ' 处文本均达标）');
+                                }
+                            } catch(e) { /* 对比度检查失败则跳过 */ }
+                            // 5b. 溢出检测（水平滚动条）
+                            try {
+                                const scrollWidth = doc.documentElement.scrollWidth;
+                                const clientWidth = doc.documentElement.clientWidth;
+                                if (scrollWidth > clientWidth + 2) {
+                                    visualIssues.push('【水平溢出】页面宽度超出视口 ' + (scrollWidth - clientWidth) + 'px，检查固定宽度元素');
+                                }
+                            } catch(e) {}
+                            // 5c. 空元素/零尺寸检测
+                            try {
+                                let emptyCount = 0;
+                                const containers = doc.querySelectorAll('div, section, article, aside, header, footer, nav, main');
+                                containers.forEach(el => {
+                                    if (emptyCount >= 5) return;
+                                    const style = win.getComputedStyle(el);
+                                    if (style.display === 'none') return;
+                                    const rect = el.getBoundingClientRect();
+                                    if (rect.width < 2 && rect.height < 2 && el.children.length === 0) {
+                                        emptyCount++;
+                                    }
+                                });
+                                if (emptyCount > 0) {
+                                    visualIssues.push('【空元素】发现 ' + emptyCount + ' 个零尺寸空容器，可能布局错误');
+                                }
+                            } catch(e) {}
+                            // 5d. 按钮无可见文字/图标
+                            try {
+                                const btns = doc.querySelectorAll('button, [role="button"]');
+                                let emptyBtns = 0;
+                                btns.forEach(btn => {
+                                    const text = (btn.textContent || '').trim();
+                                    const hasIcon = btn.querySelector('svg, img');
+                                    const ariaLabel = btn.getAttribute('aria-label');
+                                    if (!text && !hasIcon && !ariaLabel) emptyBtns++;
+                                });
+                                if (emptyBtns > 0) {
+                                    visualIssues.push('【无障碍】' + emptyBtns + ' 个按钮无文字/图标/aria-label');
+                                }
+                            } catch(e) {}
+                            visualIssues.forEach(i => report.push(i));
+                        }
+                    }
+                    // 6. Litmus Checks —— 部分自动化 + 部分需 Agent 自检
+                    if (checkAll || checks.includes('litmus')) {
+                        const iframe = document.getElementById('previewFrame');
+                        const doc = iframe && iframe.contentDocument;
+                        report.push('\n【Litmus 自检清单】');
+                        if (doc) {
+                            // 自动化检查
+                            const h1 = doc.querySelector('h1');
+                            report.push((h1 ? '[✓]' : '[✗]') + ' H1 标题存在' + (h1 ? '：「' + (h1.textContent || '').trim().slice(0, 40) + '」' : '（缺失，影响语义/SEO）'));
+                            const main = doc.querySelector('main, [role="main"]');
+                            report.push((main ? '[✓]' : '[✗]') + ' <main> 语义标签');
+                            const nav = doc.querySelector('nav, [role="navigation"]');
+                            report.push((nav ? '[✓]' : '[○]') + ' <nav> 导航标签（非必须）');
+                            const focusable = doc.querySelectorAll('a[href], button, input, textarea, select, [tabindex]');
+                            report.push('[i] 可聚焦元素 ' + focusable.length + ' 个');
+                            // 需 Agent 判断的
+                            report.push('□ 品牌/产品是否首屏可辨？');
+                            report.push('□ 是否有强视觉锚点？');
+                            report.push('□ 能否只扫标题理解页面？');
+                            report.push('□ 卡片是否必要（移除样式是否影响理解）？');
+                            report.push('□ 动效是否改善层级（非纯装饰）？');
+                        } else {
+                            report.push('□ 预览未渲染，无法自动检查');
+                        }
+                    }
+                    return report.join('\n');
+                } catch(e) { return '[ERR] 视觉验证失败: ' + e.message; }
+            }
+            case 'get_project_context': {
+                const product = loadProductMd();
+                const design = loadDesignMd();
+                if (!product && !design) return '[INFO] 项目上下文为空。用户尚未定义 PRODUCT.md / DESIGN.md。建议主动访谈：询问产品定位、目标用户、品牌调性，然后用 set_project_context 保存。';
+                let r = '【项目上下文】\n';
+                if (product) r += '--- PRODUCT.md ---\n' + product + '\n\n';
+                if (design) r += '--- DESIGN.md ---\n' + design + '\n';
+                return r;
+            }
+            case 'set_project_context': {
+                try {
+                    if (args.product_md !== undefined) saveProductMd(args.product_md);
+                    if (args.design_md !== undefined) saveDesignMd(args.design_md);
+                    updateCtxBadge();
+                    return '[OK] 项目上下文已保存（PRODUCT.md: ' + (args.product_md ? args.product_md.length + ' 字符' : '未更新') + ' / DESIGN.md: ' + (args.design_md ? args.design_md.length + ' 字符' : '未更新') + '）';
+                } catch(e) { return '[ERR] 保存失败: ' + e.message; }
             }
             case 'complete': return '[OK] 任务完成: ' + (args.summary || '无总结');
             case 'undo_edit': {
@@ -5835,7 +6744,7 @@ ${techSpec}
                         const openTags = (code.match(/<(?!\/)(?!!)(?!meta)(?!link)(?!br)(?!hr)(?!img)(?!input)(\w+)/g) || []).length;
                         const closeTags = (code.match(/<\/(\w+)>/g) || []).length;
                         if (openTags !== closeTags) issues.push('HTML 标签可能不匹配：开标签 ' + openTags + ' 个，闭标签 ' + closeTags + ' 个');
-                        if (code.includes('<script') && !code.includes('</script>')) issues.push('存在未闭合的 <script> 标签');
+                        if (code.includes('<script') && !code.includes('</scr' + 'ipt>')) issues.push('存在未闭合的 <script> 标签');
                         if (code.includes('<style') && !code.includes('</style>')) issues.push('存在未闭合的 <style> 标签');
                     }
                     // JS 函数完整性检查
@@ -5858,8 +6767,25 @@ ${techSpec}
                         if (/\beval\s*\(/.test(codeToCheck)) issues.push('使用了 eval()，存在安全风险');
                         if (/document\.write\s*\(/.test(codeToCheck)) issues.push('使用了 document.write()，可能影响页面加载');
                     }
-                    if (issues.length === 0) return '[OK] 代码安全检查通过，未发现明显问题';
-                    return '[WARN] 发现 ' + issues.length + ' 个潜在问题：\n' + issues.map((s, i) => (i + 1) + '. ' + s).join('\n');
+                    // 反模式检测（借鉴 Impeccable A+ 项目的确定性检测器，检测→教学绑定）
+                    let antipatternReport = '';
+                    if (typeof AntipatternDetector !== 'undefined') {
+                        const apIssues = AntipatternDetector.detect(code, currentLang);
+                        if (apIssues.length > 0) {
+                            antipatternReport = '\n\n【反模式检测·设计教导】\n' + AntipatternDetector.format(apIssues);
+                        }
+                    }
+                    // 汇总结果
+                    if (issues.length === 0 && !antipatternReport) {
+                        return '[OK] 代码安全检查通过，未发现明显问题，反模式检测未发现 AI 劣习';
+                    }
+                    let report = '';
+                    if (issues.length > 0) {
+                        report = '[WARN] 发现 ' + issues.length + ' 个安全问题：\n' + issues.map((s, i) => (i + 1) + '. ' + s).join('\n');
+                    } else {
+                        report = '[OK] 代码安全检查通过';
+                    }
+                    return report + antipatternReport;
                 } catch(e) { return '[ERR] 代码检查失败: ' + e.message; }
             }
             case 'get_console': {
@@ -5907,14 +6833,37 @@ ${techSpec}
             '你是 Werkstatt AI Agent — 专业的全栈前端开发助手，运行在实时预览编辑器中。\n\n' +
             '【ReAct 工作流】思考→行动（调用工具）→观察→循环→完成（调用 complete）\n\n' +
             '【任务规划】复杂任务先在 <thinking> 中制定步骤计划，再逐步执行。简单任务直接行动。\n\n' +
-            '【代码修改规范】通过 edit_code 工具用行号编辑（1-based）：replace/insert/delete。多处修改用 batch_edit 一次性完成。修改前先 analyze_code，每次改动 3-15 行，改后 preview_code 验证。可用 run_code_check 做安全检查，undo_edit 撤销上一步，format_code 格式化代码。\n\n' +
+            '【设计解读先行·Brief Inference】生成任何 UI 代码前，必须先在 <thinking> 中输出一行"设计解读"：声明页面类型（落地页/仪表盘/组件/编辑器）、目标受众、视觉风格方向（如"暗色工程感/亮色编辑级/极简留白"）、将采用的设计系统。先承诺方向再执行，禁止跳过需求理解直接套模板。\n\n' +
+            '【权威层级】优先级从高到低：①既有代码的设计系统（若用户代码已有明确配色/字体/间距，必须延续）> ②用户显式指令（用户说红色就是红色）> ③设计模板默认值。在既有代码上工作时默认"融入不突出"，不引入新的设计系统（已有4px圆角不要加8px）。\n\n' +
+            '【反AI味禁令·Anti-Slop】以下是AI生成界面的典型劣习，严禁出现：\n' +
+            '• 禁用 Inter/Roboto/Arial 作为主字体（用 Geist/Satoshi/Outfit/Cabinet Grotesk 或设计系统指定字体）\n' +
+            '• 禁用紫蓝渐变（purple/violet→blue gradient）作为背景或按钮，这是AI配色头号指纹\n' +
+            '• 禁用 em-dash（—）在标题/正文/按钮中泛滥，改用短横线或重构语句\n' +
+            '• 禁用廉价元标签（SECTION 01/QUESTION 05/ABOUT US 等大写编号眉标）\n' +
+            '• 禁用标题上方堆叠圆角方块图标容器（icon-tile-stack 特性卡模板）\n' +
+            '• 禁用卡片嵌套卡片（nested-cards）\n' +
+            '• 禁用 background-clip:text + 渐变做装饰性文字（gradient-text）\n' +
+            '• 禁用 bounce/elastic 缓动（过时俗气）\n' +
+            '• 禁用彩色背景上的灰色文字（gray-on-color，对比度不足）\n' +
+            '• 禁用 6 行标题墙（H1 必须用宽容器 max-w-5xl+，控制在 2-3 行内）\n' +
+            '• 禁用处处同一间距值（要有节奏：section 间距 64-96px，卡片内 24-32px）\n' +
+            '• 禁用纯黑 #000000（用 off-black/zinc-950/charcoal）\n' +
+            '• 禁用 prompt 语言泄漏到 UI（如"Experience the seamless integration"式空话）\n\n' +
+            '【质量底线·Always Avoid】以下是不可妥协的质量失败：\n' +
+            '• 文字在图片/背景上不可读（对比度破坏）\n' +
+            '• 交互元素无可见 focus 状态\n' +
+            '• 有合适 HTML 元素却用 div 堆砌（应用 nav/main/section/article/button）\n' +
+            '• 卡片滥用：若移除卡片样式不影响理解，就不该是卡片（默认去卡片化）\n\n' +
+            '【代码修改规范】通过 edit_code 工具用行号编辑（1-based）：replace/insert/delete。多处修改用 batch_edit 一次性完成。修改前先 analyze_code，每次改动 3-15 行，改后 preview_code 验证。可用 run_code_check 做安全检查（含反模式检测），undo_edit 撤销上一步，format_code 格式化代码。\n\n' +
             '【设计模板】' + dsNames + '\n可用 get_skill 工具按需获取详细规范。\n\n' +
             '【技术能力】GSAP 3.x 全套插件（预览已适配 CDN 镜像）；API 数据源（JSONPlaceholder/PokéAPI/Unsplash 等）；代码片段库；add_dependency 引入外部 CDN（首选 cdnjs）。\n\n' +
             '【深度思考】在 <thinking> 标签内分析：结构、视觉、交互、代码质量、可维护性，标签外给出修改方案。\n\n' +
-            '【自检】只改必要行？标签闭合？CSS 选择器误伤？JS 变量已声明？CDN 调用前判空？脚本加载顺序正确？\n\n' +
-            '【调试能力】get_console 获取预览控制台日志，run_code_check 检查代码安全，get_selection 获取选中文本。\n\n' +
-            '【效率优化】只读工具（analyze_code/get_selection/run_code_check/get_console/search_web/get_skill）可并行调用。写工具必须串行。\n\n' +
+            '【自检】只改必要行？标签闭合？CSS 选择器误伤？JS 变量已声明？CDN 调用前判空？脚本加载顺序正确？是否触犯反AI味禁令？对比度是否达标？\n\n' +
+            '【视觉验证·Visual Verification】完成 UI 修改后，必须调用 visual_verify 工具做闭环验证（它会自动检查：控制台错误、内容完整性、反模式、对比度WCAG AA、水平溢出、空元素、无障碍）。发现任何【】标记的问题必须立即用 edit_code 修复，修复后再次 visual_verify 确认通过。交付前所有自动化检查项必须 [OK] 或 [✓]，剩余 □ 项需在 <thinking> 中逐条确认。\n\n' +
+            '【调试能力】get_console 获取预览控制台日志，run_code_check 检查代码安全+反模式，get_selection 获取选中文本。\n\n' +
+            '【效率优化】只读工具（analyze_code/get_selection/run_code_check/get_console/search_web/get_skill/preview_code/visual_verify/get_project_context）可并行调用。写工具必须串行。\n\n' +
             imgCapabilityNote + '\n' +
+            buildContextPrompt() + '\n\n' +
             '\n需要最新信息用 search_web，需要图片用 generate_image，提到设计风格自动应用对应模板。';
 
         const messages = [
@@ -5945,7 +6894,7 @@ ${techSpec}
             try {
                 let payload;
                 if (toolsSupported) {
-                    payload = { model, messages, tools: AGENT_TOOLS, tool_choice: 'auto', stream: true };
+                    payload = { model, messages, tools: getAllAvailableTools(), tool_choice: 'auto', stream: true };
                 } else {
                     // Fallback: no tools, just regular chat with enhanced system prompt
                     payload = { model, messages, stream: true };
@@ -6123,7 +7072,7 @@ ${techSpec}
                 }
 
                 // Execute tool calls — parallel for read-only tools, serial for write tools
-                const READ_ONLY_TOOLS = new Set(['analyze_code', 'get_selection', 'run_code_check', 'get_console', 'search_web', 'get_skill', 'preview_code']);
+                const READ_ONLY_TOOLS = new Set(['analyze_code', 'get_selection', 'run_code_check', 'get_console', 'search_web', 'get_skill', 'preview_code', 'visual_verify', 'get_project_context']);
                 const toolCalls = msg.tool_calls;
                 // Group: if all are read-only, execute in parallel; otherwise serial
                 const allReadOnly = toolCalls.every(tc => READ_ONLY_TOOLS.has(tc.function?.name || ''));
@@ -6140,7 +7089,7 @@ ${techSpec}
                             return { tc, result: '[ERR] 参数解析失败' };
                         }
                         try {
-                            const result = await executeAgentTool(toolName, toolArgs);
+                            const result = await callToolUnified(toolName, toolArgs);
                             return { tc, result };
                         } catch(toolErr) {
                             return { tc, result: '[ERR] 工具异常: ' + toolErr.message };
@@ -6176,7 +7125,7 @@ ${techSpec}
                     const maxRetries = 2;
                     while (retryCount <= maxRetries) {
                         try {
-                            result = await executeAgentTool(toolName, toolArgs);
+                            result = await callToolUnified(toolName, toolArgs);
                             if (result && result.startsWith('[ERR]') && retryCount < maxRetries) {
                                 retryCount++;
                                 addChatMessage('assistant', '⚠ 工具执行失败，重试 ' + retryCount + '/' + maxRetries + '…', ICONS.warn);
