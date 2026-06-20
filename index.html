@@ -2575,7 +2575,7 @@ html, body {
 
     function loadAiEndpoint() { return DEFAULT_ENDPOINT; }
     function saveAiEndpoint(ep) { safeStorage.set(AI_ENDPOINT_STORAGE, ep); }
-    function loadAiKey() { return 'sk-mhcBQAj9tVbrJa79aKYT8AhTYCwW3kWWKfA3yvh4DqbxW2xz'; }
+    function loadAiKey() { return safeStorage.get(AI_KEY_STORAGE, ''); }
     function saveAiKey(k) { safeStorage.set(AI_KEY_STORAGE, k); updateAiStatus(); }
     function loadAiModel() { return safeStorage.get(AI_MODEL_STORAGE); }
     function saveAiModel(m) { safeStorage.set(AI_MODEL_STORAGE, m); }
