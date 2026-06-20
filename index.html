@@ -2372,6 +2372,9 @@ html, body {
     }
 
     const _isFileProtocol = location.protocol === 'file:';
+    if (_isFileProtocol) {
+        previewFrame.setAttribute('sandbox', 'allow-scripts allow-popups allow-same-origin');
+    }
 
     function injectPreviewCsp(html) {
         // file:// 下 CSP 与 srcdoc iframe 不兼容，跳过注入
