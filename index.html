@@ -5991,10 +5991,7 @@ ${techSpec}
     }
 
     function getBestChatModel() {
-        // Respect user's selection from the dropdown if available
-        const userSelected = aiModelSelect?.value;
-        if (userSelected) return userSelected;
-        if (!agentModelCache || !agentModelCache.chatModels.length) return 'gpt-4o';
+        if (!agentModelCache || !agentModelCache.chatModels.length) return aiModelSelect?.value || 'gpt-4o';
         return agentModelCache.chatModels[0].id;
     }
 
@@ -7069,8 +7066,12 @@ ${techSpec}
                 if (toolsSupported) {
                     payload = { model, messages, tools: getAllAvailableTools(), tool_choice: 'auto', stream: true };
                 } else {
-                    // Fallback: no tools, just regular chat with enhanced system prompt
-                    payload = { model, messages, stream: true };
+                    // Fallback: prompt-based tool calling — inject tool-call format into system prompt
+                    const toolList = AGENT_TOOLS.map(t => '- ' + t.function.name + '(' + Object.entries(t.function.parameters.properties || {}).map(([k,v]) => k + (t.function.parameters.required?.includes(k) ? '!' : '') + ':' + (v.type||'string')).join(', ') + ') — ' + t.function.description).join('\n');
+                    const fbPrompt = messages[0].content + '\n\n【降级模式·Prompt-Based Tool Calling】\n当前 API 不支持原生 function calling，请用以下文本格式调用工具：\n[TOOL: tool_name(arg1="value1", arg2="value2")]\n\n可用工具：\n' + toolList + '\n\n规则：\n• 每次回复可以在 <thinking> 中思考，然后在正文输出工具调用\n• 工具调用格式：[TOOL: tool_name(arg="value")]\n• 多个工具调用可以分行输出\n• 收到 [工具结果] 后继续下一步\n• 任务完成时调用 [TOOL: complete(summary="完成总结")]\n• 示例：[TOOL: analyze_code()] 或 [TOOL: generate_image(prompt="a red rose", size="1024x1024")]';
+                    const fbMessages = [...messages];
+                    fbMessages[0] = { role: 'system', content: fbPrompt };
+                    payload = { model, messages: fbMessages, stream: true };
                 }
                 const controller = new AbortController();
                 activeAbortController = controller;
@@ -7168,12 +7169,71 @@ ${techSpec}
                     }
                 }
 
-                // Fallback mode: no tool_calls from API, treat content as final answer
+                // Fallback mode: parse prompt-based tool calls from content
                 if (!toolsSupported) {
+                    const fallbackParsed = parseThinkingResponse(msg.content || '');
+                    if (fallbackParsed.thinking) {
+                        const thinkMsg = addChatMessage('assistant', '', ICONS.agent);
+                        addThinkingCard(thinkMsg, fallbackParsed.thinking, 0);
+                    }
+                    const contentText = fallbackParsed.answer || msg.content || '';
+                    // Parse [TOOL: name(arg="value", ...)] format
+                    const toolCallRe = /\[TOOL:\s*(\w+)\s*\(([^\)]*)\)\s*\]/g;
+                    const fallbackToolCalls = [];
+                    let ftcm;
+                    while ((ftcm = toolCallRe.exec(contentText)) !== null) {
+                        const tName = ftcm[1];
+                        const tArgsRaw = ftcm[2];
+                        const tArgs = {};
+                        // Parse arg="value" or arg='value' or arg=value pairs
+                        const argRe = /(\w+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^,\s]+))/g;
+                        let am;
+                        while ((am = argRe.exec(tArgsRaw)) !== null) {
+                            tArgs[am[1]] = am[2] || am[3] || am[4] || '';
+                        }
+                        fallbackToolCalls.push({ name: tName, args: tArgs });
+                    }
+                    if (fallbackToolCalls.length > 0) {
+                        // Execute tools and feed results back
+                        setAgentStatus('执行工具', '步骤 ' + totalTurns + ': ' + fallbackToolCalls.length + ' 个工具调用');
+                        addChatMessage('assistant', '步骤 ' + totalTurns + ': 调用 ' + fallbackToolCalls.map(t => t.name).join('、 '), ICONS.tool);
+                        // Add assistant message to history
+                        messages.push({ role: 'assistant', content: msg.content });
+                        const READ_ONLY_FB = new Set(['analyze_code', 'get_selection', 'run_code_check', 'get_console', 'search_web', 'get_skill', 'preview_code', 'visual_verify', 'get_project_context']);
+                        const allRO = fallbackToolCalls.every(t => READ_ONLY_FB.has(t.name));
+                        if (allRO && fallbackToolCalls.length > 1) {
+                            const results = await Promise.all(fallbackToolCalls.map(async tc => {
+                                try { const r = await callToolUnified(tc.name, tc.args); return { name: tc.name, result: r }; }
+                                catch(e) { return { name: tc.name, result: '[ERR] ' + e.message }; }
+                            }));
+                            for (const r of results) {
+                                addChatMessage('assistant', '→ ' + r.name + ': ' + (typeof r.result === 'string' ? r.result.slice(0, 100) : JSON.stringify(r.result).slice(0, 100)), ICONS.tool);
+                                messages.push({ role: 'user', content: '[工具结果] ' + r.name + ':\n' + r.result });
+                            }
+                        } else {
+                            for (const tc of fallbackToolCalls) {
+                                let toolResult;
+                                try { toolResult = await callToolUnified(tc.name, tc.args); }
+                                catch(e) { toolResult = '[ERR] ' + e.message; }
+                                addChatMessage('assistant', '→ ' + tc.name + ': ' + (typeof toolResult === 'string' ? toolResult.slice(0, 100) : JSON.stringify(toolResult).slice(0, 100)), ICONS.tool);
+                                messages.push({ role: 'user', content: '[工具结果] ' + tc.name + ':\n' + toolResult });
+                            }
+                        }
+                        // Check if AI called complete tool
+                        const hasComplete = fallbackToolCalls.some(t => t.name === 'complete');
+                        if (hasComplete) {
+                            setAgentStatus('完成', totalTurns + ' 步');
+                            const summary = fallbackToolCalls.find(t => t.name === 'complete')?.args?.summary || '任务完成';
+                            addChatMessage('assistant', summary, ICONS.check);
+                            return;
+                        }
+                        continue; // next loop iteration
+                    }
+                    // No tool calls found — treat as final answer
                     setAgentStatus('完成', totalTurns + ' 步');
-                    if (msg.content) {
-                        addChatMessage('assistant', msg.content);
-                        const parsed = parseThinkingResponse(msg.content);
+                    if (contentText) {
+                        const parsed = parseThinkingResponse(contentText);
+                        addChatMessage('assistant', parsed.answer || contentText);
                         const editBlocks = parseEditBlocks(parsed.answer);
                         if (editBlocks.length > 0) {
                             const result = applyEditBlocks(editBlocks);
