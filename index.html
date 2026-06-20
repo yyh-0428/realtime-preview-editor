@@ -2154,7 +2154,7 @@ html, body {
     }
 
     function wrapDefaultHtml(code, lang) {
-        if (lang === 'css') return getHtmlShell('', escapeHtml(code));
+        if (lang === 'css') return getHtmlShell('', code.replace(/<\/style>/gi, '<\\/style>'));
         if (lang === 'js') return getHtmlShell('', '').replace('<style>/* CSS */</style>', '<style>/* CSS */</style>\n<script>' + code.replace(/<\/script>/gi, '<\\/script>') + '<\/script>');
         return code;
     }
