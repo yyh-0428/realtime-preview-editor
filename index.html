@@ -7079,16 +7079,16 @@ ${techSpec}
                 });
                 if (!res.ok) {
                     const errText = await res.text();
-                    // Detect API that doesn't support tools (400/404 with tool-related error, or any 400/404 on first turn)
-                    const isToolError = (errText.includes('tool_choice') || errText.includes('tools') && (errText.includes('not support') || errText.includes('不支持')) || errText.includes('function calling') && errText.includes('not'));
-                    if (toolsSupported && (isToolError || (res.status === 404 && totalTurns <= 2))) {
+                    // Detect API that doesn't support tools (400/404/422 with tool-related error, or any 400/404/422 on first turn)
+                    const isToolError = (errText.includes('tool_choice') || errText.includes('tools') && (errText.includes('not support') || errText.includes('不支持') || errText.includes('deserialize')) || errText.includes('function calling') && errText.includes('not') || (res.status === 422 && errText.includes('deserialize')));
+                    if (toolsSupported && (isToolError || ((res.status === 404 || res.status === 422) && totalTurns <= 2))) {
                         toolsSupported = false;
                         totalTurns--; // retry this turn without tools
                         addChatMessage('assistant', '当前 API 不支持工具调用格式，已降级为智能对话模式', ICONS.info);
                         continue;
                     }
                     setAgentStatus('错误', 'API 返回 ' + res.status);
-                    addChatMessage('assistant', 'Agent 执行出错: HTTP ' + res.status + (errText ? ' — ' + errText.slice(0, 120) : ''), ICONS.error);
+                    addChatMessage('assistant', 'Agent 执行出错: HTTP ' + res.status + (errText ? ' — ' + errText.slice(0, 200) : ''), ICONS.error);
                     return;
                 }
                 // SSE streaming parse with non-SSE JSON fallback
