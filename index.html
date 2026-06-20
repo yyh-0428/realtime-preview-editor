@@ -5991,7 +5991,10 @@ ${techSpec}
     }
 
     function getBestChatModel() {
-        if (!agentModelCache || !agentModelCache.chatModels.length) return aiModelSelect?.value || 'gpt-4o';
+        // Respect user's selection from the dropdown if available
+        const userSelected = aiModelSelect?.value;
+        if (userSelected) return userSelected;
+        if (!agentModelCache || !agentModelCache.chatModels.length) return 'gpt-4o';
         return agentModelCache.chatModels[0].id;
     }
 
