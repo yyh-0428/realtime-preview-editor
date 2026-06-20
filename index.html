@@ -4373,14 +4373,14 @@ ${techSpec}
             for (const op of ops) {
                 const trimmed = op.trim();
                 if (!trimmed) continue;
-                const replaceMatch = trimmed.match(/^REPLACE\s+(\d+)(?:-(\d+))?\s*:\s*\n?([\s\S]*?)\s*END\s*$/);
+                const replaceMatch = trimmed.match(/^REPLACE\s+(\d+)(?:-(\d+))?\s*:\s*\n?([\s\S]*?)(?:\s*END\s*)?$/);
                 if (replaceMatch) {
                     const startLine = parseInt(replaceMatch[1], 10);
                     const endLine = replaceMatch[2] ? parseInt(replaceMatch[2], 10) : startLine;
                     blocks.push({ type: 'replace', startLine, endLine, content: replaceMatch[3].trim() });
                     continue;
                 }
-                const insertMatch = trimmed.match(/^INSERT\s+after\s+(\d+)\s*:\s*\n?([\s\S]*?)\s*END\s*$/);
+                const insertMatch = trimmed.match(/^INSERT\s+after\s+(\d+)\s*:\s*\n?([\s\S]*?)(?:\s*END\s*)?$/);
                 if (insertMatch) {
                     const afterLine = parseInt(insertMatch[1], 10);
                     blocks.push({ type: 'insert', afterLine, content: insertMatch[2].trim() });
@@ -4883,9 +4883,13 @@ ${techSpec}
                 }
                 return;
             }
-            const blockRe = new RegExp('```(?:' + cFence + '|html)?\\s*\\n?([\\s\\S]*?)```');
+            const blockRe = new RegExp('```(?:' + cFence + '|html|edit)?\\s*\\n?([\\s\\S]*?)```');
             const codeMatch = parsed.answer.match(blockRe);
-            const extractedCode = codeMatch ? codeMatch[1].trim() : parsed.answer.trim();
+            let extractedCode = codeMatch ? codeMatch[1].trim() : parsed.answer.trim();
+            // Strip edit-format markers if present (e.g. "REPLACE 1-1:\n")
+            extractedCode = extractedCode.replace(/^(?:REPLACE\s+\d+(?:-\d+)?|INSERT\s+after\s+\d+|DELETE\s+\d+(?:-\d+)?)\s*:?\s*\n?/, '').replace(/\s*END\s*$/, '').trim();
+            // Remove 【自检】 prefix line if present
+            extractedCode = extractedCode.replace(/^【自检】[^\n]*\n?/, '').trim();
             if (extractedCode) {
                 const beforeCode = getCode();
                 const safety = checkCodeSafety(beforeCode, extractedCode, 'full');
@@ -5524,9 +5528,13 @@ ${techSpec}
         if (editBlocks.length > 0) return { text: 'AI 建议了 ' + editBlocks.length + ' 处行号编辑', code: parsed.answer, thinking: parsed.thinking, mode: 'lineedit', editBlocks };
         const srBlocks = parseSearchReplaceBlocks(parsed.answer);
         if (srBlocks.length > 0) return { text: 'AI 建议了 ' + srBlocks.length + ' 处修改', code: parsed.answer, thinking: parsed.thinking, mode: 'searchreplace', srBlocks };
-        const blockRe = new RegExp('```(?:' + codeFence + '|html)?\\s*\\n?([\\s\\S]*?)```');
+        const blockRe = new RegExp('```(?:' + codeFence + '|html|edit)?\\s*\\n?([\\s\\S]*?)```');
         const codeMatch = parsed.answer.match(blockRe);
-        const extractedCode = codeMatch ? codeMatch[1].trim() : parsed.answer.trim();
+        let extractedCode = codeMatch ? codeMatch[1].trim() : parsed.answer.trim();
+        // Strip edit-format markers if present (e.g. "REPLACE 1-1:\n")
+        extractedCode = extractedCode.replace(/^(?:REPLACE\s+\d+(?:-\d+)?|INSERT\s+after\s+\d+|DELETE\s+\d+(?:-\d+)?)\s*:?\s*\n?/, '').replace(/\s*END\s*$/, '').trim();
+        // Remove 【自检】 prefix line if present
+        extractedCode = extractedCode.replace(/^【自检】[^\n]*\n?/, '').trim();
         if (!extractedCode) return { text: '未能从 AI 响应中提取到代码，请重试。', code: null, thinking: parsed.thinking, mode: null };
         const diffSummary = buildDiffSummary(currentCode, extractedCode);
         return { text: diffSummary || '代码已修改', code: extractedCode, thinking: parsed.thinking, mode: 'full' };
