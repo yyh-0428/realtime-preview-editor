@@ -4910,7 +4910,7 @@ ${techSpec}
             const hasThinking = !!parsed.thinking;
             if (parsed.answer.includes('NOT_CODE_TASK')) {
                 if (targetMsgEl) setAssistantMsgText(targetMsgEl, '请描述代码修改需求。');
-                return;
+                return { retry: false };
             }
             const editBlocks = parseEditBlocks(parsed.answer);
             if (editBlocks.length > 0) {
@@ -4921,6 +4921,11 @@ ${techSpec}
                     const safety = checkCodeSafety(beforeCode, afterCode, 'searchreplace');
                     if (!safety.safe) {
                         setCode(beforeCode);
+                        if (safety.severity === 'error') {
+                            if (targetMsgEl) setAssistantMsgText(targetMsgEl, '⚠ ' + safety.message + '，正在自动修复…');
+                            addDiffCard(targetMsgEl, afterCode, false);
+                            return { retry: true, errorMessage: safety.message, badCode: afterCode };
+                        }
                         if (targetMsgEl) setAssistantMsgText(targetMsgEl, safety.message);
                         addDiffCard(targetMsgEl, afterCode, false);
                         showToast('修改已撤销：' + safety.message, 'warning');
@@ -4936,7 +4941,7 @@ ${techSpec}
                     if (targetMsgEl) setAssistantMsgText(targetMsgEl, '行号编辑应用失败，请手动应用。');
                     addDiffCard(targetMsgEl, parsed.answer, false);
                 }
-                return;
+                return { retry: false };
             }
             const srBlocks = parseSearchReplaceBlocks(parsed.answer);
             if (srBlocks.length > 0) {
@@ -4947,6 +4952,11 @@ ${techSpec}
                     const safety = checkCodeSafety(beforeCode, afterCode, 'searchreplace');
                     if (!safety.safe) {
                         setCode(beforeCode);
+                        if (safety.severity === 'error') {
+                            if (targetMsgEl) setAssistantMsgText(targetMsgEl, '⚠ ' + safety.message + '，正在自动修复…');
+                            addDiffCard(targetMsgEl, afterCode, false);
+                            return { retry: true, errorMessage: safety.message, badCode: afterCode };
+                        }
                         if (targetMsgEl) setAssistantMsgText(targetMsgEl, safety.message);
                         addDiffCard(targetMsgEl, afterCode, false);
                         showToast('修改已撤销：' + safety.message, 'warning');
@@ -4961,7 +4971,7 @@ ${techSpec}
                     if (targetMsgEl) setAssistantMsgText(targetMsgEl, '自动应用失败：' + (result.reason === 'search_not_found' ? '找不到匹配文本' : result.reason === 'ambiguous_search' ? '匹配文本不唯一' : '未知错误') + '，请手动应用。');
                     addDiffCard(targetMsgEl, parsed.answer, false);
                 }
-                return;
+                return { retry: false };
             }
             const blockRe = new RegExp('```(?:' + cFence + '|html|edit)?\\s*\\n?([\\s\\S]*?)```');
             const codeMatch = parsed.answer.match(blockRe);
@@ -4974,6 +4984,12 @@ ${techSpec}
                 const beforeCode = getCode();
                 const safety = checkCodeSafety(beforeCode, extractedCode, 'full');
                 if (!safety.safe) {
+                    if (safety.severity === 'error') {
+                        // Structural integrity failure — request auto-retry
+                        if (targetMsgEl) setAssistantMsgText(targetMsgEl, '⚠ ' + safety.message + '，正在自动修复…');
+                        addDiffCard(targetMsgEl, extractedCode, false);
+                        return { retry: true, errorMessage: safety.message, badCode: extractedCode };
+                    }
                     if (targetMsgEl) setAssistantMsgText(targetMsgEl, safety.message);
                     addDiffCard(targetMsgEl, extractedCode, false);
                     showToast(safety.message, 'warning');
@@ -4990,6 +5006,7 @@ ${techSpec}
             } else if (!hasThinking) {
                 if (targetMsgEl) setAssistantMsgText(targetMsgEl, parsed.answer.trim() || '完成');
             }
+            return { retry: false };
         }
 
         try {
@@ -5043,7 +5060,41 @@ ${techSpec}
                 }
             }
 
-            await handleParsedResponse(parsed, assistantMsgEl, codeFence);
+            // Auto-retry loop for structural integrity failures
+            let retryCount = 0;
+            const MAX_AUTO_RETRY = 2;
+            let lastErrorInfo = null;
+            let currentInstruction = instruction;
+            let currentFullText = fullText;
+            let currentCodeFence = codeFence;
+            while (true) {
+                const currentParsed = (retryCount === 0) ? parsed : parseThinkingResponse(currentFullText);
+                const hpr = await handleParsedResponse(currentParsed, assistantMsgEl, currentCodeFence);
+                if (hpr && hpr.retry && retryCount < MAX_AUTO_RETRY) {
+                    retryCount++;
+                    lastErrorInfo = hpr;
+                    // Build fix instruction with error context
+                    const fixInstruction = currentInstruction + '\n\n【自动修复第' + retryCount + '次】上次生成的代码存在结构错误：' + hpr.errorMessage + '\n请重新生成完整的代码，确保所有HTML标签正确闭合，<style>和<script>标签必须配对。直接输出完整代码，不要使用编辑块格式。';
+                    currentInstruction = fixInstruction;
+                    showToast('检测到代码结构错误，自动重试第 ' + retryCount + '/' + MAX_AUTO_RETRY + ' 次…', 'info');
+                    try {
+                        const retryResult = await callAiApiStream(apiKey, aiModelSelect.value, fixInstruction, false, onStreamChunk);
+                        currentFullText = retryResult.fullText;
+                        currentCodeFence = retryResult.codeFence;
+                        if (retryResult.aborted) break;
+                    } catch (retryErr) {
+                        if (retryErr.name === 'AbortError') break;
+                        console.error('Auto-retry failed:', retryErr);
+                        break;
+                    }
+                } else {
+                    if (hpr && hpr.retry && retryCount >= MAX_AUTO_RETRY) {
+                        showToast('自动修复失败 ' + MAX_AUTO_RETRY + ' 次，请手动检查代码或重新描述需求', 'warning');
+                        if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, '⚠ 自动修复失败：' + (hpr.errorMessage || '代码结构错误') + '。请手动修改或重新描述需求。');
+                    }
+                    break;
+                }
+            }
 
             // Save to multi-turn conversation history
             aiChatHistory.push({ role: 'user', content: instruction });
@@ -5500,7 +5551,38 @@ ${techSpec}
                         try { textSpan.innerHTML = marked.parse(parsed.answer); } catch (e) { textSpan.textContent = parsed.answer; }
                     }
                 }
-                await handleParsedResponse(parsed, assistantMsgEl, codeFence);
+                // Auto-retry loop for structural integrity failures
+                let retryCount2 = 0;
+                const MAX_AUTO_RETRY_2 = 2;
+                let currentInstr2 = specializedInstruction;
+                let currentFullText2 = fullText;
+                let currentCodeFence2 = codeFence;
+                while (true) {
+                    const currentParsed2 = (retryCount2 === 0) ? parsed : parseThinkingResponse(currentFullText2);
+                    const hpr2 = await handleParsedResponse(currentParsed2, assistantMsgEl, currentCodeFence2);
+                    if (hpr2 && hpr2.retry && retryCount2 < MAX_AUTO_RETRY_2) {
+                        retryCount2++;
+                        const fixInstr2 = currentInstr2 + '\n\n【自动修复第' + retryCount2 + '次】上次生成的代码存在结构错误：' + hpr2.errorMessage + '\n请重新生成完整的代码，确保所有HTML标签正确闭合，<style>和<script>标签必须配对。直接输出完整代码，不要使用编辑块格式。';
+                        currentInstr2 = fixInstr2;
+                        showToast('检测到代码结构错误，自动重试第 ' + retryCount2 + '/' + MAX_AUTO_RETRY_2 + ' 次…', 'info');
+                        try {
+                            const retryResult2 = await callAiApiStream(apiKey, aiModelSelect.value, fixInstr2, false, onStreamChunk);
+                            currentFullText2 = retryResult2.fullText;
+                            currentCodeFence2 = retryResult2.codeFence;
+                            if (retryResult2.aborted) break;
+                        } catch (retryErr2) {
+                            if (retryErr2.name === 'AbortError') break;
+                            console.error('Auto-retry failed:', retryErr2);
+                            break;
+                        }
+                    } else {
+                        if (hpr2 && hpr2.retry && retryCount2 >= MAX_AUTO_RETRY_2) {
+                            showToast('自动修复失败 ' + MAX_AUTO_RETRY_2 + ' 次，请手动检查代码或重新描述需求', 'warning');
+                            if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, '⚠ 自动修复失败：' + (hpr2.errorMessage || '代码结构错误') + '。请手动修改或重新描述需求。');
+                        }
+                        break;
+                    }
+                }
                 // Save to history
                 aiChatHistory.push({ role: 'user', content: cmd + ' ' + extra });
                 aiChatHistory.push({ role: 'assistant', thinking: parsed.thinking || '', answer: parsed.answer || '', content: fullText });
