@@ -4546,7 +4546,87 @@ ${techSpec}
             }
         }
 
+        // Rule 4: HTML structural integrity check (applies to both full replace and from-scratch)
+        if (currentLang === 'html' || mode === 'full') {
+            const structuralIssues = checkHtmlStructuralIntegrity(modifiedCode);
+            if (structuralIssues) return structuralIssues;
+        }
+
         return { safe: true };
+    }
+
+    // Check HTML structural integrity: tag closure, <style>/<script> pairing, required tags
+    function checkHtmlStructuralIntegrity(code) {
+        // Only check if it looks like a full HTML document
+        if (!/<html[\s>]/i.test(code) && !/<!DOCTYPE/i.test(code)) return null;
+
+        const voidElements = new Set(['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr']);
+        const tagStack = [];
+        const tagRe = /<\/(\w+)[^>]*>|<(\w+)([^>]*)\/?>/g;
+        let m;
+        const mismatches = [];
+
+        while ((m = tagRe.exec(code)) !== null) {
+            if (m[1]) {
+                // Closing tag
+                const tag = m[1].toLowerCase();
+                if (voidElements.has(tag)) continue;
+                const last = tagStack[tagStack.length - 1];
+                if (last && last.tag === tag) {
+                    tagStack.pop();
+                } else {
+                    mismatches.push('未匹配的闭合标签 </' + tag + '>');
+                    if (last) mismatches.push('（期望 </' + last.tag + '>）');
+                }
+            } else if (m[2]) {
+                // Opening tag
+                const tag = m[2].toLowerCase();
+                if (voidElements.has(tag)) continue;
+                const selfClosing = /\/$/.test(m[3]) || tag === 'script' && /<script[^>]*src=/.test(m[0]);
+                if (!selfClosing) {
+                    tagStack.push({ tag, line: code.substring(0, m.index).split('\n').length });
+                }
+            }
+        }
+
+        // Unclosed tags
+        if (tagStack.length > 0) {
+            const top = tagStack[tagStack.length - 1];
+            const tagNames = tagStack.map(t => t.tag).join(', ');
+            // Be lenient for common partial-edit scenarios, but strict for full documents
+            if (tagStack.some(t => ['html', 'head', 'body', 'style', 'script'].includes(t.tag))) {
+                return {
+                    safe: false,
+                    reason: 'unclosed_tags',
+                    message: 'HTML 结构不完整：以下标签未闭合 → ' + tagNames + '。可能 AI 输出被截断或格式错误，请重试或手动检查。',
+                    severity: 'error'
+                };
+            }
+        }
+
+        // Check <style> and <script> tag pairing specifically
+        const styleOpen = (code.match(/<style[\s>]/gi) || []).length;
+        const styleClose = (code.match(/<\/style>/gi) || []).length;
+        if (styleOpen !== styleClose) {
+            return {
+                safe: false,
+                reason: 'style_tag_mismatch',
+                message: '<style> 标签不配对（开 ' + styleOpen + ' 个，闭 ' + styleClose + ' 个），CSS 会泄漏到页面文本中。',
+                severity: 'error'
+            };
+        }
+        const scriptOpen = (code.match(/<script[\s>]/gi) || []).length;
+        const scriptClose = (code.match(/<\/script>/gi) || []).length;
+        if (scriptOpen !== scriptClose) {
+            return {
+                safe: false,
+                reason: 'script_tag_mismatch',
+                message: '<script> 标签不配对（开 ' + scriptOpen + ' 个，闭 ' + scriptClose + ' 个），JS 可能无法正常执行。',
+                severity: 'error'
+            };
+        }
+
+        return null;
     }
 
     function renderThinkingSteps(thinkingText) {
