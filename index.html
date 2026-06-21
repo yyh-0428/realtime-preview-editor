@@ -4273,6 +4273,14 @@ ${techSpec}
         return { thinking, answer };
     }
 
+    // 若文本为合法 JSON 则返回格式化后的字符串，否则返回 null
+    function formatJsonIfApplicable(text) {
+        const trimmed = text.trim();
+        if (!(trimmed.startsWith('{') || trimmed.startsWith('['))) return null;
+        try { return JSON.stringify(JSON.parse(trimmed), null, 2); }
+        catch (e) { return null; }
+    }
+
     // ==================== Incremental Edit Engine ====================
     function parseSearchReplaceBlocks(text) {
         const blocks = [];
@@ -4768,6 +4776,24 @@ ${techSpec}
         if (span) span.textContent = text;
         else msgEl.textContent = text;
     }
+    function renderAssistantText(textSpan, text) {
+        if (!textSpan) return;
+        const json = formatJsonIfApplicable(text);
+        if (json) {
+            textSpan.innerHTML = '';
+            const pre = document.createElement('pre');
+            const code = document.createElement('code');
+            code.className = 'language-json';
+            code.textContent = json;
+            pre.appendChild(code);
+            textSpan.appendChild(pre);
+            if (typeof hljs !== 'undefined') {
+                try { hljs.highlightElement(code); } catch (e) {}
+            }
+        } else {
+            try { textSpan.innerHTML = marked.parse(text); } catch (e) { textSpan.textContent = text; }
+        }
+    }
     function addTypingIndicator() { const ind = document.createElement('div'); ind.className = 'ai-typing-indicator'; ind.id = 'aiTypingIndicator'; for (let i = 0; i < 3; i++) { const d = document.createElement('span'); d.className = 'ai-typing-dot'; ind.appendChild(d); } aiChatArea.appendChild(ind); aiChatArea.scrollTop = aiChatArea.scrollHeight; }
     function removeTypingIndicator() { const ind = document.getElementById('aiTypingIndicator'); if (ind) ind.remove(); }
     function hideAiEmptyState() { const e = document.getElementById('aiEmptyState'); if (e) e.style.display = 'none'; }
@@ -5073,7 +5099,7 @@ ${techSpec}
             if (assistantMsgEl && parsed.answer && !parsed.answer.includes('NOT_CODE_TASK') && !parsed.answer.match(/(REPLACE|INSERT|DELETE|```)/)) {
                 const textSpan = assistantMsgEl.querySelector('.msg-text');
                 if (textSpan && typeof marked !== 'undefined') {
-                    try { textSpan.innerHTML = marked.parse(parsed.answer); } catch (e) { textSpan.textContent = parsed.answer; }
+                    renderAssistantText(textSpan, parsed.answer);
                 }
             }
 
@@ -5565,7 +5591,7 @@ ${techSpec}
                 if (assistantMsgEl && parsed.answer && !parsed.answer.includes('NOT_CODE_TASK') && !parsed.answer.match(/(REPLACE|INSERT|DELETE|```)/)) {
                     const textSpan = assistantMsgEl.querySelector('.msg-text');
                     if (textSpan && typeof marked !== 'undefined') {
-                        try { textSpan.innerHTML = marked.parse(parsed.answer); } catch (e) { textSpan.textContent = parsed.answer; }
+                        renderAssistantText(textSpan, parsed.answer);
                     }
                 }
                 // Auto-retry loop for structural integrity failures
