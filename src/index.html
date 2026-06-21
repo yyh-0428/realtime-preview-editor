@@ -2109,7 +2109,7 @@ html, body {
 
     function looksLikeHtml(code) {
         const trimmed = (code || '').trim().toLowerCase();
-        return trimmed.startsWith('<!doctype') || trimmed.startsWith('<html') || trimmed.startsWith('<body') || /^<\w+/.test(trimmed);
+        return trimmed.startsWith('<!doctype') || trimmed.startsWith('<html') || trimmed.startsWith('<body') || trimmed.startsWith('<!--') || /^<\w+/.test(trimmed);
     }
 
     function getStorageKey(lang) { return CODE_PREFIX + lang; }
@@ -2246,10 +2246,9 @@ html, body {
         const reader = new FileReader();
         reader.onload = async () => {
             const code = reader.result;
-            switchLanguage(lang, file.name);
             setCode(code);
             editor.refresh();
-            safeStorage.set(getStorageKey(lang), code);
+            switchLanguage(lang, file.name);
             showStatus('编译中…', 'syncing');
             try {
                 const compiled = await compileCode(lang);
@@ -2278,10 +2277,10 @@ html, body {
         // 注入控制台日志捕获脚本，让父页面能读取 iframe 内的 console.log/error/warn
         const captureScript = '<script>(function(){window.__consoleLogs=[];["log","warn","error","info"].forEach(function(level){var orig=console[level];console[level]=function(){var args=Array.prototype.slice.call(arguments);var text=args.map(function(a){try{return typeof a==="object"?JSON.stringify(a):String(a)}catch(e){return String(a)}}).join(" ");window.__consoleLogs.push({level:level,text:text});if(window.__consoleLogs.length>200)window.__consoleLogs.shift();orig.apply(console,arguments)}});window.addEventListener("error",function(e){window.__consoleLogs.push({level:"error",text:(e.message||"Error")+(e.filename?" ("+e.filename.split("/").pop()+":"+e.lineno+")":"")})});window.addEventListener("unhandledrejection",function(e){window.__consoleLogs.push({level:"error",text:"Unhandled Promise Rejection: "+(e.reason&&e.reason.message?e.reason.message:String(e.reason))})})})();<\/script>';
         // 注入到 <head> 最前面（在其他脚本之前执行）
-        if (html.includes('<head')) {
-            return html.replace(/(<head[^>]*>)/i, '$1\n' + captureScript);
-        } else if (html.includes('<html')) {
-            return html.replace(/(<html[^>]*>)/i, '$1\n<head>\n' + captureScript + '\n</head>');
+        if (/<head\b/i.test(html)) {
+            return html.replace(/(<head(\s[^>]*)?>)/i, '$1\n' + captureScript);
+        } else if (/<html\b/i.test(html)) {
+            return html.replace(/(<html(\s[^>]*)?>)/i, '$1\n<head>\n' + captureScript + '\n</head>');
         } else {
             return '<!DOCTYPE html>\n<html>\n<head>\n' + captureScript + '\n</head>\n<body>\n' + html + '\n</body>\n</html>';
         }
@@ -2410,10 +2409,10 @@ html, body {
         if (_isFileProtocol) return html;
         // 预览 iframe CSP：允许外部 CDN 资源加载（用户代码常用），仅阻止 object/embed
         const csp = '<meta http-equiv="Content-Security-Policy" content="default-src * data: blob:; script-src * \'unsafe-inline\' \'unsafe-eval\' data: blob:; style-src * \'unsafe-inline\' data: blob:; img-src * data: blob:; font-src * data: blob:; connect-src *; object-src \'none\'; base-uri *; form-action *;">';
-        if (html.includes('<head')) {
-            return html.replace(/(<head[^>]*>)/i, '$1\n' + csp);
-        } else if (html.includes('<html')) {
-            return html.replace(/(<html[^>]*>)/i, '$1\n<head>\n' + csp + '\n</head>');
+        if (/<head\b/i.test(html)) {
+            return html.replace(/(<head(\s[^>]*)?>)/i, '$1\n' + csp);
+        } else if (/<html\b/i.test(html)) {
+            return html.replace(/(<html(\s[^>]*)?>)/i, '$1\n<head>\n' + csp + '\n</head>');
         } else {
             return '<!DOCTYPE html>\n<html>\n<head>\n' + csp + '\n</head>\n<body>\n' + html + '\n</body>\n</html>';
         }
