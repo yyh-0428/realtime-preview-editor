@@ -4268,7 +4268,7 @@ ${techSpec}
     function parseThinkingResponse(aiText) {
         const thinkingMatch = aiText.match(/<thinking>([\s\S]*?)<\/thinking>/);
         const thinking = thinkingMatch ? thinkingMatch[1].trim() : null;
-        let answer = aiText.replace(/<thinking>[\s\S]*?<\/thinking>/, '').trim();
+        let answer = aiText.replace(/<thinking>[\s\S]*?<\/thinking>/g, '').trim();
         // Also remove any markdown code fence indicators from the answer for display
         return { thinking, answer };
     }
@@ -4492,6 +4492,23 @@ ${techSpec}
     }
 
     // ==================== Code Safety Check ====================
+    // 共享：从 JS 代码中提取函数名集合（用于函数完整性检查）
+    function extractFnNames(code) {
+        const names = new Set();
+        let m;
+        const re1 = /function\s+(\w+)\s*\(/g;
+        while ((m = re1.exec(code)) !== null) names.add(m[1]);
+        const re2 = /(?:const|let|var)\s+(\w+)\s*=\s*(?:\([^)]*\)\s*=>|function)/g;
+        while ((m = re2.exec(code)) !== null) names.add(m[1]);
+        const re3 = /(?:^|\n)\s+(?:async\s+)?(\w+)\s*\([^)]*\)\s*\{/g;
+        while ((m = re3.exec(code)) !== null) {
+            if (!['if', 'for', 'while', 'switch', 'catch', 'constructor'].includes(m[1])) {
+                names.add(m[1]);
+            }
+        }
+        return names;
+    }
+
     function checkCodeSafety(originalCode, modifiedCode, mode) {
         const origLen = originalCode.length;
         const modLen = modifiedCode.length;
@@ -4532,21 +4549,6 @@ ${techSpec}
 
         // Rule 3: For JS, check if major function definitions are preserved
         if (currentLang === 'javascript') {
-            function extractFnNames(code) {
-                const names = new Set();
-                let m;
-                const re1 = /function\s+(\w+)\s*\(/g;
-                while ((m = re1.exec(code)) !== null) names.add(m[1]);
-                const re2 = /(?:const|let|var)\s+(\w+)\s*=\s*(?:\([^)]*\)\s*=>|function)/g;
-                while ((m = re2.exec(code)) !== null) names.add(m[1]);
-                const re3 = /(?:^|\n)\s+(?:async\s+)?(\w+)\s*\([^)]*\)\s*\{/g;
-                while ((m = re3.exec(code)) !== null) {
-                    if (!['if', 'for', 'while', 'switch', 'catch', 'constructor'].includes(m[1])) {
-                        names.add(m[1]);
-                    }
-                }
-                return names;
-            }
             const origFns = extractFnNames(originalCode);
             const modFns = extractFnNames(modifiedCode);
             let missingFns = 0;
@@ -6346,10 +6348,10 @@ ${techSpec}
     let ctxModalEl = null, ctxProductInput = null, ctxDesignInput = null, ctxBadgeEl = null;
     let ctxPanelProduct = null, ctxPanelDesign = null, ctxStatusEl = null;
 
-    function loadProductMd() { try { return localStorage.getItem(CTX_PRODUCT_KEY) || ''; } catch(e) { return ''; } }
-    function loadDesignMd() { try { return localStorage.getItem(CTX_DESIGN_KEY) || ''; } catch(e) { return ''; } }
-    function saveProductMd(v) { try { localStorage.setItem(CTX_PRODUCT_KEY, v || ''); } catch(e) {} }
-    function saveDesignMd(v) { try { localStorage.setItem(CTX_DESIGN_KEY, v || ''); } catch(e) {} }
+    function loadProductMd() { return safeStorage.get(CTX_PRODUCT_KEY, ''); }
+    function loadDesignMd() { return safeStorage.get(CTX_DESIGN_KEY, ''); }
+    function saveProductMd(v) { safeStorage.set(CTX_PRODUCT_KEY, v || ''); }
+    function saveDesignMd(v) { safeStorage.set(CTX_DESIGN_KEY, v || ''); }
     function hasProjectContext() { return !!(loadProductMd().trim() || loadDesignMd().trim()); }
 
     // 构建注入系统提示词的上下文片段
@@ -6936,14 +6938,6 @@ ${techSpec}
                     // JS 函数完整性检查
                     if (currentLang === 'javascript' || currentLang === 'html') {
                         const codeToCheck = currentLang === 'html' ? code.replace(/<script[^>]*>([\s\S]*?)<\/script>/g, (m, c) => c) : code;
-                        function extractFnNames(checkCode) {
-                            const names = new Set(); let m;
-                            const re1 = /function\s+(\w+)\s*\(/g;
-                            while ((m = re1.exec(checkCode)) !== null) names.add(m[1]);
-                            const re2 = /(?:const|let|var)\s+(\w+)\s*=\s*(?:\([^)]*\)\s*=>|function)/g;
-                            while ((m = re2.exec(checkCode)) !== null) names.add(m[1]);
-                            return names;
-                        }
                         const fns = extractFnNames(codeToCheck);
                         const braceBalance = (codeToCheck.match(/\{/g) || []).length - (codeToCheck.match(/\}/g) || []).length;
                         if (braceBalance !== 0) issues.push('JS 大括号不匹配：差 ' + braceBalance + ' 个');
@@ -7068,7 +7062,7 @@ ${techSpec}
             if (!isAiGenerating) {
                 setAgentStatus('已停止', '用户中断');
                 addChatMessage('assistant', 'Agent 执行已被用户中断', ICONS.warn);
-                throw new Error('AbortError');
+                throw new DOMException('Aborted', 'AbortError');
             }
             totalTurns++;
             // Safety: after 50 turns, ask if we should continue (not hard stop)
@@ -7355,7 +7349,7 @@ ${techSpec}
                     if (!isAiGenerating) {
                         setAgentStatus('已停止', '用户中断');
                         addChatMessage('assistant', 'Agent 执行已被用户中断', ICONS.warn);
-                        throw new Error('AbortError');
+                        throw new DOMException('Aborted', 'AbortError');
                     }
                     let toolName, toolArgs;
                     try {
@@ -7395,7 +7389,7 @@ ${techSpec}
                     }
                 }
             } catch(e) {
-                if (e.name === 'AbortError' || e.message === 'AbortError') {
+                if (e && e.name === 'AbortError') {
                     setAgentStatus('已停止', '用户中断');
                     throw e; // Let outer handler deal with it
                 }
