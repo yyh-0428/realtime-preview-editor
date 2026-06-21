@@ -2474,11 +2474,13 @@ html, body {
         showToast('代码已清空', 'success');
     }
 
+    let copyResetTimer = null;
     function onCopySuccess() {
         showToast('代码已复制到剪贴板', 'success');
-        const orig = btnCopy.innerHTML;
+        if (copyResetTimer) { clearTimeout(copyResetTimer); }
+        else { btnCopy.dataset.origHtml = btnCopy.innerHTML; }
         btnCopy.innerHTML = '<svg class="btn-icon"><use href="#icon-check"/></svg> 已复制';
-        setTimeout(() => { btnCopy.innerHTML = orig; }, 1800);
+        copyResetTimer = setTimeout(() => { btnCopy.innerHTML = btnCopy.dataset.origHtml || btnCopy.innerHTML; copyResetTimer = null; }, 1800);
     }
 
     async function copyCode() {
@@ -4747,7 +4749,6 @@ ${techSpec}
         const timeoutId = setTimeout(() => controller.abort(), 30000);
         try {
             const res = await fetch(modelsUrl, { headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' }, signal: controller.signal });
-            clearTimeout(timeoutId);
             if (!res.ok) { let em = '获取失败'; if (res.status === 401) em = 'API Key 无效'; else if (res.status === 404) em = '不支持 /models'; throw new Error(em); }
             const data = await res.json(); const models = data.data || [];
             if (models.length === 0) { showToast('未获取到模型', ''); return; }
@@ -4808,7 +4809,10 @@ ${techSpec}
                 try { hljs.highlightElement(code); } catch (e) {}
             }
         } else {
-            try { textSpan.innerHTML = marked.parse(text); } catch (e) { textSpan.textContent = text; }
+            try {
+                const html = marked.parse(text);
+                textSpan.innerHTML = (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize(html) : html;
+            } catch (e) { textSpan.textContent = text; }
         }
     }
     function addTypingIndicator() { const ind = document.createElement('div'); ind.className = 'ai-typing-indicator'; ind.id = 'aiTypingIndicator'; for (let i = 0; i < 3; i++) { const d = document.createElement('span'); d.className = 'ai-typing-dot'; ind.appendChild(d); } aiChatArea.appendChild(ind); aiChatArea.scrollTop = aiChatArea.scrollHeight; }
@@ -6215,7 +6219,7 @@ ${techSpec}
             // 外部工具走 MCPBridge
             try {
                 const result = await MCPBridge.callTool(toolName, args || {});
-                if (result && result.content && result.content[0]) return result.content[0].text;
+                if (result && result.content && result.content[0]) return result.content[0].text || JSON.stringify(result.content[0]);
                 return JSON.stringify(result);
             } catch(e) { return '[ERR] MCP工具调用失败: ' + e.message; }
         }
@@ -6581,12 +6585,12 @@ ${techSpec}
                 const blocks = [];
                 let lineDelta = 0;
                 if (args.operation === 'replace') {
-                    blocks.push({ type: 'replace', startLine: args.startLine, endLine: args.endLine || args.startLine, content: args.code });
+                    blocks.push({ type: 'replace', startLine: args.startLine, endLine: args.endLine || args.startLine, content: args.code || '' });
                     const oldLineCount = (args.endLine || args.startLine) - args.startLine + 1;
                     const newLineCount = (args.code || '').split('\n').length;
                     lineDelta = newLineCount - oldLineCount;
                 } else if (args.operation === 'insert') {
-                    blocks.push({ type: 'insert', afterLine: args.afterLine, content: args.code });
+                    blocks.push({ type: 'insert', afterLine: args.afterLine, content: args.code || '' });
                     lineDelta = (args.code || '').split('\n').length;
                 } else if (args.operation === 'delete') {
                     blocks.push({ type: 'delete', startLine: args.startLine, endLine: args.endLine || args.startLine });
@@ -6618,7 +6622,6 @@ ${techSpec}
                     const searchTimeout = setTimeout(() => searchCtrl.abort(), 10000);
                     try {
                         const res = await fetch(proxyUrl, { signal: searchCtrl.signal });
-                        clearTimeout(searchTimeout);
                         if (res.ok) {
                             const text = await res.text();
                             // Try JSON parse first
@@ -6639,8 +6642,10 @@ ${techSpec}
                                 return snippets.slice(0, 3).map(s => s.replace(/<[^>]+>/g, '').trim()).join('\n');
                             }
                             return '搜索完成，未获取到详细结果。请基于已有知识回答。';
+                        } else {
+                            await res.text().catch(() => {});
                         }
-                    } catch(e) { clearTimeout(searchTimeout); }
+                    } catch(e) { /* timeout or network error */ } finally { clearTimeout(searchTimeout); }
                     return '[WARN] 搜索暂时不可用。请基于已有知识回答。';
                 } catch(e) { return '[WARN] 搜索暂时不可用。请基于已有知识回答。'; }
             }
@@ -6658,17 +6663,24 @@ ${techSpec}
                     let lastErr = '';
                     for (const imgUrl of possibleUrls) {
                         try {
-                            const res = await fetch(imgUrl, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + loadAiKey() },
-                                body: JSON.stringify({ model: imgModel, prompt: args.prompt, n: 1, size: args.size || '1024x1024' })
-                            });
-                            if (res.ok) {
-                                const data = await res.json();
-                                const url = data.data?.[0]?.url || data.url || data.data?.[0]?.b64_json;
-                                if (url) return '[OK] 图片已生成，URL: ' + url + '\n请在 img 标签中使用此 URL。';
-                            }
-                            lastErr = 'HTTP ' + res.status;
+                            const imgCtrl = new AbortController();
+                            const imgTimeout = setTimeout(() => imgCtrl.abort(), 60000);
+                            try {
+                                const res = await fetch(imgUrl, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + loadAiKey() },
+                                    body: JSON.stringify({ model: imgModel, prompt: args.prompt, n: 1, size: args.size || '1024x1024' }),
+                                    signal: imgCtrl.signal
+                                });
+                                if (res.ok) {
+                                    const data = await res.json();
+                                    const url = data.data?.[0]?.url || data.url || data.data?.[0]?.b64_json;
+                                    if (url) return '[OK] 图片已生成，URL: ' + url + '\n请在 img 标签中使用此 URL。';
+                                } else {
+                                    lastErr = 'HTTP ' + res.status;
+                                    await res.text().catch(() => {});
+                                }
+                            } finally { clearTimeout(imgTimeout); }
                         } catch(e) { lastErr = e.message; }
                     }
                     return '[ERR] 图片生成失败: ' + lastErr;
@@ -6897,7 +6909,7 @@ ${techSpec}
                     if (args.product_md !== undefined) saveProductMd(args.product_md);
                     if (args.design_md !== undefined) saveDesignMd(args.design_md);
                     updateCtxBadge();
-                    return '[OK] 项目上下文已保存（PRODUCT.md: ' + (args.product_md ? args.product_md.length + ' 字符' : '未更新') + ' / DESIGN.md: ' + (args.design_md ? args.design_md.length + ' 字符' : '未更新') + '）';
+                    return '[OK] 项目上下文已保存（PRODUCT.md: ' + (args.product_md !== undefined ? args.product_md.length + ' 字符' : '未更新') + ' / DESIGN.md: ' + (args.design_md !== undefined ? args.design_md.length + ' 字符' : '未更新') + '）';
                 } catch(e) { return '[ERR] 保存失败: ' + e.message; }
             }
             case 'complete': return '[OK] 任务完成: ' + (args.summary || '无总结');
@@ -7020,7 +7032,7 @@ ${techSpec}
             }
             case 'get_console': {
                 try {
-                    const maxLines = args.lines || 20;
+                    const maxLines = (typeof args.lines === 'number') ? args.lines : 20;
                     const iframe = document.getElementById('previewFrame');
                     if (!iframe || !iframe.contentWindow) return '[INFO] 预览未运行';
                     // Try to read console logs from iframe
@@ -7121,6 +7133,7 @@ ${techSpec}
                 addChatMessage('assistant', 'Agent 已执行超过 50 步，任务可能较复杂。如需继续，请重新描述需求。', ICONS.info);
                 break;
             }
+            let agentTimeoutId = null;
             try {
                 let payload;
                 if (toolsSupported) {
@@ -7135,6 +7148,7 @@ ${techSpec}
                 }
                 const controller = new AbortController();
                 activeAbortController = controller;
+                agentTimeoutId = setTimeout(() => controller.abort(), 300000);
                 const res = await fetch(chatUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
@@ -7160,7 +7174,9 @@ ${techSpec}
                 const ct = res.headers.get('Content-Type') || '';
                 if (!ct.includes('text/event-stream')) {
                     // Non-SSE JSON fallback
-                    const data = await res.json();
+                    let data;
+                    try { data = await res.json(); }
+                    catch (e) { const text = await res.text().catch(() => ''); throw new Error('API 返回非 JSON 响应: ' + text.slice(0, 200)); }
                     const choice = data.choices?.[0]; if (!choice) break;
                     msg = choice.message;
                     if (!msg.tool_calls) msg.tool_calls = [];
@@ -7200,12 +7216,13 @@ ${techSpec}
                                     }
                                     if (delta.tool_calls) {
                                         for (const tc of delta.tool_calls) {
-                                            if (!msg.tool_calls[tc.index]) {
-                                                msg.tool_calls[tc.index] = { id: tc.id || '', function: { name: '', arguments: '' } };
+                                            const idx = (typeof tc.index === 'number') ? tc.index : 0;
+                                            if (!msg.tool_calls[idx]) {
+                                                msg.tool_calls[idx] = { id: tc.id || '', function: { name: '', arguments: '' } };
                                             }
-                                            if (tc.id) msg.tool_calls[tc.index].id = tc.id;
-                                            if (tc.function?.name) msg.tool_calls[tc.index].function.name += tc.function.name;
-                                            if (tc.function?.arguments) msg.tool_calls[tc.index].function.arguments += tc.function.arguments;
+                                            if (tc.id) msg.tool_calls[idx].id = tc.id;
+                                            if (tc.function?.name) msg.tool_calls[idx].function.name += tc.function.name;
+                                            if (tc.function?.arguments) msg.tool_calls[idx].function.arguments += tc.function.arguments;
                                         }
                                     }
                                 } catch (e) { /* ignore malformed lines */ }
@@ -7446,8 +7463,12 @@ ${techSpec}
                 setAgentStatus('错误', e.message);
                 addChatMessage('assistant', 'Agent 执行出错: ' + e.message, ICONS.error);
                 return;
+            } finally {
+                clearTimeout(agentTimeoutId);
+                activeAbortController = null;
             }
         }
+        activeAbortController = null;
         setAgentStatus('完成', totalTurns + ' 步');
         addChatMessage('assistant', 'Agent 执行结束（共 ' + totalTurns + ' 步）', ICONS.check);
     }
