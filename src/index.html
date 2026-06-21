@@ -2107,6 +2107,11 @@ html, body {
         return map[ext] || 'html';
     }
 
+    function looksLikeHtml(code) {
+        const trimmed = (code || '').trim().toLowerCase();
+        return trimmed.startsWith('<!doctype') || trimmed.startsWith('<html') || trimmed.startsWith('<body') || /^<\w+/.test(trimmed);
+    }
+
     function getStorageKey(lang) { return CODE_PREFIX + lang; }
 
     function switchLanguage(lang, fileName) {
@@ -2304,7 +2309,15 @@ html, body {
             const saved = safeStorage.get(LANG_STORAGE);
             if (saved && LANG_CONFIG[saved]) {
                 const code = safeStorage.get(getStorageKey(saved));
-                if (code && code.trim()) { switchLanguage(saved); setCode(code); return true; }
+                if (code && code.trim()) {
+                    // 若保存的语言不是 HTML，但内容明显是 HTML，则自动切回 HTML 模式预览
+                    if (saved !== 'html' && looksLikeHtml(code)) {
+                        switchLanguage('html');
+                        setCode(code);
+                        return true;
+                    }
+                    switchLanguage(saved); setCode(code); return true;
+                }
             }
         } catch (e) { console.error(e); }
         return false;
@@ -2352,6 +2365,10 @@ html, body {
         if (!langRestored) {
             const savedCode = loadEditorCode();
             setCode(savedCode || defaultCode);
+        }
+        // 兜底：若编辑器内容明显是 HTML，但当前语言不是 HTML，自动切回 HTML 模式
+        if (currentLang !== 'html' && looksLikeHtml(getCode())) {
+            switchLanguage('html');
         }
         updatePreview();
         showStatus('就绪', 'ready');
@@ -2415,7 +2432,8 @@ html, body {
     (function patchUpdatePreview() {
         const _orig = updatePreview;
         updatePreview = async function() {
-            if (currentLang === 'html' || !LANG_CONFIG[currentLang]) { _orig(); return; }
+            // 即使 currentLang 不是 html，只要编辑器内容明显是 HTML 就按原始 HTML 预览
+            if (currentLang === 'html' || !LANG_CONFIG[currentLang] || looksLikeHtml(getCode())) { _orig(); return; }
             try {
                 const compiled = await compileCode(currentLang);
                 updatePreviewWith(compiled);
