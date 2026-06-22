@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+
+# IDE
+.codebuddy/
+.workbuddy/
+.vscode/
+.idea/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Build output
+dist/
+build/
+
+# Temporary
+*.tmp
+*.bak
+*.zip
