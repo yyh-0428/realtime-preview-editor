@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script>/* CSP only for http/https, skip for file:// */if(location.protocol==='http:'||location.protocol==='https:'){document.write('<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\' https://cdnjs.cloudflare.com https://unpkg.com \'unsafe-inline\'; style-src \'self\' https://fonts.googleapis.com https://cdnjs.cloudflare.com \'unsafe-inline\'; font-src \'self\' https://fonts.gstatic.com; img-src \'self\' data: blob:; connect-src *;">');}</script>
+<script>/* CSP only for http/https, skip for file:// */if(location.protocol==='http:'||location.protocol==='https:'){document.write('<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\' https://cdnjs.cloudflare.com https://unpkg.com https://cdn.jsdelivr.net \'unsafe-inline\'; style-src \'self\' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net \'unsafe-inline\'; font-src \'self\' https://fonts.gstatic.com; img-src \'self\' data: blob:; connect-src *;">');}</script>
 <title>Werkstatt — 实时预览编辑器</title>
 
 <!-- Fonts: DM Sans (UI) + JetBrains Mono (code) -->
@@ -13,7 +13,6 @@
 
 <!-- CodeMirror 5 -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
 
 <style>
@@ -669,6 +668,15 @@ html, body {
 
 /* Design System Selector */
 .ai-design-row { justify-content: space-between; align-items: center; }
+
+/* Three-knob design control system */
+.ai-knobs-row { gap: var(--space-2); padding: var(--space-1) 0; }
+.knob-label { display: flex; align-items: center; gap: var(--space-half); font-size: var(--font-size-caption); color: var(--text-tertiary); flex: 1; min-width: 0; }
+.knob-name { white-space: nowrap; flex-shrink: 0; }
+.knob-slider { flex: 1; min-width: 0; height: 4px; -webkit-appearance: none; appearance: none; background: var(--bg-surface-raised); border-radius: 2px; outline: none; cursor: pointer; }
+.knob-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--bg-surface); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.knob-slider::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--bg-surface); }
+.knob-value { font-size: var(--font-size-caption); font-weight: var(--font-weight-semibold); color: var(--accent); min-width: 16px; text-align: center; flex-shrink: 0; font-variant-numeric: tabular-nums; }
 .ai-design-select {
   background: var(--bg-input); border: 1px solid var(--border-default);
   border-radius: var(--radius-xs); padding: var(--space-1) var(--space-1);
@@ -1185,46 +1193,224 @@ html, body {
 .CodeMirror-vscrollbar::-webkit-scrollbar { display: none; }
 
 /* ============================================================
-   RESPONSIVE
+   RESPONSIVE — Mobile-first enhancements
    ============================================================ */
-@media (max-width: 768px) {
-  .workspace { flex-direction: column; }
-  .side-panel {
-    width: 100%; height: 0;
-    border-right: none; border-bottom: 1px solid var(--border-subtle);
-    transition: height var(--duration-slow) var(--ease-out-expo);
-  }
-  .side-panel.mobile-open { height: 320px; opacity: 1; }
-  .side-panel.collapsed { width: 100%; height: 0; opacity: 0; }
 
+/* ── Mobile Bottom Navigation Bar ── */
+.mobile-nav-bar {
+  display: none;
+  flex-shrink: 0;
+  background: var(--bg-toolbar);
+  border-top: 1px solid var(--border-default);
+  padding: var(--space-1) var(--space-3);
+  gap: var(--space-1);
+  z-index: 25;
+  align-items: center;
+  justify-content: center;
+}
+.mobile-nav-btn {
+  flex: 1;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: none; background: transparent;
+  color: var(--text-tertiary);
+  font-family: var(--font-ui); font-size: var(--font-size-ui);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out-quart);
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-nav-btn:hover { color: var(--text-secondary); background: var(--bg-surface-raised); }
+.mobile-nav-btn.active { color: var(--accent); background: var(--accent-subtle); }
+.mobile-nav-btn .btn-icon { width: var(--icon-md); height: var(--icon-md); }
+
+/* ── Side-panel overlay backdrop (mobile) ── */
+.side-panel-backdrop {
+  display: none;
+  position: absolute; inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 15;
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-out-quart);
+  pointer-events: none;
+}
+.side-panel-backdrop.active { opacity: 1; pointer-events: auto; }
+
+@media (max-width: 768px) {
+  /* ── App Shell: stack toolbar + workspace + bottom nav ── */
+  .app-container { flex-direction: column; }
+
+  /* ── Toolbar: simplified, single-row ── */
+  .toolbar {
+    padding: var(--space-1) var(--space-2);
+    gap: var(--space-1);
+    min-height: 48px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .toolbar::-webkit-scrollbar { display: none; }
+  .toolbar-left { gap: var(--space-1); flex-shrink: 0; }
+  .toolbar-actions { gap: var(--space-half); flex-shrink: 0; flex-wrap: nowrap; }
+
+  /* Hide non-essential toolbar items on mobile */
+  .brand-mark { display: none; }
+  .toolbar-title { font-size: var(--font-size-body); }
+  .toolbar-sep { display: none; }
+  .toolbar-status { display: none; }
+  .theme-picker { display: none; }
+
+  /* Compact buttons */
+  .btn {
+    padding: var(--space-2) var(--space-2);
+    font-size: var(--font-size-caption);
+    gap: var(--space-half);
+    min-height: 36px;
+    min-width: 36px;
+  }
+  .panel-toggle {
+    min-width: 36px; min-height: 36px;
+    padding: var(--space-1) var(--space-2);
+  }
+  .panel-toggle .btn-icon { width: var(--icon-md); height: var(--icon-md); }
+
+  /* Hide text labels on some action buttons, keep icon-only */
+  #btnClear, #btnCopy, #btnDownload, #btnImport {
+    font-size: 0; gap: 0; padding: var(--space-2); min-width: 36px; justify-content: center;
+  }
+  #btnClear .btn-icon, #btnCopy .btn-icon, #btnDownload .btn-icon, #btnImport .btn-icon {
+    width: var(--icon-md); height: var(--icon-md); opacity: 1;
+  }
+  #btnRefresh { font-size: 0; gap: 0; padding: var(--space-2); min-width: 36px; justify-content: center; }
+  #btnRefresh .btn-icon { width: var(--icon-md); height: var(--icon-md); opacity: 1; }
+  #btnFormat { font-size: var(--font-size-caption); padding: var(--space-2) var(--space-2); }
+
+  /* ── Workspace: column layout ── */
+  .workspace { flex-direction: column; position: relative; }
+
+  /* ── Side Panel: overlay drawer ── */
+  .side-panel {
+    position: absolute; top: 0; left: 0; bottom: 0;
+    width: 85vw !important; max-width: 340px;
+    height: 100% !important;
+    border-right: 1px solid var(--border-default);
+    border-bottom: none;
+    z-index: 20;
+    transform: translateX(-105%);
+    opacity: 1;
+    transition: transform var(--duration-slow) var(--ease-out-expo);
+    box-shadow: var(--shadow-lg);
+    background: var(--bg-surface);
+    display: flex !important; /* override side-hidden display:none on mobile */
+  }
+  .side-panel.mobile-open {
+    transform: translateX(0);
+    height: 100% !important;
+  }
+  .side-panel.collapsed {
+    transform: translateX(-105%);
+    opacity: 1;
+    pointer-events: none;
+    width: 85vw; max-width: 340px;
+  }
+  /* Override display:none from side-hidden on mobile — use overlay instead */
+  .workspace.side-hidden .side-panel { display: flex !important; }
+  .side-panel-backdrop { display: block; }
+
+  /* ── Main Content: vertical stack ── */
   .main-content { flex-direction: column; }
 
-  .editor-panel { flex-basis: auto; height: 50%; flex-shrink: 0; }
-  .preview-panel { flex-basis: auto; height: 50%; }
+  /* ── Editor / Preview: vertical split, full-height toggle via mobile nav ── */
+  .editor-panel {
+    flex-basis: auto; height: 60%; flex-shrink: 0;
+    transition: height var(--duration-normal) var(--ease-out-quart);
+  }
+  .preview-panel {
+    flex-basis: auto; height: 40%;
+    transition: height var(--duration-normal) var(--ease-out-quart);
+  }
 
-  .resizer { width: 100%; height: var(--resizer-size); cursor: row-resize; }
+  /* When editor is "maximized" via mobile nav */
+  .workspace.editor-focused .editor-panel { height: 100%; flex-shrink: 1; }
+  .workspace.editor-focused .preview-panel { height: 0; overflow: hidden; }
+  .workspace.editor-focused .resizer { display: none; }
+
+  /* When preview is "maximized" via mobile nav */
+  .workspace.preview-focused .editor-panel { height: 0; overflow: hidden; }
+  .workspace.preview-focused .preview-panel { height: 100%; flex-shrink: 1; }
+  .workspace.preview-focused .resizer { display: none; }
+
+  /* ── Resizer: horizontal bar ── */
+  .resizer { width: 100%; height: var(--resizer-size); cursor: row-resize; flex-shrink: 0; }
   .resizer-left { display: none; }
   .resizer::before { left: 0; right: 0; top: 1.5px; bottom: 1.5px; }
-  .resizer::after { left: 0; right: 0; top: -6px; bottom: -6px; }
+  .resizer::after { left: 0; right: 0; top: -10px; bottom: -10px; }
   .drag-overlay { cursor: row-resize; }
 
-  .toolbar { padding: var(--space-1) var(--space-2); gap: var(--space-1); min-height: 40px; }
-  .toolbar-title { font-size: var(--font-size-body); }
-  .btn { padding: var(--space-1) var(--space-2); font-size: var(--font-size-caption); gap: var(--space-half); }
-  .editor-panel-header, .preview-panel-header { padding: var(--space-1) var(--space-2); font-size: var(--font-size-caption); }
-  .theme-dot { width: var(--space-4); height: var(--space-4); min-width: var(--space-4); min-height: var(--space-4); }
+  /* ── Panel headers ── */
+  .editor-panel-header, .preview-panel-header {
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--font-size-caption);
+    min-height: 36px;
+  }
+
+  /* ── Mobile bottom nav: show ── */
+  .mobile-nav-bar { display: flex; }
+
+  /* ── Modal: full-width on small screens ── */
+  .modal-box {
+    min-width: auto; width: calc(100vw - var(--space-8));
+    padding: var(--space-4);
+    gap: var(--space-3);
+  }
+  .modal-actions { flex-direction: column; }
+  .modal-actions .btn { width: 100%; justify-content: center; min-height: 44px; }
+
+  /* ── Toast: stay within viewport ── */
+  .toast { max-width: 90vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ── AI Panel: compact ── */
+  .ai-config-bar { padding: var(--space-1); gap: var(--space-half); }
+  .ai-config-row { flex-wrap: wrap; gap: var(--space-half); }
+  .ai-input-bar { padding: var(--space-1); gap: var(--space-half); }
+  .ai-chat-input { font-size: var(--font-size-body); min-height: 40px; }
+  .ai-chat-input::placeholder { font-size: var(--font-size-body); }
+
+  /* ── Snippets: larger touch targets ── */
+  .snippet-item { padding: var(--space-3) var(--space-2); }
+  .snippet-delete { padding: var(--space-2); min-width: 36px; min-height: 36px; }
+  .btn-icon-only { min-width: 36px; min-height: 36px; }
+
+  /* ── Panel tabs ── */
+  .panel-tab { padding: var(--space-2) var(--space-2); font-size: var(--font-size-body); }
+
+  /* ── Preview fullscreen button ── */
+  .preview-fullscreen-btn { width: 36px; height: 36px; }
 }
 
+/* ── Landscape phone ── */
 @media (max-height: 500px) and (orientation: landscape) {
   .workspace { flex-direction: row; }
-  .side-panel { width: 0; height: auto; }
-  .side-panel.mobile-open { width: var(--panel-side-width); height: auto; }
+  .side-panel {
+    position: absolute; top: 0; left: 0; bottom: 0;
+    width: 0 !important; height: auto !important;
+    transform: translateX(-105%);
+  }
+  .side-panel.mobile-open { width: 320px !important; transform: translateX(0); }
   .main-content { flex-direction: row; }
-  .editor-panel { flex-basis: 50%; height: auto; }
-  .preview-panel { flex-basis: 50%; height: auto; }
+  .editor-panel { flex-basis: 50%; height: auto !important; }
+  .preview-panel { flex-basis: 50%; height: auto !important; }
   .resizer { width: var(--resizer-size); height: 100%; cursor: col-resize; }
   .resizer::before { left: 1.5px; right: 1.5px; top: 0; bottom: 0; }
   .toolbar { min-height: 36px; padding: var(--space-1) var(--space-2); }
+  .mobile-nav-bar { display: none; }
+  .workspace.editor-focused .editor-panel,
+  .workspace.preview-focused .preview-panel { flex-basis: 100% !important; }
+  .workspace.editor-focused .preview-panel,
+  .workspace.preview-focused .editor-panel { flex-basis: 0 !important; overflow: hidden; }
 }
 
 /* ============================================================
@@ -1272,6 +1458,7 @@ html, body {
     <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
         <symbol id="icon-workbench" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="10" rx="1.5"/><line x1="7" y1="18" x2="6" y2="22"/><line x1="17" y1="18" x2="18" y2="22"/><path d="M8 8V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/></symbol>
         <symbol id="icon-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></symbol>
+        <symbol id="icon-package" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 9.4l-9-5.19"></path><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></symbol>
         <symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></symbol>
         <symbol id="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></symbol>
         <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></symbol>
@@ -1355,11 +1542,16 @@ html, body {
 
         <!-- Workspace -->
         <div class="workspace">
+            <!-- Side-panel overlay backdrop (mobile) -->
+            <div class="side-panel-backdrop" id="sidePanelBackdrop"></div>
             <!-- Side Panel -->
             <aside class="side-panel snippets-panel" id="sidePanel">
                 <div class="panel-tabs">
                     <button class="panel-tab active" data-panel="snippets" aria-label="代码片段">
                         <svg class="btn-icon"><use href="#icon-book"></use></svg> 片段
+                    </button>
+                    <button class="panel-tab" data-panel="cdn" aria-label="CDN 库">
+                        <svg class="btn-icon"><use href="#icon-package"></use></svg> CDN
                     </button>
                     <button class="panel-tab" data-panel="ai" aria-label="AI 助手">
                         <svg class="btn-icon"><use href="#icon-sparkle"></use></svg> AI
@@ -1379,6 +1571,23 @@ html, body {
                         <button class="btn btn-accent" id="btnSaveSnippet" style="width:100%;justify-content:center;">
                             <svg class="btn-icon"><use href="#icon-plus"></use></svg> 保存当前代码
                         </button>
+                    </div>
+                </div>
+                <!-- CDN Library Browser -->
+                <div class="panel-content" id="panelCdn">
+                    <div class="snippets-header">
+                        <span>CDN 库管理</span>
+                        <button class="btn-icon-only" id="btnCloseCdn" aria-label="折叠面板" title="折叠面板">
+                            <svg><use href="#icon-close"></use></svg>
+                        </button>
+                    </div>
+                    <div style="padding:var(--space-2); border-bottom:1px solid var(--border-subtle);">
+                        <input type="text" class="ai-input" id="cdnSearchInput" placeholder="搜索库名（如 react, three.js...）" style="width:100%;margin-bottom:var(--space-2);">
+                        <div id="cdnSearchResults" style="display:none;"></div>
+                        <div id="cdnPresetsView">
+                            <div style="font-size:var(--font-size-caption);color:var(--text-tertiary);margin-bottom:var(--space-1);">一键添加常用库</div>
+                            <div id="cdnPresetList"></div>
+                        </div>
                     </div>
                 </div>
                 <!-- AI Panel -->
@@ -1445,6 +1654,23 @@ html, body {
                                 <span id="ctxBadge">CTX</span>
                             </button>
                         </div>
+                        <div class="ai-config-row ai-knobs-row">
+                            <label class="knob-label" title="设计多样性：1=完美对称，10=艺术混乱">
+                                <span class="knob-name">多样性</span>
+                                <input type="range" class="knob-slider" id="knobVariance" min="1" max="10" value="8">
+                                <span class="knob-value" id="knobVarianceVal">8</span>
+                            </label>
+                            <label class="knob-label" title="动效强度：1=静态，10=电影级">
+                                <span class="knob-name">动效</span>
+                                <input type="range" class="knob-slider" id="knobMotion" min="1" max="10" value="6">
+                                <span class="knob-value" id="knobMotionVal">6</span>
+                            </label>
+                            <label class="knob-label" title="视觉密度：1=美术馆空灵，10=驾驶舱密集">
+                                <span class="knob-name">密度</span>
+                                <input type="range" class="knob-slider" id="knobDensity" min="1" max="10" value="4">
+                                <span class="knob-value" id="knobDensityVal">4</span>
+                            </label>
+                        </div>
                     </div>
                     <div class="agent-status-bar" id="agentStatusBar">
                         <span class="agent-dot"></span>
@@ -1507,6 +1733,19 @@ html, body {
                 </section>
             </main>
         </div>
+
+        <!-- Mobile Bottom Navigation Bar -->
+        <nav class="mobile-nav-bar" id="mobileNavBar">
+            <button class="mobile-nav-btn active" data-view="editor" aria-label="编辑器">
+                <svg class="btn-icon"><use href="#icon-code-brackets"/></svg> 编辑
+            </button>
+            <button class="mobile-nav-btn" data-view="split" aria-label="分屏">
+                <svg class="btn-icon"><use href="#icon-layout-sidebar"/></svg> 分屏
+            </button>
+            <button class="mobile-nav-btn" data-view="preview" aria-label="预览">
+                <svg class="btn-icon"><use href="#icon-screen"/></svg> 预览
+            </button>
+        </nav>
     </div>
 
     <div class="drag-overlay" id="dragOverlay"></div>
@@ -1871,6 +2110,8 @@ html, body {
     }
 
     function applyRatio() {
+        // Skip ratio application when mobile nav is focused on a single panel
+        if (workspace.classList.contains('editor-focused') || workspace.classList.contains('preview-focused')) return;
         const direction = getLayoutDirection();
         if (direction === 'horizontal') {
             editorPanel.style.flexBasis = `${editorRatio * 100}%`;
@@ -2287,11 +2528,25 @@ html, body {
     }
 
     function updatePreviewIframe(html) {
-        // CDN 镜像重写：墙内替换 cdnjs 为 bootcdn 镜像
+        // CDN 镜像重写：cdnjs → bootcdn（墙内加速）
         if (/cdnjs\.cloudflare\.com/.test(html)) {
             html = html.replace(/https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\//g, 'https://cdn.bootcdn.net/ajax/libs/');
         }
-        // 注入控制台捕获脚本
+        // CDN health fallback: inject error listener for failed CDN scripts
+        const cdnFallbackScript = '<script>(function(){document.addEventListener("error",function(e){var t=e.target;if(t&&t.tagName==="SCRIPT"&&/cdnjs\\.cloudflare\\.com/.test(t.src||"")){var n=document.createElement("script");n.src=t.src.replace("cdnjs.cloudflare.com/ajax/libs","cdn.jsdelivr.net/npm");document.head.appendChild(n);}},true);})();<\/script>';
+
+        // Console hook: intercept console.log/warn/error/info into __consoleLogs array
+        const consoleHookScript = '<script>(function(){var L=[];var F=function(lvl){return function(){var a=Array.prototype.slice.call(arguments);var t=a.map(function(x){try{return typeof x==="object"?JSON.stringify(x):String(x)}catch(e){return String(x)}}).join(" ");L.push({level:lvl,text:t,ts:Date.now()});if(L.length>100)L.shift();window.__consoleLogs=L;if(window.parent&&window.parent!==window){try{window.parent.postMessage({type:"preview-console",level:lvl,text:t},"*")}catch(e){}}}};var orig={log:console.log,warn:console.warn,error:console.error,info:console.info};console.log=F("log");console.warn=F("warn");console.error=F("error");console.info=F("info");window.addEventListener("error",function(e){L.push({level:"error",text:(e.message||"Unknown error")+(e.filename?" ("+e.filename.split("/").pop()+":"+e.lineno+")":""),ts:Date.now()});window.__consoleLogs=L})})();<\/script>';
+
+        // Inject console hook + CDN fallback into <head> or at the beginning
+        if (/<head[^>]*>/i.test(html)) {
+            html = html.replace(/<head[^>]*>/i, m => m + '\n' + consoleHookScript + '\n' + cdnFallbackScript);
+        } else if (/<html[^>]*>/i.test(html)) {
+            html = html.replace(/<html[^>]*>/i, m => m + '\n<head>' + consoleHookScript + '\n' + cdnFallbackScript + '</head>');
+        } else {
+            html = consoleHookScript + '\n' + cdnFallbackScript + '\n' + html;
+        }
+        // 注入控制台捕获脚本（与上方 console hook 互补，捕获 srcdoc 内日志）
         html = injectConsoleCapture(html);
         // 统一使用 srcdoc 渲染（file:// 下已移除 sandbox，srcdoc 继承父页面 origin）
         if (_isFileProtocol) {
@@ -2376,6 +2631,7 @@ html, body {
         initMcpUI();              // 初始化 MCP 管理面板 UI（按钮/模态框/事件）
         initCtxUI();              // 初始化项目上下文 UI（PRODUCT.md / DESIGN.md）
         loadExternalDesignSystems(); // 加载外部 DESIGN.md 格式设计系统（数据外置）
+        initCdnPanel();           // 初始化 CDN 资源面板（搜索 4600+ 库一键插入）
         editor.refresh();
         editor.focus();
     }
@@ -2644,6 +2900,32 @@ html, body {
         const states = loadPanelStates();
         states[key] = !isVisible;
         savePanelStates(states);
+
+        // Mobile: toggle side panel as overlay drawer
+        if (key === 'side' && window.matchMedia('(max-width: 768px)').matches) {
+            const backdrop = document.getElementById('sidePanelBackdrop');
+            if (!isVisible) {
+                snippetsPanel.classList.add('mobile-open');
+                if (backdrop) backdrop.classList.add('active');
+            } else {
+                snippetsPanel.classList.remove('mobile-open');
+                if (backdrop) backdrop.classList.remove('active');
+            }
+        }
+
+        // Mobile: when toggling editor/preview visibility, reset focused mode to split
+        if ((key === 'editor' || key === 'preview') && window.matchMedia('(max-width: 768px)').matches) {
+            workspace.classList.remove('editor-focused', 'preview-focused');
+            const mobileNavBtns = document.querySelectorAll('#mobileNavBar .mobile-nav-btn');
+            mobileNavBtns.forEach(b => b.classList.remove('active'));
+            const splitBtn = document.querySelector('#mobileNavBar .mobile-nav-btn[data-view="split"]');
+            if (splitBtn) splitBtn.classList.add('active');
+            // Reset inline heights so split ratio works
+            editorPanel.style.height = '';
+            previewPanel.style.height = '';
+            if (!isVisible) applyRatio();
+        }
+
         setTimeout(() => editor.refresh(), 100);
     }
 
@@ -2722,6 +3004,7 @@ html, body {
     const AI_DEEP_THINKING_STORAGE = 'editor_ai_deep_thinking';
     const AI_ENDPOINT_STORAGE = 'editor_ai_endpoint'; const AI_MODELS_CACHE = 'editor_ai_models_cache';
     const AI_DESIGN_SYSTEM_STORAGE = 'editor_ai_design_system';
+    const AI_KNOBS_STORAGE = 'editor_ai_knobs';
     const DEFAULT_ENDPOINT = 'https://apihub.agnes-ai.com/v1';
 
     function loadAiEndpoint() { return DEFAULT_ENDPOINT; }
@@ -2732,6 +3015,18 @@ html, body {
     function saveAiModel(m) { safeStorage.set(AI_MODEL_STORAGE, m); }
     function loadDesignSystem() { return safeStorage.get(AI_DESIGN_SYSTEM_STORAGE, 'default'); }
     function saveDesignSystem(ds) { safeStorage.set(AI_DESIGN_SYSTEM_STORAGE, ds); }
+
+    // Three-knob design control system (from taste-skill)
+    const KNOB_DEFAULTS = { variance: 8, motion: 6, density: 4 };
+    function loadKnobs() { return Object.assign({}, KNOB_DEFAULTS, safeStorage.json(AI_KNOBS_STORAGE) || {}); }
+    function saveKnobs(k) { safeStorage.setJson(AI_KNOBS_STORAGE, k); }
+    function getKnobsPrompt() {
+        const k = loadKnobs();
+        const varianceDesc = k.variance <= 3 ? '高度对称、经典网格布局' : k.variance <= 6 ? '适度不对称、有节奏的布局' : k.variance <= 8 ? '大胆不对称、破网格元素、重叠构图' : '艺术混乱、极端非对称、有意打破规则';
+        const motionDesc = k.motion <= 3 ? '极简动效、仅 hover 微交互' : k.motion <= 6 ? '适度动效、staggered 入场+滚动触发' : k.motion <= 8 ? '丰富动效、多元素编排+视差+GSAP timeline' : '电影级动效、shader/canvas/物理动画+全页编排';
+        const densityDesc = k.density <= 3 ? '美术馆式空灵、大量负空间、单列居中' : k.density <= 6 ? '舒适密度、标准卡片+网格' : k.density <= 8 ? '高密度、多列+紧凑间距+信息密集' : '驾驶舱式极致密集、仪表盘风格+数据密集';
+        return '\\n【设计三旋钮 — 当前设定】\\nDESIGN_VARIANCE: ' + k.variance + '/10 (' + varianceDesc + ')\\nMOTION_INTENSITY: ' + k.motion + '/10 (' + motionDesc + ')\\nVISUAL_DENSITY: ' + k.density + '/10 (' + densityDesc + ')\\n请严格遵循以上三旋钮的设定方向生成设计。';
+    }
     function loadModelsCache() { return safeStorage.json(AI_MODELS_CACHE); }
     function saveModelsCache(ep, models) { safeStorage.setJson(AI_MODELS_CACHE, { endpoint: ep, models: models, ts: Date.now() }); }
     function getEndpointChatUrl(ep) { let u = (ep || DEFAULT_ENDPOINT).replace(/\/+$/, ''); if (!/\/chat\/completions$/.test(u)) u += '/chat/completions'; return u; }
@@ -2801,14 +3096,16 @@ CDN 引用方式（在 <head> 中插入）：
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"><\/script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"><\/script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Observer.min.js"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/SplitText.min.js"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MorphSVGPlugin.min.js"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/DrawSVGPlugin.min.js"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrambleTextPlugin.min.js"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/InertiaPlugin.min.js"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollSmoother.min.js"><\/script>
+<!-- 以下为 GSAP Club 付费插件，cdnjs 上不存在，改用 gsap-trial（jsDelivr） -->
+<script src="https://cdn.jsdelivr.net/npm/gsap-trial@3.12.5/SplitText.min.js"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/gsap-trial@3.12.5/MorphSVGPlugin.min.js"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/gsap-trial@3.12.5/DrawSVGPlugin.min.js"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/gsap-trial@3.12.5/ScrambleTextPlugin.min.js"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/gsap-trial@3.12.5/InertiaPlugin.min.js"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/gsap-trial@3.12.5/ScrollSmoother.min.js"><\/script>
 
 然后在 <script> 中统一注册：gsap.registerPlugin(ScrollTrigger, Flip, Draggable, MotionPathPlugin, TextPlugin, CustomEase, ScrollToPlugin, Observer, SplitText, MorphSVGPlugin, DrawSVGPlugin, ScrambleTextPlugin, InertiaPlugin, ScrollSmoother);
+注意：SplitText/MorphSVG/DrawSVG/ScrambleText/Inertia/ScrollSmoother 是 GSAP Club 付费插件，此处使用 gsap-trial 试用版（仅供开发测试）。生产环境需购买 GSAP Club 授权。
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 一、核心动画（Core + CSSPlugin）
@@ -2991,12 +3288,13 @@ GSDevTools.create(); // 创建时间线调试面板
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"><\/script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"><\/script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Observer.min.js"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/SplitText.min.js"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MorphSVGPlugin.min.js"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/DrawSVGPlugin.min.js"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrambleTextPlugin.min.js"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/InertiaPlugin.min.js"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollSmoother.min.js"><\/script>`,
+<!-- Club 插件改用 gsap-trial（jsDelivr），cdnjs 上不存在 -->
+<script src="https://cdn.jsdelivr.net/npm/gsap-trial@3.12.5/SplitText.min.js"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/gsap-trial@3.12.5/MorphSVGPlugin.min.js"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/gsap-trial@3.12.5/DrawSVGPlugin.min.js"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/gsap-trial@3.12.5/ScrambleTextPlugin.min.js"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/gsap-trial@3.12.5/InertiaPlugin.min.js"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/gsap-trial@3.12.5/ScrollSmoother.min.js"><\/script>`,
         register: `<script>
 gsap.registerPlugin(ScrollTrigger, Flip, Draggable, MotionPathPlugin, TextPlugin, CustomEase, ScrollToPlugin, Observer, SplitText, MorphSVGPlugin, DrawSVGPlugin, ScrambleTextPlugin, InertiaPlugin, ScrollSmoother);
 <\/script>`,
@@ -3127,6 +3425,188 @@ ScrollSmoother.create({wrapper:'#smooth-wrapper',content:'#smooth-content',smoot
         { category: 'RapidAPI', name: 'QR Code Generator', desc: '高级二维码生成（Logo/颜色）', url: 'https://qr-code-generator.p.rapidapi.com/', auth: 'apiKey', cors: 'Yes', source: 'RapidAPI', method: 'GET', headers: { 'X-RapidAPI-Key': 'YOUR_RAPIDAPI_KEY', 'X-RapidAPI-Host': 'qr-code-generator.p.rapidapi.com' } }
     ];
 
+    // CDN library presets — one-click insertion of popular libraries
+    const CDN_PRESETS = [
+        { category: '框架', name: 'React 18', desc: 'React + ReactDOM + Babel', files: [
+            { type: 'script', url: 'https://unpkg.com/react@18/umd/react.development.js' },
+            { type: 'script', url: 'https://unpkg.com/react-dom@18/umd/react-dom.development.js' },
+            { type: 'script', url: 'https://unpkg.com/@babel/standalone/babel.min.js' }
+        ]},
+        { category: '框架', name: 'Vue 3', desc: 'Vue 3 全局构建版', files: [
+            { type: 'script', url: 'https://unpkg.com/vue@3/dist/vue.global.js' }
+        ]},
+        { category: '框架', name: 'Alpine.js', desc: '轻量级响应式框架', files: [
+            { type: 'script', url: 'https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js' }
+        ]},
+        { category: '样式', name: 'Tailwind CSS', desc: 'Tailwind Play CDN（仅开发用）', files: [
+            { type: 'script', url: 'https://cdn.tailwindcss.com' }
+        ]},
+        { category: '样式', name: 'Bootstrap 5', desc: 'Bootstrap 5 CSS + JS', files: [
+            { type: 'style', url: 'https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css' },
+            { type: 'script', url: 'https://cdn.jsdelivr.net/npm/bootstrap@5/dist/js/bootstrap.bundle.min.js' }
+        ]},
+        { category: '样式', name: 'Bulma', desc: '纯 CSS 框架', files: [
+            { type: 'style', url: 'https://cdn.jsdelivr.net/npm/bulma@1/css/bulma.min.css' }
+        ]},
+        { category: '动画', name: 'GSAP', desc: 'GSAP 核心 + ScrollTrigger', files: [
+            { type: 'script', url: 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js' },
+            { type: 'script', url: 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js' }
+        ]},
+        { category: '动画', name: 'Anime.js', desc: '轻量动画引擎', files: [
+            { type: 'script', url: 'https://cdn.jsdelivr.net/npm/animejs@3/anime.min.js' }
+        ]},
+        { category: '动画', name: 'AOS', desc: '滚动动画库', files: [
+            { type: 'style', url: 'https://cdn.jsdelivr.net/npm/aos@2/dist/aos.css' },
+            { type: 'script', url: 'https://cdn.jsdelivr.net/npm/aos@2/dist/aos.js' }
+        ]},
+        { category: '3D/Canvas', name: 'Three.js', desc: 'Three.js r160', files: [
+            { type: 'script', url: 'https://unpkg.com/three@0.160.0/build/three.min.js' }
+        ]},
+        { category: '3D/Canvas', name: 'p5.js', desc: '创意编程库', files: [
+            { type: 'script', url: 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js' }
+        ]},
+        { category: '3D/Canvas', name: 'D3.js', desc: '数据可视化', files: [
+            { type: 'script', url: 'https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js' }
+        ]},
+        { category: '图表', name: 'Chart.js', desc: '响应式图表库', files: [
+            { type: 'script', url: 'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js' }
+        ]},
+        { category: '图表', name: 'ECharts', desc: 'Apache ECharts', files: [
+            { type: 'script', url: 'https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js' }
+        ]},
+        { category: '工具', name: 'Lodash', desc: 'JS 工具函数库', files: [
+            { type: 'script', url: 'https://cdn.jsdelivr.net/npm/lodash@4/lodash.min.js' }
+        ]},
+        { category: '工具', name: 'Day.js', desc: '轻量日期处理', files: [
+            { type: 'script', url: 'https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js' }
+        ]},
+        { category: '工具', name: 'Axios', desc: 'HTTP 请求库', files: [
+            { type: 'script', url: 'https://cdn.jsdelivr.net/npm/axios@1/dist/axios.min.js' }
+        ]},
+        { category: '图标', name: 'Font Awesome', desc: '图标字体库', files: [
+            { type: 'style', url: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css' }
+        ]},
+        { category: '图标', name: 'Lucide', desc: '轻量 SVG 图标', files: [
+            { type: 'script', url: 'https://unpkg.com/lucide@latest/dist/umd/lucide.js' }
+        ]},
+        { category: '字体', name: 'Google Fonts', desc: 'Inter + JetBrains Mono', files: [
+            { type: 'style', url: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap' }
+        ]}
+    ];
+
+    // Insert CDN dependency into code (with dedup)
+    function insertCdnDependency(files) {
+        const code = getCode();
+        let inserted = 0, skipped = 0;
+        const tags = files.map(f => {
+            const escaped = f.url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            if (new RegExp(escaped).test(code)) { skipped++; return null; }
+            inserted++;
+            return f.type === 'style'
+                ? '<link rel="stylesheet" href="' + f.url + '">'
+                : '<script src="' + f.url + '"><\/script>';
+        }).filter(Boolean);
+        if (tags.length === 0) return { inserted: 0, skipped: skipped, message: '所有依赖已存在，未重复插入' };
+        const insertStr = '\n' + tags.join('\n') + '\n';
+        if (/<\/head>/i.test(code)) {
+            setCode(code.replace(/<\/head>/i, insertStr + '</head>'));
+        } else if (/<body[^>]*>/i.test(code)) {
+            setCode(code.replace(/<body[^>]*>/i, m => m + insertStr));
+        } else {
+            setCode(insertStr + code);
+        }
+        updatePreview();
+        return { inserted: inserted, skipped: skipped, message: '已插入 ' + inserted + ' 个标签' + (skipped > 0 ? '，跳过 ' + skipped + ' 个已存在' : '') };
+    }
+
+    // Search cdnjs API (free, CORS-enabled, no key needed)
+    async function cdnSearchLibs(query) {
+        if (!query || query.trim().length < 2) return [];
+        try {
+            const url = 'https://api.cdnjs.com/libraries?search=' + encodeURIComponent(query) + '&fields=name,description,version,filename&limit=15';
+            const res = await fetch(url);
+            if (!res.ok) return [];
+            const data = await res.json();
+            return (data.results || []).map(x => ({
+                name: x.name, version: x.version, desc: x.description || '',
+                url: 'https://cdnjs.cloudflare.com/ajax/libs/' + x.name + '/' + x.version + '/' + (x.filename || x.name + '.min.js')
+            }));
+        } catch(e) { return []; }
+    }
+
+    function renderCdnPresets() {
+        const list = document.getElementById('cdnPresetList');
+        if (!list) return;
+        const categories = {};
+        CDN_PRESETS.forEach(p => { if (!categories[p.category]) categories[p.category] = []; categories[p.category].push(p); });
+        let html = '';
+        Object.keys(categories).forEach(cat => {
+            html += '<div style="font-size:var(--font-size-caption);color:var(--text-tertiary);margin:var(--space-2) 0 var(--space-1);">' + cat + '</div>';
+            categories[cat].forEach(p => {
+                html += '<div class="snippet-item cdn-preset-item" data-preset="' + p.name + '" style="cursor:pointer;">' +
+                    '<div class="snippet-info"><div class="snippet-title">' + p.name + '</div>' +
+                    '<div class="snippet-preview">' + p.desc + '</div></div>' +
+                    '<svg class="btn-icon" style="flex-shrink:0;color:var(--accent);"><use href="#icon-plus"></use></svg></div>';
+            });
+        });
+        list.innerHTML = html;
+        list.querySelectorAll('.cdn-preset-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const name = item.dataset.preset;
+                const preset = CDN_PRESETS.find(p => p.name === name);
+                if (!preset) return;
+                const result = insertCdnDependency(preset.files);
+                showToast(result.message, '');
+                updatePreview();
+            });
+        });
+    }
+
+    function initCdnPanel() {
+        renderCdnPresets();
+        const searchInput = document.getElementById('cdnSearchInput');
+        const searchResults = document.getElementById('cdnSearchResults');
+        const presetsView = document.getElementById('cdnPresetsView');
+        const btnCloseCdn = document.getElementById('btnCloseCdn');
+        if (btnCloseCdn) btnCloseCdn.addEventListener('click', () => togglePanel(document.getElementById('btnToggleSidebar')));
+        if (!searchInput) return;
+        let searchTimer = null;
+        searchInput.addEventListener('input', () => {
+            const q = searchInput.value.trim();
+            clearTimeout(searchTimer);
+            if (q.length < 2) {
+                searchResults.style.display = 'none';
+                searchResults.innerHTML = '';
+                presetsView.style.display = '';
+                return;
+            }
+            presetsView.style.display = 'none';
+            searchResults.style.display = '';
+            searchResults.innerHTML = '<div style="padding:var(--space-2);color:var(--text-tertiary);font-size:var(--font-size-caption);">搜索中...</div>';
+            searchTimer = setTimeout(async () => {
+                const results = await cdnSearchLibs(q);
+                if (results.length === 0) {
+                    searchResults.innerHTML = '<div style="padding:var(--space-2);color:var(--text-tertiary);font-size:var(--font-size-caption);">未找到匹配的库</div>';
+                    return;
+                }
+                let html = '';
+                results.forEach(r => {
+                    html += '<div class="snippet-item cdn-search-item" data-url="' + r.url + '" data-name="' + r.name + '" style="cursor:pointer;">' +
+                        '<div class="snippet-info"><div class="snippet-title">' + r.name + ' <span style="color:var(--text-tertiary);font-size:var(--font-size-caption);">v' + r.version + '</span></div>' +
+                        '<div class="snippet-preview">' + (r.desc || r.url) + '</div></div>' +
+                        '<svg class="btn-icon" style="flex-shrink:0;color:var(--accent);"><use href="#icon-plus"></use></svg></div>';
+                });
+                searchResults.innerHTML = html;
+                searchResults.querySelectorAll('.cdn-search-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const result = insertCdnDependency([{ type: 'script', url: item.dataset.url }]);
+                        showToast(result.message, '');
+                    });
+                });
+            }, 400);
+        });
+    }
+
     function generateApiFetchCode(api) {
         const needsKey = api.auth === 'apiKey' || api.auth === 'OAuth';
         const isRapid = api.source === 'RapidAPI';
@@ -3148,43 +3628,103 @@ ScrollSmoother.create({wrapper:'#smooth-wrapper',content:'#smooth-content',smoot
         return '<script>' + keyComment + rapidComment + '\nfetch("' + api.url + '"' + options + ')\n  .then(res => res.json())\n  .then(data => console.log(data))\n  .catch(err => console.error(err));\n<\/script>';
     }
 
-    // 前端设计终极原则（来自 frontend-design-ultimate 技能）
-    const DESIGN_PRINCIPLES = `【设计原则：Anti-AI-Slop】
-1. 避免设计平庸：
-   - 禁止默认字体（无特色的系统字体）
-   - 禁止居中对称的预测性布局
-   - 禁止纯白/浅灰实心背景
-   - 禁止均匀分布的 5 色板
-   - 禁止无编排的零散淡入动画
+    // 前端设计终极原则（融合 impeccable/taste-skill/frontend-design 的 anti-AI-slop 规则）
+    const DESIGN_PRINCIPLES = `【设计原则：Anti-AI-Slop 全面规范】
+你在前端设计中倾向于收敛到通用的"在分布上"输出，产生用户所称的"AI slop"美学。必须主动对抗这种倾向，产出有意图、有记忆点、有上下文特色的设计。
 
-2. 字体层级（3x+ 跳跃，不要胆怯的 1.5x）：
-   - Display: clamp(3rem, 8vw, 6rem); weight: 600; line-height: 1; letter-spacing: -0.02em
-   - Heading: clamp(1.5rem, 3vw, 2.5rem); weight: 500; line-height: 1.2
-   - Body: 1rem; weight: 400; line-height: 1.6
-   - Mono: 0.875rem; letter-spacing: 0
+━━━ 一、设计思维 — 写代码前先承诺 ━━━
+1. 理解上下文：Purpose（解决什么问题/谁用）、Tone、Constraints、Differentiation（让人记住的那"一件事"）
+2. 从以下极端调性中选一个并完全执行：brutally-minimal / maximalist-chaos / retro-futuristic / organic-natural / luxury-refined / playful-toy-like / editorial-magazine / brutalist-raw / art-deco-geometric / soft-pastel / industrial-utilitarian
+3. 写代码前先输出一行"Design Read"声明你的设计方向
+4. 跨会话轮换美学方向——禁止两次生成共享同一显示字体或同一布局
 
-3. 颜色策略：
-   - 70-20-10 法则：70% 主色/中性、20% 次要、10% 强调
-   - 使用 CSS 变量：--primary, --accent, --surface, --text
-   - CTA 按钮必须高对比度弹出
+━━━ 二、Typography — 字体系统 ━━━
+【硬禁令】
+- 禁止 Inter/Roboto/Arial/Open Sans/system-ui 作为显示字体（Inter 作正文可接受）
+- 禁止 Space Grotesk 作为"升级"默认选择
+- 禁止通用衬线（Times New Roman/Georgia/Garamond/Palatino）
+- 禁止斜体标题（最可靠的 AI tell 之一）
+- 禁止在 dashboard/软件 UI 中使用衬线字体
 
-4. 空间构图：
-   - 有目的的不对称
-   - 允许元素重叠（有清晰层级）
-   - 慷慨的负空间 或 控制密度（二选一，不要中间态）
-   - 打破网格的 hero 区域
+【推荐字体】
+- 显示字体：Geist/Cabinet Grotesk/Satoshi/Clash Display/General Sans/Plus Jakarta Sans/Instrument Sans
+- 现代衬线：Fraunces/Newsreader/Crimson Pro/DM Serif Display/Bodoni Moda/Vollkorn
+- 等宽：IBM Plex Mono/JetBrains Mono/DM Mono
 
-5. 动效编排：
-   - 一次精心编排的页面加载 > 零散微交互
-   - 持续时间 200-400ms（干脆，不拖沓）
-   - CSS 优先做简单动画，GSAP 做复杂编排
-   - 交错入场（stagger）制造节奏感
+【字号规则】
+- 使用 3x+ 跳跃，禁止胆怯的 1.5x 递增
+- 有效刻度示例：11/13/14/16/24px——无中间值，14px 承载 60% 正文
+- Display: clamp(3rem, 8vw, 6rem); weight: 600; line-height: 1; letter-spacing: -0.02em
+- Heading: clamp(1.5rem, 3vw, 2.5rem); weight: 500; line-height: 1.2
+- Body: 1rem; weight: 400; line-height: 1.6; max-width: 65ch
+- 极端字重对比：细标题+粗强调，或粗标题+细正文
+- 层级靠字重+颜色而非单纯巨大字号
+- 2+1 字体纪律：1 显示 + 1 正文 + 至多 1 异类
 
-6. 背景氛围：
-   - 渐变网格（微妙，不刺眼）
-   - 噪点/颗粒纹理（SVG filter 或 CSS）
-   - 几何图案（点、线、形状）
-   - 层次透明度和戏剧性阴影`;
+━━━ 三、Color — 颜色策略 ━━━
+【硬禁令】
+- 禁止白底紫渐变、蓝到紫 hero 渐变、霓虹紫光晕
+- 禁止纯黑 #000000（用 Zinc-950/深暖灰/Off-Black 替代）
+- 禁止混用暖灰与冷灰
+- 禁止均匀分布的 5 色调色板
+- 禁止"高端消费"米色+黄铜默认配色
+- 禁止装饰性 alpha 透明度堆叠（alpha is a design smell）
+
+【强制规则】
+- 70-20-10 法则：70% 主色/中性、20% 次要、10% 强调
+- 最多 1 个强调色，饱和度 < 80%
+- 用 OKLCH 定义颜色（而非 hex/rgb/hsl），语义角色命名（surface-base 而非 gray-50）
+- 所有颜色锚定为 CSS 变量：--primary, --accent, --surface, --text
+- 整页一个主题，禁止中途反转（Page theme lock）
+- CTA 按钮必须高对比度弹出，WCAG AA（4.5:1 文本，3:1 非文本）
+
+━━━ 四、Layout & Spacing — 空间构图 ━━━
+【硬禁令】
+- 禁止居中 max-w-2xl + 卡片网格的默认 hero
+- 禁止三列等高特性卡 + emoji 图标
+- 禁止 h-screen（用 min-h-[100dvh]，避免 iOS Safari 布局跳动）
+- 禁止千篇一律的圆角卡片网格
+
+【强制规则】
+- 4px 基准间距，刻度 4/8/12/16/24/32/48/64——禁止 6/10/20
+- 有目的的不对称、允许元素重叠（有清晰层级）
+- 慷慨的负空间 或 控制密度（二选一，不要中间态）
+- 打破网格的 hero 区域
+- 背景禁止纯白/纯灰——用渐变网格/噪点纹理/几何图案/分层透明/颗粒叠加
+
+━━━ 五、Motion — 动效编排 ━━━
+【硬禁令】
+- 禁止动画 width/height/top/left（只动画 transform 和 opacity，GPU 加速）
+- 禁止无目的装饰性动画（旋转 spinner、跳动元素）
+- 禁止弹跳弹簧物理（除非明确要求）
+- 禁止散落的微交互
+
+【强制规则】
+- 一次精心编排的页面加载（staggered reveals + animation-delay）> 零散微交互
+- 持续时间 200-400ms（干脆，不拖沓）；退出动画 = 进入动画时长的 75%
+- 标准时长档：100/200/300/500ms
+- CSS 优先做简单动画，GSAP 做复杂编排
+- 交错入场（stagger）制造节奏感
+- 必须尊重 prefers-reduced-motion
+- 触摸目标 >= 44x44px
+
+━━━ 六、Anti-Slop 硬禁令清单 ━━━
+- 禁止代码中使用 emoji（用 Phosphor/Radix/Lucide 图标替代）
+- 禁止 em-dash（破折号）——用冒号或句号替代
+- 禁止空洞形容词："clean and modern"、"neutral palette for professional feel"、"minimalist design that doesn't distract"
+- 禁止通用毛玻璃/软投影/动画渐变 blob 作为默认
+- 禁止 shadcn 默认卡 + Tailwind 默认 rounded-xl 按钮的公式化组合
+
+━━━ 七、出货前自检（Pre-Flight Check）━━━
+1. 主题锁/颜色锁/形状锁一致性验证
+2. WCAG AA 对比度（4.5:1 文本，3:1 非文本）
+3. 触摸目标 >= 44x44px
+4. 320/375/768px 渲染正常
+5. 每页有 h1（sr-only 可）
+6. 零 em-dash（全页面检查）
+7. 背景氛围检查（非纯白/纯灰）
+
+实现复杂度须匹配美学愿景：极繁需要大量动效代码；极简需要克制、精度和对间距字体的极致打磨。不要收敛到中位数——做出有意图的选择。`;
 
     // 公共 API 数据源知识（整合四大来源）
     const PUBLIC_APIS_KNOWLEDGE = `【公共 API 数据源 — 四大来源整合】
@@ -3290,14 +3830,6 @@ fetch('URL', {
 - 标注 cors:No 的 API 需通过后端代理或浏览器关闭安全限制才能调用
 - 国内用户优先使用 source:APIList 的中文友好 API
 - 所有 API 均支持 HTTPS`;
-
-    // API 来源标签配色
-    const API_SOURCE_COLORS = {
-        'public-apis': { bg: '#e8f4fd', text: '#0070f3', label: '国际' },
-        'APIList': { bg: '#fef3e8', text: '#f5a623', label: '中文' },
-        'Free-API': { bg: '#e8f8f0', text: '#10b981', label: '海外' },
-        'RapidAPI': { bg: '#f3e8ff', text: '#8b5cf6', label: '企业' }
-    };
 
     // 设计系统自动匹配关键词
     const DESIGN_SYSTEMS = {
@@ -4000,10 +4532,10 @@ ${ds.desc}
 
     function buildGroupKey(dsKey) {
         if (!dsKey) return undefined;
-        if (['light', 'lightModern', 'claude', 'stripe', 'linear', 'apple', 'spotify', 'notion'].includes(dsKey)) return 'lightModern';
-        if (['dark', 'darkTech', 'supabase', 'github', 'vercel'].includes(dsKey)) return 'darkTech';
-        if (['warm', 'warmEditorial', 'nytimes', 'medium', 'nike'].includes(dsKey)) return 'warmEditorial';
-        if (['brutal', 'brutalist', 'neobrutalism'].includes(dsKey)) return 'brutal';
+        if (['lightModern', 'claude', 'stripe', 'linear', 'apple', 'spotify'].includes(dsKey)) return 'lightModern';
+        if (['darkTech', 'supabase', 'vercel'].includes(dsKey)) return 'darkTech';
+        if (['warmEditorial', 'nike'].includes(dsKey)) return 'warmEditorial';
+        if (['brutal', 'neobrutalism'].includes(dsKey)) return 'brutal';
         if (['neon', 'cyberpunk'].includes(dsKey)) return 'neon';
         if (['glass', 'glassmorphism'].includes(dsKey)) return 'glass';
         return undefined;
@@ -5374,6 +5906,7 @@ ${techSpec}
         '/refactor': { desc: '给出代码重构建议', mode: 'refactor' },
         '/optimize': { desc: '分析性能瓶颈并给出优化建议', mode: 'optimize' },
         '/test': { desc: '为当前代码生成测试用例', mode: 'test' },
+        '/api': { desc: '推荐适合的公共 API 并生成调用代码', mode: 'api' },
         '/help': { desc: '显示快捷指令帮助', mode: 'help' },
         // ===== 设计命令词汇表（借鉴 Impeccable A+ 设计命令体系）=====
         '/audit': { desc: '设计审计：扫描 AI 劣习、对比度、反模式', mode: 'design', action: 'audit' },
@@ -5513,6 +6046,9 @@ ${techSpec}
                 break;
             case 'test':
                 specializedInstruction = '请为以下' + langLabel + '代码生成测试用例' + (extra ? '，测试框架：' + extra : '，使用合适的测试框架') + '。输出完整的测试代码。\n\n需要测试的代码：\n```\n' + (selection || code) + '\n```';
+                break;
+            case 'api':
+                specializedInstruction = '请根据当前代码的需求，推荐 3-5 个适合的公共 API，并生成完整的 fetch 调用代码。优先推荐无需认证的 API。如果用户指定了需求（如"天气""新闻"），按需求筛选。\n\n内置 API 数据源知识：\n' + PUBLIC_APIS_KNOWLEDGE + '\n\n可用 API 列表（共' + PUBLIC_APIS.length + '个）：\n' + PUBLIC_APIS.slice(0, 30).map(a => '- ' + a.name + ' (' + a.category + '): ' + a.desc + ' — ' + a.url).join('\n') + '\n\n' + (extra ? '用户需求：' + extra + '\n\n' : '') + '请推荐 API 并用 ```edit 格式输出调用代码。';
                 break;
             case 'design': {
                 // 设计命令走 Agent 模式（需要 edit_code/preview_code/run_code_check 等工具）
@@ -5713,7 +6249,7 @@ ${techSpec}
             const complexity = detectComplexity(instruction);
             messages = buildDeepThinkingPrompt(instruction, complexity, currentCodeWithLines, langLabel, structureHints, designSystemPrompt, editorCtx, outputFormatRule, techSpec, totalLines);
         } else {
-            const systemPrompt = '你是实时预览编辑器内置的资深前端开发工程师。用户正在编辑 ' + langLabel + ' 代码。\n\n' + designSystemPrompt + '\n\n' + outputFormatRule + '\n\n' + techSpec + '\n\n工作规则：\n1. 【用户指令绝对优先】用户明确要求的颜色、尺寸、布局等必须执行。用户说红色就是红色\n2. 保持原有代码风格和缩进，只做必要的修改，不改动无关代码\n3. 所有 CSS/HTML/JS 必须语法正确，属性值符合 W3C 规范\n4. 用户未指定样式时才使用设计规范作为默认填充，禁止为规范覆盖用户明确要求\n5. 组件代码必须完整可运行（display、padding、border、background、color 等属性齐全）\n6. 动效代码使用标准 CSS，禁止无效语法如 transition: all ease\n7. 颜色值使用规范色值或用户指定色值，禁止编造颜色';
+            const systemPrompt = '你是实时预览编辑器内置的资深前端开发工程师。用户正在编辑 ' + langLabel + ' 代码。\n\n' + designSystemPrompt + getKnobsPrompt() + '\n\n' + outputFormatRule + '\n\n' + techSpec + '\n\n工作规则：\n1. 【用户指令绝对优先】用户明确要求的颜色、尺寸、布局等必须执行。用户说红色就是红色\n2. 保持原有代码风格和缩进，只做必要的修改，不改动无关代码\n3. 所有 CSS/HTML/JS 必须语法正确，属性值符合 W3C 规范\n4. 用户未指定样式时才使用设计规范作为默认填充，禁止为规范覆盖用户明确要求\n5. 组件代码必须完整可运行（display、padding、border、background、color 等属性齐全）\n6. 动效代码使用标准 CSS，禁止无效语法如 transition: all ease\n7. 颜色值使用规范色值或用户指定色值，禁止编造颜色';
             messages = [
                 { role: 'system', content: systemPrompt },
                 // Inject multi-turn conversation history (excluding system)
@@ -5974,6 +6510,29 @@ ${techSpec}
                     showToast('已切换设计规范：' + (ds ? ds.name : '通用现代'), '');
                 }
             });
+
+            // Three-knob design control initialization
+            const knobVariance = document.getElementById('knobVariance');
+            const knobMotion = document.getElementById('knobMotion');
+            const knobDensity = document.getElementById('knobDensity');
+            const knobVarianceVal = document.getElementById('knobVarianceVal');
+            const knobMotionVal = document.getElementById('knobMotionVal');
+            const knobDensityVal = document.getElementById('knobDensityVal');
+            if (knobVariance && knobMotion && knobDensity) {
+                const savedKnobs = loadKnobs();
+                knobVariance.value = savedKnobs.variance; knobVarianceVal.textContent = savedKnobs.variance;
+                knobMotion.value = savedKnobs.motion; knobMotionVal.textContent = savedKnobs.motion;
+                knobDensity.value = savedKnobs.density; knobDensityVal.textContent = savedKnobs.density;
+                const updateKnobs = () => {
+                    saveKnobs({ variance: parseInt(knobVariance.value), motion: parseInt(knobMotion.value), density: parseInt(knobDensity.value) });
+                    knobVarianceVal.textContent = knobVariance.value;
+                    knobMotionVal.textContent = knobMotion.value;
+                    knobDensityVal.textContent = knobDensity.value;
+                };
+                knobVariance.addEventListener('input', updateKnobs);
+                knobMotion.addEventListener('input', updateKnobs);
+                knobDensity.addEventListener('input', updateKnobs);
+            }
         }
         updateAiStatus();
     }
@@ -5999,7 +6558,64 @@ ${techSpec}
         confirmModal.addEventListener('click', (e) => { if (e.target === confirmModal) closeConfirm(); });
         document.querySelectorAll('.panel-toggle').forEach(btn => { btn.addEventListener('click', () => togglePanel(btn)); });
         btnCloseSnippets.addEventListener('click', () => { const btn = document.getElementById('btnToggleSidebar'); if (btn) btn.click(); });
-        document.querySelector('.main-content').addEventListener('click', () => { if (window.matchMedia('(max-width: 768px)').matches && snippetsPanel.classList.contains('mobile-open')) snippetsPanel.classList.remove('mobile-open'); });
+
+        // Mobile: close side panel overlay when tapping main content or backdrop
+        document.querySelector('.main-content').addEventListener('click', () => {
+            if (window.matchMedia('(max-width: 768px)').matches && snippetsPanel.classList.contains('mobile-open')) {
+                snippetsPanel.classList.remove('mobile-open');
+                const backdrop = document.getElementById('sidePanelBackdrop');
+                if (backdrop) backdrop.classList.remove('active');
+            }
+        });
+        const sidePanelBackdrop = document.getElementById('sidePanelBackdrop');
+        if (sidePanelBackdrop) {
+            sidePanelBackdrop.addEventListener('click', () => {
+                const btn = document.getElementById('btnToggleSidebar');
+                if (btn) btn.click();
+            });
+        }
+
+        // Mobile bottom nav bar: switch between editor / split / preview
+        const mobileNavBar = document.getElementById('mobileNavBar');
+        if (mobileNavBar) {
+            const mobileNavBtns = mobileNavBar.querySelectorAll('.mobile-nav-btn');
+            mobileNavBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!window.matchMedia('(max-width: 768px)').matches) return;
+                    const view = btn.dataset.view;
+                    workspace.classList.remove('editor-focused', 'preview-focused');
+
+                    // Auto-show hidden panels when focusing them
+                    if (view === 'editor' && workspace.classList.contains('editor-hidden')) {
+                        workspace.classList.remove('editor-hidden');
+                        const editorToggle = document.getElementById('btnToggleEditor');
+                        if (editorToggle) editorToggle.classList.add('active');
+                        const states = loadPanelStates(); states.editor = true; savePanelStates(states);
+                    }
+                    if (view === 'preview' && workspace.classList.contains('preview-hidden')) {
+                        workspace.classList.remove('preview-hidden');
+                        const previewToggle = document.getElementById('btnTogglePreview');
+                        if (previewToggle) previewToggle.classList.add('active');
+                        const states = loadPanelStates(); states.preview = true; savePanelStates(states);
+                    }
+
+                    mobileNavBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    if (view === 'editor') {
+                        workspace.classList.add('editor-focused');
+                    } else if (view === 'preview') {
+                        workspace.classList.add('preview-focused');
+                    }
+                    // Reset editor/preview panel heights for split view
+                    if (view === 'split') {
+                        editorPanel.style.height = '';
+                        previewPanel.style.height = '';
+                        applyRatio();
+                    }
+                    setTimeout(() => editor.refresh(), 100);
+                });
+            });
+        }
     }
 
     // ==================== Agent Mode Engine ====================
@@ -6105,10 +6721,12 @@ ${techSpec}
             }, required: ['prompt'] }
         }},
         { type: 'function', function: {
-            name: 'add_dependency', description: '在预览 HTML 中添加 CDN 依赖（如 GSAP、Chart.js 等）',
+            name: 'add_dependency', description: '在预览 HTML 中添加 CDN 依赖（支持去重、SRI 安全哈希、ESM 模块）。优先使用 jsDelivr（多CDN容错）或 cdnjs（含SRI）',
             parameters: { type: 'object', properties: {
-                url: { type: 'string', description: 'CDN 资源的完整 URL' },
-                type: { type: 'string', enum: ['script', 'style'], description: '资源类型' }
+                url: { type: 'string', description: 'CDN 资源的完整 URL（如 https://cdn.jsdelivr.net/npm/lodash@4/lodash.min.js）' },
+                type: { type: 'string', enum: ['script', 'style', 'module'], description: '资源类型：script=普通脚本，style=样式表，module=ES模块（自动生成import语句）' },
+                sri: { type: 'string', description: '可选。Subresource Integrity 哈希（如 sha384-xxx），用于安全校验。cdnjs API 可获取预计算值' },
+                import_statement: { type: 'string', description: '仅 type=module 时需要。import 语句的内容，如 * as React 或 { debounce }' }
             }, required: ['url', 'type'] }
         }},
         { type: 'function', function: {
@@ -6688,9 +7306,23 @@ ${techSpec}
             }
             case 'add_dependency': {
                 const code = getCode();
-                const tag = args.type === 'script'
-                    ? '<script src="' + args.url + '"><\/script>'
-                    : '<link rel="stylesheet" href="' + args.url + '">';
+                // Dedup: check if URL already exists in code
+                const escapedUrl = args.url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                if (new RegExp(escapedUrl).test(code)) {
+                    return '[SKIP] 该依赖已存在，未重复插入: ' + args.url;
+                }
+                // Build tag with optional SRI and ESM support
+                const integrity = args.sri ? ' integrity="' + args.sri + '" crossorigin="anonymous"' : '';
+                let tag;
+                if (args.type === 'module') {
+                    // ESM import support
+                    const importStmt = args.import_statement || '';
+                    tag = '<script type="module">\nimport ' + importStmt + ' from "' + args.url + '";\n<\/script>';
+                } else if (args.type === 'script') {
+                    tag = '<script src="' + args.url + '"' + integrity + '><\/script>';
+                } else {
+                    tag = '<link rel="stylesheet" href="' + args.url + '"' + integrity + '>';
+                }
                 let newCode;
                 if (code.includes('</head>')) {
                     newCode = code.replace('</head>', '  ' + tag + '\n</head>');
@@ -6700,7 +7332,7 @@ ${techSpec}
                     newCode = '<head>\n  ' + tag + '\n</head>\n' + code;
                 }
                 setCode(newCode); updatePreview();
-                return '[OK] 已添加' + (args.type === 'script' ? '脚本' : '样式') + ': ' + args.url;
+                return '[OK] 已添加' + (args.type === 'module' ? 'ESM模块' : args.type === 'script' ? '脚本' : '样式') + (args.sri ? '(含SRI)' : '') + ': ' + args.url;
             }
             case 'get_skill': {
                 if (args.domain === 'gsap') {
@@ -7097,8 +7729,8 @@ ${techSpec}
             '• 有合适 HTML 元素却用 div 堆砌（应用 nav/main/section/article/button）\n' +
             '• 卡片滥用：若移除卡片样式不影响理解，就不该是卡片（默认去卡片化）\n\n' +
             '【代码修改规范】通过 edit_code 工具用行号编辑（1-based）：replace/insert/delete。多处修改用 batch_edit 一次性完成。修改前先 analyze_code，每次改动 3-15 行，改后 preview_code 验证。可用 run_code_check 做安全检查（含反模式检测），undo_edit 撤销上一步，format_code 格式化代码。\n\n' +
-            '【设计模板】' + dsNames + '\n可用 get_skill 工具按需获取详细规范。\n\n' +
-            '【技术能力】GSAP 3.x 全套插件（预览已适配 CDN 镜像）；API 数据源（JSONPlaceholder/PokéAPI/Unsplash 等）；代码片段库；add_dependency 引入外部 CDN（首选 cdnjs）。\n\n' +
+            '【设计模板】' + dsNames + '\n可用 get_skill 工具按需获取详细规范。' + getKnobsPrompt() + '\n\n' +
+            '【技术能力】GSAP 3.x 全套插件（预览已适配 CDN 镜像）；API 数据源（JSONPlaceholder/PokéAPI/Unsplash 等）；代码片段库；add_dependency 引入外部 CDN（支持去重、SRI 安全哈希、ESM 模块，优先 jsDelivr 或 cdnjs）；CDN 面板可搜索 4600+ 库并一键插入。\n\n' +
             '【深度思考】在 <thinking> 标签内分析：结构、视觉、交互、代码质量、可维护性，标签外给出修改方案。\n\n' +
             '【自检】只改必要行？标签闭合？CSS 选择器误伤？JS 变量已声明？CDN 调用前判空？脚本加载顺序正确？是否触犯反AI味禁令？对比度是否达标？\n\n' +
             '【视觉验证·Visual Verification】完成 UI 修改后，必须调用 visual_verify 工具做闭环验证（它会自动检查：控制台错误、内容完整性、反模式、对比度WCAG AA、水平溢出、空元素、无障碍）。发现任何【】标记的问题必须立即用 edit_code 修复，修复后再次 visual_verify 确认通过。交付前所有自动化检查项必须 [OK] 或 [✓]，剩余 □ 项需在 <thinking> 中逐条确认。\n\n' +
@@ -7162,7 +7794,9 @@ ${techSpec}
                     if (toolsSupported && (isToolError || ((res.status === 404 || res.status === 422) && totalTurns <= 2))) {
                         toolsSupported = false;
                         totalTurns--; // retry this turn without tools
-                        addChatMessage('assistant', '当前 API 不支持工具调用格式，已降级为智能对话模式', ICONS.info);
+                        addChatMessage('assistant', '当前 API 不支持工具调用，已降级为智能对话模式', ICONS.info);
+                        // Replace system prompt to remove tool references
+                        messages[0] = { role: 'system', content: systemPrompt.replace(/【ReAct 工作流】[\s\S]*?串行。\n\n/g, '').replace(/通过 edit_code 工具[\s\S]*?验证。\n/g, '直接输出修改后的完整代码。\n') };
                         continue;
                     }
                     setAgentStatus('错误', 'API 返回 ' + res.status);
@@ -7237,10 +7871,12 @@ ${techSpec}
                 if (msg.tool_calls.length === 0) delete msg.tool_calls;
                 messages.push(msg);
 
-                // FIX 12: Context window management — truncate old tool results
+                // Context window management — truncate old tool results, preserve analyze_code
                 if (messages.length > 20) {
                     for (let mi = 0; mi < messages.length - 6; mi++) {
                         if (messages[mi].role === 'tool' && typeof messages[mi].content === 'string' && messages[mi].content.length > 200) {
+                            // Never truncate analyze_code results — AI needs complete code with line numbers
+                            if (messages[mi].content.startsWith('代码共')) continue;
                             messages[mi].content = messages[mi].content.slice(0, 100) + '\n…（已截断，' + messages[mi].content.length + ' 字）';
                         }
                     }
@@ -7358,7 +7994,7 @@ ${techSpec}
                     const toolCallCount = messages.filter(m => m.role === 'tool').length;
                     const editCount = messages.filter(m => m.role === 'tool' && typeof m.content === 'string' && m.content.includes('[OK] 修改成功')).length;
                     const summaryMsg = addChatMessage('assistant', '', ICONS.check);
-                    let summaryHtml = '📊 执行摘要\n';
+                    let summaryHtml = '执行摘要\n';
                     summaryHtml += '─────────────\n';
                     summaryHtml += '总步骤: ' + totalTurns + '\n';
                     summaryHtml += '工具调用: ' + toolCallCount + ' 次\n';
@@ -7373,8 +8009,8 @@ ${techSpec}
                         if (currentLang === 'html') {
                             const openTags = (finalCode.match(/<(?!\/)(?!!)(?!meta)(?!link)(?!br)(?!hr)(?!img)(?!input)(\w+)/g) || []).length;
                             const closeTags = (finalCode.match(/<\/(\w+)>/g) || []).length;
-                            if (openTags !== closeTags) summaryHtml += '⚠ HTML 标签可能不匹配\n';
-                            else summaryHtml += '✓ HTML 标签匹配\n';
+                            if (openTags !== closeTags) summaryHtml += 'HTML 标签可能不匹配\n';
+                            else summaryHtml += 'HTML 标签匹配\n';
                         }
                     } catch(e) { /* ignore */ }
                     setAssistantMsgText(summaryMsg, summaryHtml);
@@ -7389,7 +8025,7 @@ ${techSpec}
                 if (allReadOnly && toolCalls.length > 1) {
                     // Parallel execution for independent read-only tools
                     setAgentStatus('并行执行 ' + toolCalls.length + ' 个工具 (步骤 ' + totalTurns + ')', '');
-                    addChatMessage('assistant', '⚡ 步骤 ' + totalTurns + ': 并行调用 ' + toolCalls.length + ' 个工具…', ICONS.tool);
+                    addChatMessage('assistant', '步骤 ' + totalTurns + ': 并行调用 ' + toolCalls.length + ' 个工具…', ICONS.tool);
                     const promises = toolCalls.map(async (tc) => {
                         let toolName, toolArgs;
                         try {
@@ -7427,25 +8063,26 @@ ${techSpec}
                         continue;
                     }
                     setAgentStatus('执行: ' + toolName + ' (步骤 ' + totalTurns + ')', toolArgs.query || toolArgs.operation || '');
-                    addChatMessage('assistant', '▶ 步骤 ' + totalTurns + ': 调用 ' + toolName + '…', ICONS.tool);
+                    addChatMessage('assistant', '步骤 ' + totalTurns + ': 调用 ' + toolName + '…', ICONS.tool);
 
-                    // Tool execution with retry on failure
+                    // Tool execution with retry on failure (read-only tools only)
                     let result = null;
                     let retryCount = 0;
-                    const maxRetries = 2;
+                    const isReadOnly = READ_ONLY_TOOLS.has(toolName);
+                    const maxRetries = isReadOnly ? 2 : 0; // Write tools: no retry
                     while (retryCount <= maxRetries) {
                         try {
                             result = await callToolUnified(toolName, toolArgs);
                             if (result && result.startsWith('[ERR]') && retryCount < maxRetries) {
                                 retryCount++;
-                                addChatMessage('assistant', '⚠ 工具执行失败，重试 ' + retryCount + '/' + maxRetries + '…', ICONS.warn);
+                                addChatMessage('assistant', '工具执行失败，重试 ' + retryCount + '/' + maxRetries + '…', ICONS.warn);
                                 continue;
                             }
                             break;
                         } catch(toolErr) {
                             if (retryCount < maxRetries) {
                                 retryCount++;
-                                addChatMessage('assistant', '⚠ 工具异常，重试 ' + retryCount + '/' + maxRetries + '…', ICONS.warn);
+                                addChatMessage('assistant', '工具异常，重试 ' + retryCount + '/' + maxRetries + '…', ICONS.warn);
                                 continue;
                             }
                             result = '[ERR] 工具执行异常: ' + toolErr.message;
@@ -7458,7 +8095,7 @@ ${techSpec}
             } catch(e) {
                 if (e && e.name === 'AbortError') {
                     setAgentStatus('已停止', '用户中断');
-                    throw e; // Let outer handler deal with it
+                    return; // Clean exit — outer handler already cleans up
                 }
                 setAgentStatus('错误', e.message);
                 addChatMessage('assistant', 'Agent 执行出错: ' + e.message, ICONS.error);
