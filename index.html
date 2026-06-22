@@ -669,14 +669,6 @@ html, body {
 /* Design System Selector */
 .ai-design-row { justify-content: space-between; align-items: center; }
 
-/* Three-knob design control system */
-.ai-knobs-row { gap: var(--space-2); padding: var(--space-1) 0; }
-.knob-label { display: flex; align-items: center; gap: var(--space-half); font-size: var(--font-size-caption); color: var(--text-tertiary); flex: 1; min-width: 0; }
-.knob-name { white-space: nowrap; flex-shrink: 0; }
-.knob-slider { flex: 1; min-width: 0; height: 4px; -webkit-appearance: none; appearance: none; background: var(--bg-surface-raised); border-radius: 2px; outline: none; cursor: pointer; }
-.knob-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--bg-surface); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
-.knob-slider::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--bg-surface); }
-.knob-value { font-size: var(--font-size-caption); font-weight: var(--font-weight-semibold); color: var(--accent); min-width: 16px; text-align: center; flex-shrink: 0; font-variant-numeric: tabular-nums; }
 .ai-design-select {
   background: var(--bg-input); border: 1px solid var(--border-default);
   border-radius: var(--radius-xs); padding: var(--space-1) var(--space-1);
@@ -1654,23 +1646,7 @@ html, body {
                                 <span id="ctxBadge">CTX</span>
                             </button>
                         </div>
-                        <div class="ai-config-row ai-knobs-row">
-                            <label class="knob-label" title="设计多样性：1=完美对称，10=艺术混乱">
-                                <span class="knob-name">多样性</span>
-                                <input type="range" class="knob-slider" id="knobVariance" min="1" max="10" value="8">
-                                <span class="knob-value" id="knobVarianceVal">8</span>
-                            </label>
-                            <label class="knob-label" title="动效强度：1=静态，10=电影级">
-                                <span class="knob-name">动效</span>
-                                <input type="range" class="knob-slider" id="knobMotion" min="1" max="10" value="6">
-                                <span class="knob-value" id="knobMotionVal">6</span>
-                            </label>
-                            <label class="knob-label" title="视觉密度：1=美术馆空灵，10=驾驶舱密集">
-                                <span class="knob-name">密度</span>
-                                <input type="range" class="knob-slider" id="knobDensity" min="1" max="10" value="4">
-                                <span class="knob-value" id="knobDensityVal">4</span>
-                            </label>
-                        </div>
+
                     </div>
                     <div class="agent-status-bar" id="agentStatusBar">
                         <span class="agent-dot"></span>
@@ -2290,16 +2266,21 @@ html, body {
         return 'amber';
     }
 
-    if (typeof marked !== 'undefined' && typeof hljs !== 'undefined') {
+    if (typeof marked !== 'undefined') {
         marked.setOptions({
-            highlight: function(code, lang) {
-                if (!lang) return code;
-                try {
-                    if (hljs.getLanguage(lang)) return hljs.highlight(code, { language: lang }).value;
-                    return hljs.highlightAuto(code).value;
-                } catch (e) { return code; }
-            },
-            gfm: true, breaks: true
+            gfm: true, breaks: false, headerIds: false, mangle: false
+        });
+    }
+
+    // Markdown 代码高亮后处理（marked 14.x 移除了内置 highlight 选项）
+    function highlightCodeBlocks(html) {
+        if (typeof hljs === 'undefined') return html;
+        return html.replace(/<pre><code(?:\s+class="(?:language-|hljs )?([\w-]+)")?>([\s\S]*?)<\/code><\/pre>/g, function(match, lang, code) {
+            code = code.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+            try {
+                if (lang && hljs.getLanguage(lang)) return '<pre><code class="hljs language-' + lang + '">' + hljs.highlight(code, { language: lang }).value + '</code></pre>';
+                return '<pre><code class="hljs">' + hljs.highlightAuto(code).value + '</code></pre>';
+            } catch (e) { return match; }
         });
     }
 
@@ -2410,11 +2391,14 @@ html, body {
     function compileMd(code) {
         let html;
         if (typeof marked !== 'undefined') {
-            try { html = marked.parse(code); } catch (e) { html = '<pre>' + code.replace(/</g, '&lt;') + '</pre>'; }
+            try {
+                html = marked.parse(code);
+                html = highlightCodeBlocks(html);
+            } catch (e) { html = '<pre>' + code.replace(/</g, '&lt;') + '</pre>'; }
         } else {
             html = '<pre>' + code.replace(/</g, '&lt;') + '</pre>';
         }
-        return '<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">\n<style>body{max-width:800px;margin:0 auto;padding:24px;font-family:system-ui;line-height:1.7;color:#2D2822;background:#fff}pre{background:#f5f5f5;padding:16px;border-radius:8px;overflow-x:auto;border:1px solid #e5e5e5}code{background:#f0f0f0;padding:2px 6px;border-radius:4px;font-size:.9em}pre code{background:transparent;padding:0}img{max-width:100%;border-radius:8px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px 12px;text-align:left}th{background:#f5f5f5}blockquote{border-left:4px solid #ddd;margin:1em 0;padding:4px 16px;color:#555}a{color:#0366d6}</style>\n</head>\n<body>' + html + '</body>\n</html>';
+        return '<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">\n<style>body{max-width:820px;margin:0 auto;padding:32px 24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;line-height:1.8;color:#1a1a1a;background:#fff}h1{font-size:2em;font-weight:700;margin:1em 0 0.5em;border-bottom:2px solid #eee;padding-bottom:0.3em}h2{font-size:1.5em;font-weight:600;margin:1.2em 0 0.5em;border-bottom:1px solid #eee;padding-bottom:0.2em}h3{font-size:1.25em;font-weight:600;margin:1em 0 0.4em}h4{font-size:1em;font-weight:600;margin:0.8em 0 0.3em}p{margin:0.6em 0}pre{background:#f6f8fa;padding:16px;border-radius:8px;overflow-x:auto;border:1px solid #e1e4e8}code{background:#f0f0f0;padding:2px 6px;border-radius:4px;font-size:.9em;font-family:"SF Mono",Menlo,Consolas,monospace}pre code{background:transparent;padding:0;font-size:.9em}img{max-width:100%;border-radius:8px}table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.95em}th,td{border:1px solid #d0d7de;padding:8px 12px;text-align:left}th{background:#f6f8fa;font-weight:600}tr:nth-child(even){background:#fafbfc}blockquote{border-left:4px solid #dfe2e5;margin:1em 0;padding:8px 16px;color:#555;background:#fafbfc}a{color:#0969da;text-decoration:none}a:hover{text-decoration:underline}hr{border:none;border-top:2px solid #eee;margin:2em 0}ul,ol{padding-left:2em;margin:0.5em 0}li{margin:0.25em 0}strong{font-weight:650}del{color:#999}</style>\n</head>\n<body>' + html + '</body>\n</html>';
     }
 
     async function compileTs(code, lang) {
@@ -3004,7 +2988,6 @@ html, body {
     const AI_DEEP_THINKING_STORAGE = 'editor_ai_deep_thinking';
     const AI_ENDPOINT_STORAGE = 'editor_ai_endpoint'; const AI_MODELS_CACHE = 'editor_ai_models_cache';
     const AI_DESIGN_SYSTEM_STORAGE = 'editor_ai_design_system';
-    const AI_KNOBS_STORAGE = 'editor_ai_knobs';
     const DEFAULT_ENDPOINT = 'https://apihub.agnes-ai.com/v1';
 
     function loadAiEndpoint() { return DEFAULT_ENDPOINT; }
@@ -3016,17 +2999,9 @@ html, body {
     function loadDesignSystem() { return safeStorage.get(AI_DESIGN_SYSTEM_STORAGE, 'default'); }
     function saveDesignSystem(ds) { safeStorage.set(AI_DESIGN_SYSTEM_STORAGE, ds); }
 
-    // Three-knob design control system (from taste-skill)
-    const KNOB_DEFAULTS = { variance: 8, motion: 6, density: 4 };
-    function loadKnobs() { return Object.assign({}, KNOB_DEFAULTS, safeStorage.json(AI_KNOBS_STORAGE) || {}); }
-    function saveKnobs(k) { safeStorage.setJson(AI_KNOBS_STORAGE, k); }
-    function getKnobsPrompt() {
-        const k = loadKnobs();
-        const varianceDesc = k.variance <= 3 ? '高度对称、经典网格布局' : k.variance <= 6 ? '适度不对称、有节奏的布局' : k.variance <= 8 ? '大胆不对称、破网格元素、重叠构图' : '艺术混乱、极端非对称、有意打破规则';
-        const motionDesc = k.motion <= 3 ? '极简动效、仅 hover 微交互' : k.motion <= 6 ? '适度动效、staggered 入场+滚动触发' : k.motion <= 8 ? '丰富动效、多元素编排+视差+GSAP timeline' : '电影级动效、shader/canvas/物理动画+全页编排';
-        const densityDesc = k.density <= 3 ? '美术馆式空灵、大量负空间、单列居中' : k.density <= 6 ? '舒适密度、标准卡片+网格' : k.density <= 8 ? '高密度、多列+紧凑间距+信息密集' : '驾驶舱式极致密集、仪表盘风格+数据密集';
-        return '\\n【设计三旋钮 — 当前设定】\\nDESIGN_VARIANCE: ' + k.variance + '/10 (' + varianceDesc + ')\\nMOTION_INTENSITY: ' + k.motion + '/10 (' + motionDesc + ')\\nVISUAL_DENSITY: ' + k.density + '/10 (' + densityDesc + ')\\n请严格遵循以上三旋钮的设定方向生成设计。';
-    }
+    // knobs UI removed; stub kept for system prompt references
+    function getKnobsPrompt() { return ''; }
+
     function loadModelsCache() { return safeStorage.json(AI_MODELS_CACHE); }
     function saveModelsCache(ep, models) { safeStorage.setJson(AI_MODELS_CACHE, { endpoint: ep, models: models, ts: Date.now() }); }
     function getEndpointChatUrl(ep) { let u = (ep || DEFAULT_ENDPOINT).replace(/\/+$/, ''); if (!/\/chat\/completions$/.test(u)) u += '/chat/completions'; return u; }
@@ -6511,28 +6486,6 @@ ${techSpec}
                 }
             });
 
-            // Three-knob design control initialization
-            const knobVariance = document.getElementById('knobVariance');
-            const knobMotion = document.getElementById('knobMotion');
-            const knobDensity = document.getElementById('knobDensity');
-            const knobVarianceVal = document.getElementById('knobVarianceVal');
-            const knobMotionVal = document.getElementById('knobMotionVal');
-            const knobDensityVal = document.getElementById('knobDensityVal');
-            if (knobVariance && knobMotion && knobDensity) {
-                const savedKnobs = loadKnobs();
-                knobVariance.value = savedKnobs.variance; knobVarianceVal.textContent = savedKnobs.variance;
-                knobMotion.value = savedKnobs.motion; knobMotionVal.textContent = savedKnobs.motion;
-                knobDensity.value = savedKnobs.density; knobDensityVal.textContent = savedKnobs.density;
-                const updateKnobs = () => {
-                    saveKnobs({ variance: parseInt(knobVariance.value), motion: parseInt(knobMotion.value), density: parseInt(knobDensity.value) });
-                    knobVarianceVal.textContent = knobVariance.value;
-                    knobMotionVal.textContent = knobMotion.value;
-                    knobDensityVal.textContent = knobDensity.value;
-                };
-                knobVariance.addEventListener('input', updateKnobs);
-                knobMotion.addEventListener('input', updateKnobs);
-                knobDensity.addEventListener('input', updateKnobs);
-            }
         }
         updateAiStatus();
     }
