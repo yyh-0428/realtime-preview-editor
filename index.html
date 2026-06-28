@@ -7362,7 +7362,7 @@ ${techSpec}
                         } else {
                             await res.text().catch(() => {});
                         }
-                    } catch(e) { /* timeout or network error */ } finally { clearTimeout(searchTimeout); }
+                    } catch(e) { console.warn('[Werkstatt] search_web fetch failed:', e.message); } finally { clearTimeout(searchTimeout); }
                     return '[WARN] 搜索暂时不可用。请基于已有知识回答。';
                 } catch(e) { return '[WARN] 搜索暂时不可用。请基于已有知识回答。'; }
             }
@@ -7555,7 +7555,7 @@ ${techSpec}
                                 } else if (contrastChecked > 0) {
                                     report.push('[OK] 对比度检查通过（' + contrastChecked + ' 处文本均达标）');
                                 }
-                            } catch(e) { /* 对比度检查失败则跳过 */ }
+                            } catch(e) { console.warn('[Werkstatt] visual_verify 对比度检查失败:', e.message); }
                             // 5b. 溢出检测（水平滚动条）
                             try {
                                 const scrollWidth = doc.documentElement.scrollWidth;
@@ -7791,7 +7791,7 @@ ${techSpec}
             const modelsUrl = endpoint.replace(/\/+$/, '') + '/models';
             const res = await fetch(modelsUrl, { headers: { 'Authorization': 'Bearer ' + apiKey } });
             if (res.ok) { const data = await res.json(); analyzeModelCapabilities(data.data || []); }
-        } catch(e) { /* use cached if fetch fails */ }
+        } catch(e) { console.warn('[Werkstatt] 模型列表 fetch 失败，使用缓存:', e.message); }
 
         const imgModel = getBestImageModel();
         const imgCapabilityNote = imgModel ? '\n【图片生成】可用模型：' + imgModel : '\n【图片生成】当前 API 不支持图片生成';
