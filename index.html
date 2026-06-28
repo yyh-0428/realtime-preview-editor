@@ -5824,6 +5824,42 @@ ${techSpec}
             }
         }
 
+        // Shared auto-retry for structural integrity failures (deduplicated from 2 inline copies)
+        async function autoRetryStructuralFix(initialInstruction, initialFullText, initialCodeFence, parsed, assistantMsgEl, onStreamChunk) {
+            const MAX_RETRIES = 2;
+            let retryCount = 0;
+            let currentInstruction = initialInstruction;
+            let currentFullText = initialFullText;
+            let currentCodeFence = initialCodeFence;
+            let currentParsed = parsed;
+            while (true) {
+                currentParsed = (retryCount === 0) ? parsed : parseThinkingResponse(currentFullText);
+                const hpr = await handleParsedResponse(currentParsed, assistantMsgEl, currentCodeFence);
+                if (hpr && hpr.retry && retryCount < MAX_RETRIES) {
+                    retryCount++;
+                    currentInstruction += '\n\n【自动修复第' + retryCount + '次】上次生成的代码存在结构错误：' + hpr.errorMessage + '\n请重新生成完整的代码，确保所有HTML标签正确闭合，<style>和<script>标签必须配对。直接输出完整代码，不要使用编辑块格式。';
+                    showToast('检测到代码结构错误，自动重试第 ' + retryCount + '/' + MAX_RETRIES + ' 次…', 'info');
+                    try {
+                        const retryResult = await callAiApiStream(apiKey, aiModelSelect.value, currentInstruction, false, onStreamChunk);
+                        currentFullText = retryResult.fullText;
+                        currentCodeFence = retryResult.codeFence;
+                        if (retryResult.aborted) break;
+                    } catch (retryErr) {
+                        if (retryErr.name === 'AbortError') break;
+                        console.error('Auto-retry failed:', retryErr);
+                        break;
+                    }
+                } else {
+                    if (hpr && hpr.retry && retryCount >= MAX_RETRIES) {
+                        showToast('自动修复失败 ' + MAX_RETRIES + ' 次，请手动检查代码或重新描述需求', 'warning');
+                        if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, '\u26a0 自动修复失败：' + (hpr.errorMessage || '代码结构错误') + '。请手动修改或重新描述需求。');
+                    }
+                    break;
+                }
+            }
+            return { fullText: currentFullText, codeFence: currentCodeFence };
+        }
+
         async function handleParsedResponse(parsed, targetMsgEl, cFence) {
             const hasThinking = !!parsed.thinking;
             if (parsed.answer.includes('NOT_CODE_TASK')) {
@@ -5978,41 +6014,10 @@ ${techSpec}
                 }
             }
 
-            // Auto-retry loop for structural integrity failures
-            let retryCount = 0;
-            const MAX_AUTO_RETRY = 2;
-            let lastErrorInfo = null;
-            let currentInstruction = instruction;
-            let currentFullText = fullText;
-            let currentCodeFence = codeFence;
-            while (true) {
-                const currentParsed = (retryCount === 0) ? parsed : parseThinkingResponse(currentFullText);
-                const hpr = await handleParsedResponse(currentParsed, assistantMsgEl, currentCodeFence);
-                if (hpr && hpr.retry && retryCount < MAX_AUTO_RETRY) {
-                    retryCount++;
-                    lastErrorInfo = hpr;
-                    // Build fix instruction with error context
-                    const fixInstruction = currentInstruction + '\n\n【自动修复第' + retryCount + '次】上次生成的代码存在结构错误：' + hpr.errorMessage + '\n请重新生成完整的代码，确保所有HTML标签正确闭合，<style>和<script>标签必须配对。直接输出完整代码，不要使用编辑块格式。';
-                    currentInstruction = fixInstruction;
-                    showToast('检测到代码结构错误，自动重试第 ' + retryCount + '/' + MAX_AUTO_RETRY + ' 次…', 'info');
-                    try {
-                        const retryResult = await callAiApiStream(apiKey, aiModelSelect.value, fixInstruction, false, onStreamChunk);
-                        currentFullText = retryResult.fullText;
-                        currentCodeFence = retryResult.codeFence;
-                        if (retryResult.aborted) break;
-                    } catch (retryErr) {
-                        if (retryErr.name === 'AbortError') break;
-                        console.error('Auto-retry failed:', retryErr);
-                        break;
-                    }
-                } else {
-                    if (hpr && hpr.retry && retryCount >= MAX_AUTO_RETRY) {
-                        showToast('自动修复失败 ' + MAX_AUTO_RETRY + ' 次，请手动检查代码或重新描述需求', 'warning');
-                        if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, '⚠ 自动修复失败：' + (hpr.errorMessage || '代码结构错误') + '。请手动修改或重新描述需求。');
-                    }
-                    break;
-                }
-            }
+            // Auto-retry for structural integrity failures
+            const retryResult = await autoRetryStructuralFix(instruction, fullText, codeFence, parsed, assistantMsgEl, onStreamChunk);
+            fullText = retryResult.fullText;
+            codeFence = retryResult.codeFence;
 
             // Save to multi-turn conversation history
             aiChatHistory.push({ role: 'user', content: instruction });
@@ -6475,38 +6480,10 @@ ${techSpec}
                         renderAssistantText(textSpan, parsed.answer);
                     }
                 }
-                // Auto-retry loop for structural integrity failures
-                let retryCount2 = 0;
-                const MAX_AUTO_RETRY_2 = 2;
-                let currentInstr2 = specializedInstruction;
-                let currentFullText2 = fullText;
-                let currentCodeFence2 = codeFence;
-                while (true) {
-                    const currentParsed2 = (retryCount2 === 0) ? parsed : parseThinkingResponse(currentFullText2);
-                    const hpr2 = await handleParsedResponse(currentParsed2, assistantMsgEl, currentCodeFence2);
-                    if (hpr2 && hpr2.retry && retryCount2 < MAX_AUTO_RETRY_2) {
-                        retryCount2++;
-                        const fixInstr2 = currentInstr2 + '\n\n【自动修复第' + retryCount2 + '次】上次生成的代码存在结构错误：' + hpr2.errorMessage + '\n请重新生成完整的代码，确保所有HTML标签正确闭合，<style>和<script>标签必须配对。直接输出完整代码，不要使用编辑块格式。';
-                        currentInstr2 = fixInstr2;
-                        showToast('检测到代码结构错误，自动重试第 ' + retryCount2 + '/' + MAX_AUTO_RETRY_2 + ' 次…', 'info');
-                        try {
-                            const retryResult2 = await callAiApiStream(apiKey, aiModelSelect.value, fixInstr2, false, onStreamChunk);
-                            currentFullText2 = retryResult2.fullText;
-                            currentCodeFence2 = retryResult2.codeFence;
-                            if (retryResult2.aborted) break;
-                        } catch (retryErr2) {
-                            if (retryErr2.name === 'AbortError') break;
-                            console.error('Auto-retry failed:', retryErr2);
-                            break;
-                        }
-                    } else {
-                        if (hpr2 && hpr2.retry && retryCount2 >= MAX_AUTO_RETRY_2) {
-                            showToast('自动修复失败 ' + MAX_AUTO_RETRY_2 + ' 次，请手动检查代码或重新描述需求', 'warning');
-                            if (assistantMsgEl) setAssistantMsgText(assistantMsgEl, '⚠ 自动修复失败：' + (hpr2.errorMessage || '代码结构错误') + '。请手动修改或重新描述需求。');
-                        }
-                        break;
-                    }
-                }
+                // Auto-retry for structural integrity failures
+                const retryResult2 = await autoRetryStructuralFix(specializedInstruction, fullText, codeFence, parsed, assistantMsgEl, onStreamChunk);
+                fullText = retryResult2.fullText;
+                codeFence = retryResult2.codeFence;
                 // Save to history
                 aiChatHistory.push({ role: 'user', content: cmd + ' ' + extra });
                 aiChatHistory.push({ role: 'assistant', thinking: parsed.thinking || '', answer: parsed.answer || '', content: fullText });
