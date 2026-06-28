@@ -983,6 +983,7 @@ html, body {
   color: var(--text-secondary);
 }
 .lang-tab .dot { width: var(--space-2); height: var(--space-2); border-radius: 50%; flex-shrink: 0; }
+.lang-tab .exp-tag { font-size: 9px; padding: 1px 4px; border-radius: 3px; background: var(--accent-subtle); color: var(--accent); text-transform: none; letter-spacing: 0; font-weight: 400; margin-left: 2px; }
 
 .editor-wrapper {
   display: flex; flex: 1; min-height: 0; overflow: hidden;
@@ -2415,9 +2416,10 @@ html, body {
             if (!code.trim()) return;
             hasAny = true;
             const cfg = LANG_CONFIG[lang];
+            const isExperimental = (lang === 'ts' || lang === 'tsx' || lang === 'scss');
             const tab = document.createElement('span');
             tab.className = 'lang-tab';
-            tab.innerHTML = '<span class="dot"></span>' + cfg.label;
+            tab.innerHTML = '<span class="dot"></span>' + cfg.label + (isExperimental ? '<span class="exp-tag">实验</span>' : '');
             tab.querySelector('.dot').style.background = LANG_COLORS[lang] || 'var(--accent)';
             container.appendChild(tab);
         });
@@ -2495,7 +2497,7 @@ html, body {
             const s = document.createElement('script');
             s.src = 'https://unpkg.com/@babel/standalone@7.24.0/babel.min.js';
             s.onload = () => { babelReady = true; resolve(); };
-            s.onerror = () => reject(new Error('Babel 加载失败'));
+            s.onerror = () => { showToast('Babel CDN 加载失败，TS 编译不可用。请检查网络或切换为 JS。', 'error'); reject(new Error('Babel CDN 加载失败（实验性功能）')); };
             document.head.appendChild(s);
         });
     }
@@ -2507,7 +2509,7 @@ html, body {
             const s = document.createElement('script');
             s.src = 'https://unpkg.com/sass.js@0.11.1/dist/sass.sync.js';
             s.onload = () => { sassReady = true; resolve(); };
-            s.onerror = () => reject(new Error('sass.js 加载失败'));
+            s.onerror = () => { showToast('sass.js CDN 加载失败，SCSS 编译不可用。请检查网络或切换为 CSS。', 'error'); reject(new Error('sass.js CDN 加载失败（实验性功能）')); };
             document.head.appendChild(s);
         });
     }
