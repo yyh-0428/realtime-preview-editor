@@ -2214,12 +2214,27 @@ html, body {
         saveRatio();
     }
 
+    resizer.setAttribute('role', 'separator');
+    resizer.setAttribute('aria-orientation', 'vertical');
+    resizer.setAttribute('aria-label', '调整编辑器与预览面板大小');
+    resizer.setAttribute('tabindex', '0');
     resizer.addEventListener('mousedown', (e) => { e.preventDefault(); startDrag(e.clientX, e.clientY); });
     resizer.addEventListener('touchstart', (e) => {
         e.preventDefault();
         const touch = e.touches[0];
         if (touch) startDrag(touch.clientX, touch.clientY);
     }, { passive: false });
+    resizer.addEventListener('keydown', (e) => {
+        const cur = loadRatio();
+        let next = cur;
+        if (e.key === 'ArrowLeft') { e.preventDefault(); next = Math.max(MIN_RATIO, cur - 0.02); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); next = Math.min(MAX_RATIO, cur + 0.02); }
+        else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); next = 0.5; }
+        else return;
+        editorRatio = next;
+        applyRatio();
+        saveRatio();
+    });
 
     let resizeRaf = null;
     window.addEventListener('resize', () => {
@@ -2759,6 +2774,8 @@ html, body {
         if (toastTimer) clearTimeout(toastTimer);
         toast.textContent = message;
         toast.className = 'toast ' + (type || '');
+        toast.setAttribute('role', type === 'warning' || type === 'error' ? 'alert' : 'status');
+        toast.setAttribute('aria-live', 'polite');
         void toast.offsetHeight;
         toast.classList.add('show');
         toastTimer = setTimeout(() => { toast.classList.remove('show'); toastTimer = null; }, 2200);
@@ -3026,8 +3043,22 @@ html, body {
         document.body.style.userSelect = ''; savePanelWidth(); editor.refresh();
     }
     function initLeftResizer() {
+        resizerLeft.setAttribute('role', 'separator');
+        resizerLeft.setAttribute('aria-orientation', 'vertical');
+        resizerLeft.setAttribute('aria-label', '调整 AI 助手面板宽度');
+        resizerLeft.setAttribute('tabindex', '0');
         resizerLeft.addEventListener('mousedown', (e) => { e.preventDefault(); startLeftDrag(e.clientX); });
         resizerLeft.addEventListener('touchstart', (e) => { e.preventDefault(); const t = e.touches[0]; if (t) startLeftDrag(t.clientX); }, { passive: false });
+        resizerLeft.addEventListener('keydown', (e) => {
+            const cur = loadPanelWidth();
+            let next = cur;
+            if (e.key === 'ArrowLeft') { e.preventDefault(); next = Math.max(PANEL_MIN_PCT, cur - 2); }
+            else if (e.key === 'ArrowRight') { e.preventDefault(); next = Math.min(PANEL_MAX_PCT, cur + 2); }
+            else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); next = PANEL_DEFAULT_PCT; }
+            else return;
+            applyPanelWidth(next);
+            savePanelWidth();
+        });
     }
 
     // ==================== AI Panel ====================
