@@ -1599,6 +1599,12 @@ html, body {
                             <select class="ai-model-select" id="aiModelSelect"></select>
                             <span class="ai-status-dot" id="aiStatusDot" title="未配置 API Key"></span>
                         </div>
+                        <div class="ai-config-row" style="gap:var(--space-2);font-size:var(--font-size-caption);color:var(--text-tertiary);">
+                            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+                                <input type="checkbox" id="rememberKeyToggle" style="margin:0;">
+                                <span>记住 Key（存到本地）</span>
+                            </label>
+                        </div>
                         <div class="ai-config-row ai-thinking-row">
                             <label class="thinking-toggle" title="Agent 模式：AI 自动规划、执行、验证，支持多步工具调用">
                                 <input type="checkbox" id="agentModeToggle">
@@ -1635,6 +1641,7 @@ html, body {
                                 <option value="cyberpunk">Cyberpunk · 赛博霓虹</option>
                                 <option value="neobrutalism">Neobrutalism · 粗野高对比</option>
                                 <option value="glassmorphism">Glassmorphism · 玻璃拟态</option>
+                                <option value="liquidGlass">Liquid Glass · 液态玻璃 (iOS 26)</option>
                             </select>
                             <span class="design-badge" id="designBadge">默认规范</span>
                             <button class="btn-icon-only" id="btnMcpManage" title="MCP 服务器管理（连接外部工具扩展 Agent 能力）" aria-label="MCP 管理" style="padding:4px 6px;opacity:0.7;font-size:11px;border:1px solid var(--hairline);border-radius:var(--radius-sm);background:transparent;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;gap:4px;">
@@ -2670,17 +2677,22 @@ html, body {
 
     (function patchUpdatePreview() {
         const _orig = updatePreview;
+        let previewToken = 0; // 编译版本号，防止异步竞态
         updatePreview = async function() {
             // 即使 currentLang 不是 html，只要编辑器内容明显是 HTML 就按原始 HTML 预览
             if (currentLang === 'html' || !LANG_CONFIG[currentLang] || looksLikeHtml(getCode())) { _orig(); return; }
+            const myToken = ++previewToken;
             try {
                 const compiled = await compileCode(currentLang);
+                // 如果在编译期间又触发了新的预览请求，丢弃这次过期的结果
+                if (myToken !== previewToken) return;
                 updatePreviewWith(compiled);
                 previewFrame.style.display = 'block';
                 const code = getCode();
                 if (code.trim().length > 0) { previewPlaceholder.classList.add('hidden'); }
                 else { previewPlaceholder.classList.remove('hidden'); }
             } catch (err) {
+                if (myToken !== previewToken) return;
                 updatePreviewWith(errorHtml('编译错误: ' + (err.message || err)));
                 showStatus('编译失败', 'error');
             }
@@ -2988,12 +3000,29 @@ html, body {
     const AI_DEEP_THINKING_STORAGE = 'editor_ai_deep_thinking';
     const AI_ENDPOINT_STORAGE = 'editor_ai_endpoint'; const AI_MODELS_CACHE = 'editor_ai_models_cache';
     const AI_DESIGN_SYSTEM_STORAGE = 'editor_ai_design_system';
+    const REMEMBER_KEY_STORAGE = 'editor_remember_key';
     const DEFAULT_ENDPOINT = 'https://apihub.agnes-ai.com/v1';
 
-    function loadAiEndpoint() { return DEFAULT_ENDPOINT; }
+    // Sensitive data (API Key) uses sessionStorage by default, localStorage only with explicit opt-in
+    const secureStorage = {
+        _getBackend() { return safeStorage.get(REMEMBER_KEY_STORAGE) === 'true' ? localStorage : (window.sessionStorage || { getItem: () => null, setItem: () => {}, removeItem: () => {} }); },
+        get(k, fb = '') { try { const b = this._getBackend(); const v = b.getItem(k); return v !== null ? v : fb; } catch (e) { console.warn('[Werkstatt] secureStorage.get failed:', k, e.message); return fb; } },
+        set(k, v) { try { const b = this._getBackend(); b.setItem(k, v); return true; } catch (e) { console.warn('[Werkstatt] secureStorage.set failed:', k, e.message); return false; } },
+        remove(k) { try { const b = this._getBackend(); b.removeItem(k); return true; } catch (e) { console.warn('[Werkstatt] secureStorage.remove failed:', k, e.message); return false; } },
+    };
+
+    function loadRememberKey() { return safeStorage.get(REMEMBER_KEY_STORAGE) === 'true'; }
+    function saveRememberKey(v) { safeStorage.set(REMEMBER_KEY_STORAGE, v ? 'true' : 'false'); }
+
+    function loadAiEndpoint() { return safeStorage.get(AI_ENDPOINT_STORAGE) || DEFAULT_ENDPOINT; }
     function saveAiEndpoint(ep) { safeStorage.set(AI_ENDPOINT_STORAGE, ep); }
-    function loadAiKey() { return safeStorage.get(AI_KEY_STORAGE) || ''; }
-    function saveAiKey(k) { safeStorage.set(AI_KEY_STORAGE, k); updateAiStatus(); }
+    function loadAiKey() {
+        // Try sessionStorage first, fall back to localStorage for migration from old versions
+        let k = secureStorage.get(AI_KEY_STORAGE, '');
+        if (!k) { k = safeStorage.get(AI_KEY_STORAGE, ''); if (k) { /* migrate from localStorage */ secureStorage.set(AI_KEY_STORAGE, k); safeStorage.remove(AI_KEY_STORAGE); } }
+        return k || '';
+    }
+    function saveAiKey(k) { secureStorage.set(AI_KEY_STORAGE, k); updateAiStatus(); }
     function loadAiModel() { return safeStorage.get(AI_MODEL_STORAGE); }
     function saveAiModel(m) { safeStorage.set(AI_MODEL_STORAGE, m); }
     function loadDesignSystem() { return safeStorage.get(AI_DESIGN_SYSTEM_STORAGE, 'default'); }
@@ -4353,6 +4382,45 @@ fetch('URL', {
             ],
             keywords: ['玻璃', '透明', '模糊', '现代', '悬浮', '层次', '渐变', 'UI', '卡片', '仪表板', '后台', 'dashboard'],
             tone: 'luxuryRefined'
+        },
+        liquidGlass: {
+            name: 'Liquid Glass',
+            desc: '苹果 WWDC25 液态玻璃设计语言。SVG滤镜管线：feTurbulence→feSpecularLighting→feDisplacementMap(scale=120)。四层结构：effect(滤镜+blur)/tint(着色)/shine(边缘高光)/content(内容)。核心规则：(1)默认=磨砂玻璃(有blur)，按下=高透玻璃(去blur) (2)不透明度≥0.45 (3)feSpecularLighting光学镜面高光非手写CSS。浅色明亮基调+多彩壁纸背景',
+            colors: {
+                canvas: '#f5f0eb', surface: 'rgba(255,255,255,0.55)', surfaceElevated: 'rgba(255,255,255,0.65)',
+                ink: 'rgba(0,0,0,0.85)', body: 'rgba(0,0,0,0.6)', muted: 'rgba(0,0,0,0.35)',
+                primary: 'rgba(10,132,255,0.12)', primaryHover: 'rgba(10,132,255,0.22)', onPrimary: 'rgba(0,0,0,0.85)',
+                hairline: 'rgba(0,0,0,0.06)', hairlineSoft: 'rgba(0,0,0,0.03)',
+                accent: '#0a84ff', accentSecondary: '#5e5ce6',
+                glassTint: 'rgba(120,180,255,0.04)',
+                highlightEdge: 'rgba(255,255,255,0.65)',
+                shadowDeep: '0 8px 30px rgba(0,0,0,0.08)'
+            },
+            typography: {
+                fontFamily: '-apple-system, "SF Pro Display", "SF Pro Text", system-ui, sans-serif',
+                fontMono: '"SF Mono", "JetBrains Mono", monospace',
+                display: 'font-size:48px; font-weight:600; line-height:1.08; letter-spacing:-0.02em;',
+                title: 'font-size:28px; font-weight:600; line-height:1.15; letter-spacing:-0.015em;',
+                body: 'font-size:17px; font-weight:400; line-height:1.47; letter-spacing:-0.01em;',
+                caption: 'font-size:13px; font-weight:400; line-height:1.38; letter-spacing:0;',
+                button: 'font-size:15px; font-weight:500; line-height:1.0; letter-spacing:-0.01em;'
+            },
+            spacing: { base: 8, xs: 8, sm: 12, md: 16, lg: 24, xl: 32, xxl: 48, section: 80 },
+            radius: { sm: '12px', md: '20px', lg: '28px', xl: '44px', pill: '9999px' },
+            rules: [
+                '页面背景必须色彩丰富——多彩渐变/壁纸/纹理图，玻璃才有折射素材',
+                '所有玻璃组件用四层div结构：effect(滤镜+blur) + tint(着色) + shine(边缘高光) + content(内容)',
+                '必须包含SVG滤镜#liquid-glass-filter：feTurbulence→feComponentTransfer→feGaussianBlur→feSpecularLighting→feComposite→feDisplacementMap(scale=120)',
+                '镜面高光由feSpecularLighting光学计算生成，非手写CSS box-shadow模拟',
+                '滤镜只挂在effect层(filter:url(#liquid-glass-filter))，不污染内容层',
+                'effect层用backdrop-filter:blur(12px) saturate(1.5)做磨砂，shine层用inset box-shadow做菲涅尔边缘高光',
+                '圆角 ≥ 20px，优先pill/28px；动效用cubic-bezier(0.175,0.885,0.32,2.2)弹性弹簧',
+                '默认态/卡片=磨砂玻璃(blur 12-16px)，按钮按下=高透玻璃(去blur只留saturate(1.2))',
+                '光线折射渐变是backdrop-filter的blur值渐变(12→16→0px)，不是opacity淡入淡出',
+                '禁止：纯色背景、硬阴影、直角、扁平卡片、单一backdrop-filter无SVG滤镜、深色单色背景'
+            ],
+            keywords: ['液态玻璃', 'liquid glass', 'iOS 26', 'iOS 27', 'WWDC', '苹果', 'apple', 'glass effect', '折射', 'refraction', '菲涅尔', 'fresnel', '材料感', '玻璃按钮', 'glassmorphism', '毛玻璃', '液态', '流体', 'material', 'native', 'iPhone'],
+            tone: 'liquidGlass'
         }
     };
 
@@ -4459,6 +4527,67 @@ fetch('URL', {
 - 入场: opacity 0→1 + translateY(20px→0) + blur(8px→0); duration 0.6s ease-out; stagger 0.08s
 - 悬浮感: 卡片使用 translateY(-4px) + 更亮边框 + 更大模糊阴影 hover
 - 背景: 必须使用鲜艳的 body background:linear-gradient(135deg,#8b5cf6,#ec4899,#06b6d4) 或类似渐变作为底层`
+        },
+        liquidGlass: {
+            components: `组件规范（必须生成可运行代码）：
+
+// ===== Liquid Glass SVG 滤镜管线（参照 Apple Metal shader + lucasromerodb/liquid-glass-effect-macos） =====
+// 管线顺序：feTurbulence(分形噪声) → feComponentTransfer(gamma挤压) → feGaussianBlur(软化) → feSpecularLighting(光学镜面高光) → feComposite(叠加) → feDisplacementMap(折射位移,scale=120)
+// 四层结构：effect(滤镜+blur) + tint(着色) + shine(边缘高光) + content(内容)，滤镜只挂在effect层上
+// 基调：浅色明亮。多彩渐变背景（暖橙+蓝+淡紫），白色半透玻璃，深色文字。
+
+【SVG 滤镜 — 必须放在 <svg><filter id="liquid-glass-filter"> 中】
+<feTurbulence type="fractalNoise" baseFrequency="0.012 0.012" numOctaves="1" seed="5" result="turbulence"/>
+<feComponentTransfer in="turbulence" result="displacementMap">
+  <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5"/>
+  <feFuncG type="gamma" amplitude="1" exponent="10" offset="0.5"/>
+  <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5"/>
+</feComponentTransfer>
+<feGaussianBlur in="displacementMap" stdDeviation="4" result="softMap"/>
+<feSpecularLighting in="softMap" surfaceScale="6" specularConstant="1" specularExponent="80" lighting-color="white" result="specLight">
+  <fePointLight x="-200" y="-200" z="300"/>
+</feSpecularLighting>
+<feComposite in="SourceGraphic" in2="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage"/>
+<feDisplacementMap in="litImage" in2="softMap" scale="120" xChannelSelector="R" yChannelSelector="G"/>
+
+【四层HTML结构 — 每个玻璃组件必须用4个子div叠层】
+<div class="glass-wrap" style="position:relative;display:inline-flex;border-radius:9999px;overflow:hidden;box-shadow:0 6px 6px rgba(0,0,0,0.12),0 0 20px rgba(0,0,0,0.06);transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,2.2),box-shadow 0.4s cubic-bezier(0.175,0.885,0.32,2.2);">
+  <div class="glass-effect" style="position:absolute;inset:0;z-index:0;border-radius:inherit;backdrop-filter:blur(12px) saturate(1.5);filter:url(#liquid-glass-filter);overflow:hidden;isolation:isolate;transition:backdrop-filter 0.35s ease;"></div>
+  <div class="glass-tint" style="z-index:1;position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,0.3),rgba(255,255,255,0.55),rgba(255,255,255,0.3));pointer-events:none;"></div>
+  <div class="glass-shine" style="position:absolute;inset:0;z-index:2;border-radius:inherit;overflow:hidden;pointer-events:none;box-shadow:inset 0 1px 1px rgba(255,255,255,0.5),inset 0 -1px 1px rgba(0,0,0,0.08);"></div>
+  <div class="glass-content" style="position:relative;z-index:3;display:inline-flex;align-items:center;justify-content:center;padding:14px 28px;font-size:15px;font-weight:500;letter-spacing:-0.01em;color:rgba(0,0,0,0.85);border-radius:inherit;height:52px;">内容</div>
+</div>
+
+【交互规则 — 必须同时操作三层】
+- hover(外层): transform:translateY(-2px) scale(1.03); box-shadow增强
+- hover(effect层): backdrop-filter:blur(16px) saturate(2.0) ← 增强模糊=更多光线折射
+- hover(shine层): inset高光亮度提高到0.65
+- active(外层): transform:scale(0.94); transition-duration:0.12s
+- active(effect层): backdrop-filter:saturate(1.2) ← 去掉blur! 变高透玻璃
+- active(shine层): 暗化边缘:inset 0 1px 2px rgba(0,0,0,0.1),inset 0 -2px 3px rgba(0,0,0,0.06)
+
+【Primary蓝色调变体】tint层从白色渐变改为:linear-gradient(180deg,rgba(10,132,255,0.2),rgba(10,132,255,0.45),rgba(10,132,255,0.2));effect层加hue-rotate(-5deg)
+
+【Card卡片 — 始终磨砂玻璃，不做高透切换】
+.glass-wrap加上border-radius:28px;tint层:linear-gradient(180deg,rgba(255,255,255,0.35),rgba(255,255,255,0.55),rgba(255,255,255,0.35));effect层blur(16px) saturate(1.8);content层padding:28px
+
+【Input输入框】同按钮结构，height:48px;border-radius:12px;tint降低到0.35;effect blur(8px) saturate(1.4);shine无高光用border:1px solid rgba(0,0,0,0.08)
+
+【Nav导航栏】同按钮结构，width:100%;height:64px;border-radius:0;tint:linear-gradient(水平);底部border-bottom:1px solid rgba(0,0,0,0.05)
+
+【FAB浮动按钮】同按钮结构，width:56px;height:56px;position:fixed;z-index:100`,
+            motion: `动效规范（必须使用有效CSS）：
+- 弹性弹簧: cubic-bezier(0.175,0.885,0.32,2.2) 用于外层 transform/box-shadow 过渡
+- backdrop-filter过渡: 0.35s ease — 模拟光线透射渐变（非opacity淡入淡出）
+- hover: transform:translateY(-2px) scale(1.03) + effect层blur增加 + shine层高光亮度提升
+- active: scale(0.94) 0.12s + effect层去掉blur()变高透玻璃 + shine层暗化边缘
+- 苹果核心规则: 默认/卡片=磨砂玻璃(有blur(12-16px))，按下按钮=高透玻璃(saturate(1.2)无blur)
+- 镜面高光: feSpecularLighting光学计算（非手写CSS box-shadow），表面法线基于turbulence噪声图
+- 折射强度: feDisplacementMap scale=120（可见级折射，有机噪声图驱动非人造SDF）
+- 鼠标跟随光斑: JS更新CSS变量--glow-x/--glow-y/--glow-opacity，radial-gradient光斑跟随指针
+- 不透明度: 玻璃体≥0.45(苹果「半透明材质保持一定不透明度」)，tint层控制
+- 背景要求: 多彩渐变/壁纸+动态光点→提供折射素材。禁止深色单色背景
+- 入场: opacity 0→1 + translateY(24px→0) + scale(0.95→1); 0.5s cubic-bezier(0.175,0.885,0.32,2.2); stagger 0.06s`
         }
     };
 
@@ -4513,6 +4642,7 @@ ${ds.desc}
         if (['brutal', 'neobrutalism'].includes(dsKey)) return 'brutal';
         if (['neon', 'cyberpunk'].includes(dsKey)) return 'neon';
         if (['glass', 'glassmorphism'].includes(dsKey)) return 'glass';
+        if (dsKey === 'liquidGlass') return 'liquidGlass';
         return undefined;
     }
 
@@ -5313,7 +5443,7 @@ ${techSpec}
             pre.appendChild(code);
             textSpan.appendChild(pre);
             if (typeof hljs !== 'undefined') {
-                try { hljs.highlightElement(code); } catch (e) {}
+                try { hljs.highlightElement(code); } catch (e) { console.warn('[Werkstatt] hljs highlight failed:', e.message); }
             }
         } else {
             try {
@@ -5352,6 +5482,22 @@ ${techSpec}
     }
     aiModelSelect.addEventListener('change', () => { saveAiModel(aiModelSelect.value); });
     btnRefreshModels.addEventListener('click', () => fetchModels());
+
+    // Remember Key toggle — controls whether API Key persists in localStorage or just sessionStorage
+    const rememberKeyToggle = document.getElementById('rememberKeyToggle');
+    if (rememberKeyToggle) {
+        rememberKeyToggle.checked = loadRememberKey();
+        rememberKeyToggle.addEventListener('change', () => {
+            saveRememberKey(rememberKeyToggle.checked);
+            // Re-save current key to the new backend
+            const k = loadAiKey();
+            if (k) { secureStorage.remove(AI_KEY_STORAGE); saveAiKey(k); }
+            if (!rememberKeyToggle.checked) {
+                // Clear from localStorage, keep in sessionStorage via secureStorage
+                try { localStorage.removeItem(AI_KEY_STORAGE); } catch(e) { console.warn('[Werkstatt] Failed to clear localStorage key:', e.message); }
+            }
+        });
+    }
 
     btnAiSend.addEventListener('click', async () => {
         // If AI is currently generating, click = stop
@@ -6358,7 +6504,7 @@ ${techSpec}
             }
             throw e;
         } finally {
-            if (reader) { try { reader.releaseLock(); } catch (e) {} }
+            if (reader) { try { reader.releaseLock(); } catch (e) { console.warn('[Werkstatt] reader.releaseLock failed:', e.message); } }
             clearTimeout(timeoutId);
             activeAbortController = null;
         }
@@ -6594,7 +6740,7 @@ ${techSpec}
     let agentModelCache = null; // { chatModels: [], imageModels: [], visionModels: [] }
 
     function loadAgentMode() { try { return sessionStorage.getItem(AGENT_MODE_STORAGE) === 'true'; } catch(e) { return false; } }
-    function saveAgentMode(v) { try { sessionStorage.setItem(AGENT_MODE_STORAGE, v ? 'true' : 'false'); } catch(e) {} }
+    function saveAgentMode(v) { try { sessionStorage.setItem(AGENT_MODE_STORAGE, v ? 'true' : 'false'); } catch(e) { console.warn('[Werkstatt] Failed to save agent mode to sessionStorage:', e.message); } }
 
     function setAgentStatus(step, detail) {
         if (!agentStepText) return;
@@ -7417,7 +7563,7 @@ ${techSpec}
                                 if (scrollWidth > clientWidth + 2) {
                                     visualIssues.push('【水平溢出】页面宽度超出视口 ' + (scrollWidth - clientWidth) + 'px，检查固定宽度元素');
                                 }
-                            } catch(e) {}
+                            } catch(e) { console.warn('[Werkstatt] visual_verify 溢出检测失败:', e.message); }
                             // 5c. 空元素/零尺寸检测
                             try {
                                 let emptyCount = 0;
@@ -7434,7 +7580,7 @@ ${techSpec}
                                 if (emptyCount > 0) {
                                     visualIssues.push('【空元素】发现 ' + emptyCount + ' 个零尺寸空容器，可能布局错误');
                                 }
-                            } catch(e) {}
+                            } catch(e) { console.warn('[Werkstatt] visual_verify 空元素检测失败:', e.message); }
                             // 5d. 按钮无可见文字/图标
                             try {
                                 const btns = doc.querySelectorAll('button, [role="button"]');
@@ -7448,7 +7594,7 @@ ${techSpec}
                                 if (emptyBtns > 0) {
                                     visualIssues.push('【无障碍】' + emptyBtns + ' 个按钮无文字/图标/aria-label');
                                 }
-                            } catch(e) {}
+                            } catch(e) { console.warn('[Werkstatt] visual_verify 按钮检测失败:', e.message); }
                             visualIssues.forEach(i => report.push(i));
                         }
                     }
