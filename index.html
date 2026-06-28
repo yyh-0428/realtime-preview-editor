@@ -868,6 +868,43 @@ html, body {
 .ai-diff-actions { display: flex; gap: var(--space-1); padding: var(--space-1) var(--space-2); border-top: 1px solid var(--border-subtle); }
 .ai-diff-actions .btn { font-size: var(--font-size-caption); padding: var(--space-half) var(--space-2); }
 
+.ai-snapshot-bar {
+  display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-2);
+  border-top: 1px solid var(--border-subtle); background: var(--bg-surface); flex-shrink: 0;
+  min-height: 32px; position: relative;
+}
+.ai-snapshot-btn {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
+  font-size: var(--font-size-caption); color: var(--text-secondary);
+  background: transparent; border: 1px solid var(--border-default); border-radius: var(--radius-sm);
+  cursor: pointer; transition: all var(--duration-fast); white-space: nowrap;
+}
+.ai-snapshot-btn:hover:not(:disabled) { color: var(--accent); border-color: var(--accent); }
+.ai-snapshot-btn:disabled { opacity: 0.35; cursor: default; }
+.ai-snapshot-btn.active { color: var(--accent); border-color: var(--accent); }
+.ai-snapshot-count { font-size: var(--font-size-caption); color: var(--text-tertiary); }
+.ai-snapshot-popup {
+  position: absolute; bottom: 100%; left: var(--space-2); right: var(--space-2);
+  max-height: 320px; overflow-y: auto;
+  background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-sm);
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.12); z-index: 100; display: none;
+}
+.ai-snapshot-popup.open { display: block; }
+.ai-snapshot-popup-section {
+  font-size: var(--font-size-caption); color: var(--text-tertiary);
+  padding: var(--space-1) var(--space-2); border-bottom: 1px solid var(--border-subtle);
+  position: sticky; top: 0; background: var(--bg-surface);
+}
+.ai-snapshot-popup-item {
+  padding: var(--space-1) var(--space-2); font-size: var(--font-size-caption); cursor: pointer;
+  border-bottom: 1px solid var(--border-subtle); color: var(--text-secondary);
+  display: flex; align-items: center; gap: var(--space-1); transition: background var(--duration-fast);
+}
+.ai-snapshot-popup-item:hover { background: var(--bg-input); color: var(--text-primary); }
+.ai-snapshot-popup-item.current { color: var(--accent); font-weight: 500; }
+.ai-snapshot-popup-item.expired { color: var(--text-tertiary); cursor: default; }
+.ai-snapshot-popup-item.expired:hover { background: transparent; }
+
 .ai-input-bar {
   display: flex; gap: var(--space-1); padding: var(--space-2);
   border-top: 1px solid var(--border-subtle);
@@ -1673,6 +1710,14 @@ html, body {
                                 <button class="empty-hint-chip" data-cmd="/help" style="padding:3px 10px;font-size:11px;border:1px solid var(--hairline);border-radius:12px;background:transparent;color:var(--text-secondary);cursor:pointer;transition:all 0.15s;">/help 全部指令</button>
                             </div>
                         </div>
+                    </div>
+                    <div class="ai-snapshot-bar">
+                        <button class="ai-snapshot-btn" id="btnAiUndo" disabled title="撤销上一轮 AI 修改">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>
+                            撤销 AI 修改
+                        </button>
+                        <span class="ai-snapshot-count" id="aiSnapshotCount"></span>
+                        <div class="ai-snapshot-popup" id="aiSnapshotPopup"></div>
                     </div>
                     <div class="ai-input-bar">
                         <textarea class="ai-chat-input" id="aiChatInput" placeholder="描述修改需求，或输入 / 查看快捷指令…" rows="1"></textarea>
@@ -3050,6 +3095,157 @@ html, body {
     // AI multi-turn conversation history (stores recent user+assistant exchanges)
     let aiChatHistory = [];
     const AI_HISTORY_MAX = 6; // Keep last 6 exchanges (12 messages)
+
+    // AI Snapshot Stack — undo AI modifications independently from CodeMirror undo
+    const AI_SNAPSHOT_MAX = 20;
+    let aiSnapshots = [];
+    let aiSnapshotTimeline = []; // expired snapshots, summary-only
+
+    const btnAiUndo = document.getElementById('btnAiUndo');
+    const aiSnapshotCount = document.getElementById('aiSnapshotCount');
+    const aiSnapshotPopup = document.getElementById('aiSnapshotPopup');
+
+    // ── AI Snapshot Stack ──
+    function takeAiSnapshot() {
+        const snapshot = {
+            id: Date.now(),
+            code: editor.getValue(),
+            lang: currentLang,
+            scrollPos: editor.getScrollInfo(),
+            summary: '第 ' + (aiSnapshotTimeline.length + aiSnapshots.length + 1) + ' 轮 AI 修改'
+        };
+        aiSnapshots.push(snapshot);
+        if (aiSnapshots.length > AI_SNAPSHOT_MAX) {
+            const dropped = aiSnapshots.shift();
+            aiSnapshotTimeline.push({ id: dropped.id, summary: dropped.summary, ts: dropped.id });
+        }
+        updateAiSnapshotUI();
+    }
+
+    function updateAiSnapshotSummary(text) {
+        if (aiSnapshots.length === 0) return;
+        const last = aiSnapshots[aiSnapshots.length - 1];
+        if (text && text.trim()) {
+            last.summary = text.trim().slice(0, 30) + (text.length > 30 ? '\u2026' : '');
+        }
+        updateAiSnapshotUI();
+    }
+
+    function undoAiSnapshot() {
+        if (aiSnapshots.length === 0) return;
+        const snapshot = aiSnapshots.pop();
+        editor.setValue(snapshot.code);
+        if (currentLang !== snapshot.lang) {
+            currentLang = snapshot.lang;
+            const langTab = document.querySelector('.lang-tab[data-lang="' + snapshot.lang + '"]');
+            if (langTab) langTab.click();
+        }
+        if (snapshot.scrollPos) {
+            editor.scrollTo(snapshot.scrollPos.left || 0, snapshot.scrollPos.top || 0);
+        }
+        updatePreview();
+        showToast('已撤销: ' + snapshot.summary, '');
+        updateAiSnapshotUI();
+    }
+
+    function undoAiSnapshotToIndex(index) {
+        // Undo to a specific snapshot (0 = oldest in current stack)
+        if (index < 0 || index >= aiSnapshots.length) return;
+        const target = aiSnapshots[index];
+        // Pop everything after and including target
+        const popped = aiSnapshots.splice(index);
+        // Apply the target snapshot
+        editor.setValue(target.code);
+        if (currentLang !== target.lang) {
+            currentLang = target.lang;
+            const langTab = document.querySelector('.lang-tab[data-lang="' + target.lang + '"]');
+            if (langTab) langTab.click();
+        }
+        if (target.scrollPos) {
+            editor.scrollTo(target.scrollPos.left || 0, target.scrollPos.top || 0);
+        }
+        updatePreview();
+        showToast('已撤销到: ' + target.summary, '');
+        updateAiSnapshotUI();
+    }
+
+    function updateAiSnapshotUI() {
+        const count = aiSnapshots.length;
+        if (count === 0) {
+            btnAiUndo.disabled = true;
+            btnAiUndo.classList.remove('active');
+            aiSnapshotCount.textContent = '';
+        } else {
+            btnAiUndo.disabled = false;
+            btnAiUndo.classList.add('active');
+            aiSnapshotCount.textContent = '第 ' + count + '/' + AI_SNAPSHOT_MAX + ' 步';
+        }
+    }
+
+    function buildSnapshotPopup() {
+        let html = '';
+        if (aiSnapshots.length > 0) {
+            html += '<div class="ai-snapshot-popup-section">\u53ef\u64a4\u9500\uff08\u6700\u8fd1 ' + aiSnapshots.length + ' \u6b65\uff09<\/div>';
+            for (let i = aiSnapshots.length - 1; i >= 0; i--) {
+                const s = aiSnapshots[i];
+                const isCurrent = (i === aiSnapshots.length - 1);
+                html += '<div class="ai-snapshot-popup-item' + (isCurrent ? ' current' : '') + '" data-snapshot-index="' + i + '">';
+                html += (isCurrent ? '\u25cf' : '\u25cb') + ' ' + escapeHtml(s.summary);
+                html += '<\/div>';
+            }
+        }
+        if (aiSnapshotTimeline.length > 0) {
+            html += '<div class="ai-snapshot-popup-section">\u5386\u53f2\u65f6\u95f4\u7ebf\uff08\u5df2\u8fc7\u671f\uff09<\/div>';
+            for (let i = aiSnapshotTimeline.length - 1; i >= 0 && i >= aiSnapshotTimeline.length - 20; i--) {
+                const t = aiSnapshotTimeline[i];
+                html += '<div class="ai-snapshot-popup-item expired">\u00b7 ' + escapeHtml(t.summary) + '<\/div>';
+            }
+        }
+        if (html === '') {
+            html = '<div class="ai-snapshot-popup-section">\u6682\u65e0\u5feb\u7167\u8bb0\u5f55<\/div>';
+        }
+        aiSnapshotPopup.innerHTML = html;
+        // Bind click events
+        aiSnapshotPopup.querySelectorAll('.ai-snapshot-popup-item[data-snapshot-index]').forEach(item => {
+            item.addEventListener('click', () => {
+                const idx = parseInt(item.dataset.snapshotIndex, 10);
+                undoAiSnapshotToIndex(idx);
+                aiSnapshotPopup.classList.remove('open');
+            });
+        });
+    }
+
+    // Snapshot button: click = undo one step, long-press / right-click = popup
+    let snapshotLongPressTimer = null;
+    btnAiUndo.addEventListener('click', (e) => {
+        if (snapshotLongPressTimer) { clearTimeout(snapshotLongPressTimer); snapshotLongPressTimer = null; return; }
+        if (!btnAiUndo.disabled) undoAiSnapshot();
+    });
+    btnAiUndo.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        buildSnapshotPopup();
+        aiSnapshotPopup.classList.toggle('open');
+    });
+    btnAiUndo.addEventListener('touchstart', () => {
+        if (btnAiUndo.disabled) return;
+        snapshotLongPressTimer = setTimeout(() => {
+            snapshotLongPressTimer = null;
+            buildSnapshotPopup();
+            aiSnapshotPopup.classList.add('open');
+        }, 500);
+    });
+    btnAiUndo.addEventListener('touchend', () => {
+        if (snapshotLongPressTimer) { clearTimeout(snapshotLongPressTimer); snapshotLongPressTimer = null; }
+    });
+    btnAiUndo.addEventListener('touchmove', () => {
+        if (snapshotLongPressTimer) { clearTimeout(snapshotLongPressTimer); snapshotLongPressTimer = null; }
+    });
+    // Close popup on outside click
+    document.addEventListener('click', (e) => {
+        if (!aiSnapshotPopup.contains(e.target) && e.target !== btnAiUndo && !btnAiUndo.contains(e.target)) {
+            aiSnapshotPopup.classList.remove('open');
+        }
+    });
 
     function setAiGenerating(generating) {
         isAiGenerating = generating;
@@ -5522,6 +5718,9 @@ ${techSpec}
 
         const instruction = rawInput;
 
+        // Take snapshot before any AI modification
+        takeAiSnapshot();
+
         // Agent Mode
         if (agentModeToggle && agentModeToggle.checked) {
             aiChatInput.value = '';
@@ -5921,6 +6120,8 @@ ${techSpec}
             setAiGenerating(false);
             if (thinkingBadge) thinkingBadge.style.display = 'none';
             clearAiSelectionHighlight();
+            // Update last snapshot summary with AI response text
+            if (typeof streamTextBuf !== 'undefined') updateAiSnapshotSummary(streamTextBuf);
         }
     });
 
@@ -8078,6 +8279,8 @@ ${techSpec}
                         if (parsed.answer && parsed.answer.trim()) {
                             addChatMessage('assistant', parsed.answer);
                         }
+                        // Update snapshot summary with Agent's final answer
+                        updateAiSnapshotSummary(parsed.answer);
                         // Try to apply any edit blocks in the final answer
                         const editBlocks = parseEditBlocks(parsed.answer);
                         if (editBlocks.length > 0) {
