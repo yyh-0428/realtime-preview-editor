@@ -5307,6 +5307,13 @@ ${techSpec}
 
     function applyEditBlocks(blocks) {
         if (blocks.length === 0) return { success: false, reason: 'no_blocks' };
+        const maxLine = editor.lineCount();
+        for (const block of blocks) {
+            const refLine = block.type === 'insert' ? block.afterLine : block.startLine;
+            if (refLine < 1 || refLine > maxLine + (block.type === 'insert' ? 1 : 0)) {
+                return { success: false, reason: '行号越界: ' + refLine + '（有效范围 1-' + maxLine + '）' };
+            }
+        }
         const changedLines = new Set();
         const sorted = [...blocks].sort((a, b) => {
             const lineA = a.type === 'insert' ? a.afterLine : a.startLine;
@@ -6602,7 +6609,17 @@ ${techSpec}
         const { messages, codeFence, currentCode } = buildAiPayload(instruction, deepThinking);
         const chatUrl = getEndpointChatUrl(loadAiEndpoint());
         const payload = { model: model, messages: messages };
-        const res = await fetch(chatUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey }, body: JSON.stringify(payload) });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for non-streaming
+        let res;
+        try {
+            res = await fetch(chatUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey }, body: JSON.stringify(payload), signal: controller.signal });
+        } catch(e) {
+            clearTimeout(timeoutId);
+            if (e.name === 'AbortError') throw new Error('请求超时（60s），请检查网络或尝试切换模型');
+            throw e;
+        }
+        clearTimeout(timeoutId);
         if (!res.ok) {
             let em = 'API 错误 ' + res.status;
             if (res.status === 401) em = 'API Key 无效';
@@ -7510,6 +7527,7 @@ ${techSpec}
                 return '代码共 ' + lines.length + ' 行，语言: ' + lang + '\n当前完整代码（带行号）：\n```\n' + lines.map((l, i) => '  ' + (i+1) + ' | ' + l).join('\n') + '\n```';
             }
             case 'edit_code': {
+                try {
                 const blocks = [];
                 let lineDelta = 0;
                 if (args.operation === 'replace') {
@@ -7535,6 +7553,7 @@ ${techSpec}
                     return msg;
                 }
                 return '[ERR] 修改失败: ' + (result.reason || '未知错误');
+                } catch(e) { return '[ERR] edit_code 异常: ' + e.message; }
             }
             case 'preview_code': {
                 await updatePreview();

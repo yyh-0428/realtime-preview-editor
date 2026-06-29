@@ -21,20 +21,93 @@
       "warning": "#f5a623"
     },
     "typography": {
-      "display": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "48px", "fontWeight": 600, "lineHeight": 1.1, "letterSpacing": "-2.4px" },
-      "title": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "24px", "fontWeight": 600, "lineHeight": 1.2, "letterSpacing": "-0.6px" },
-      "body": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.5 },
-      "caption": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "12px", "fontWeight": 400, "lineHeight": 1.4 },
-      "button": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": 1.0 },
-      "mono": { "fontFamily": "\"JetBrains Mono\", \"Fira Code\", monospace", "fontSize": "14px", "fontWeight": 400 }
+      "display": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "48px",
+        "fontWeight": 600,
+        "lineHeight": 1.1,
+        "letterSpacing": "-2.4px"
+      },
+      "title": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "24px",
+        "fontWeight": 600,
+        "lineHeight": 1.2,
+        "letterSpacing": "-0.6px"
+      },
+      "body": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": 1.5
+      },
+      "caption": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": 400,
+        "lineHeight": 1.4
+      },
+      "button": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 500,
+        "lineHeight": 1
+      },
+      "mono": {
+        "fontFamily": "\"JetBrains Mono\", \"Fira Code\", monospace",
+        "fontSize": "14px",
+        "fontWeight": 400
+      }
     },
-    "rounded": { "xs": "4px", "sm": "4px", "md": "8px", "lg": "12px", "xl": "16px", "pill": "9999px" },
-    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "rounded": {
+      "xs": "4px",
+      "sm": "4px",
+      "md": "8px",
+      "lg": "12px",
+      "xl": "16px",
+      "pill": "9999px"
+    },
+    "spacing": {
+      "xxs": "2px",
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "xxl": "48px",
+      "section": "96px"
+    },
     "components": {
-      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "10px 20px", "height": "40px" },
-      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "24px" },
-      "input": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px", "height": "40px" },
-      "nav": { "backgroundColor": "{colors.surface}", "textColor": "{colors.body}", "borderBottom": "1px solid {colors.hairline}", "height": "64px" }
+      "button-primary": {
+        "backgroundColor": "{colors.primary}",
+        "textColor": "{colors.on-primary}",
+        "typography": "{typography.button}",
+        "rounded": "{rounded.md}",
+        "padding": "10px 20px",
+        "height": "40px"
+      },
+      "card": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "rounded": "{rounded.lg}",
+        "padding": "24px"
+      },
+      "input": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "typography": "{typography.body}",
+        "rounded": "{rounded.md}",
+        "padding": "10px 12px",
+        "height": "40px"
+      },
+      "nav": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.body}",
+        "borderBottom": "1px solid {colors.hairline}",
+        "height": "64px"
+      }
     },
     "rules": [
       "使用白底 (#fafafa) 作为页面背景，卡片用纯白 (#ffffff)",
@@ -60,10 +133,32 @@
       "不要突破 4px 间距网格使用任意值",
       "不要在 Display 标题使用 400 weight"
     ],
-    "keywords": ["现代", "简约", "清爽", "SaaS", "商务", "企业", "工具", "平台", "dashboard", "管理后台", "landing page", "官网", "产品介绍", "软件", "app", "应用"],
+    "keywords": [
+      "现代",
+      "简约",
+      "清爽",
+      "SaaS",
+      "商务",
+      "企业",
+      "工具",
+      "平台",
+      "dashboard",
+      "管理后台",
+      "landing page",
+      "官网",
+      "产品介绍",
+      "软件",
+      "app",
+      "应用"
+    ],
     "tone": "brutallyMinimal",
     "responsive": {
-      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "breakpoints": {
+        "mobile": "<768px",
+        "tablet": "768-1023px",
+        "desktop": "1024-1439px",
+        "wide": ">=1440px"
+      },
       "strategy": "桌面优先，最大内容宽度 1200px 居中；移动端将多列网格降为单列，section 间距从 96px 降至 48px。"
     }
   },
@@ -90,20 +185,90 @@
       "warning": "#d4a05a"
     },
     "typography": {
-      "display": { "fontFamily": "\"Cormorant Garamond\", Garamond, \"Times New Roman\", serif", "fontSize": "48px", "fontWeight": 400, "lineHeight": 1.1, "letterSpacing": "-1px" },
-      "title": { "fontFamily": "\"Cormorant Garamond\", Garamond, \"Times New Roman\", serif", "fontSize": "24px", "fontWeight": 500, "lineHeight": 1.3 },
-      "body": { "fontFamily": "Inter, -apple-system, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.55 },
-      "caption": { "fontFamily": "Inter, -apple-system, sans-serif", "fontSize": "13px", "fontWeight": 500, "lineHeight": 1.4 },
-      "button": { "fontFamily": "Inter, -apple-system, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": 1.0 },
-      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+      "display": {
+        "fontFamily": "\"Cormorant Garamond\", Garamond, \"Times New Roman\", serif",
+        "fontSize": "48px",
+        "fontWeight": 400,
+        "lineHeight": 1.1,
+        "letterSpacing": "-1px"
+      },
+      "title": {
+        "fontFamily": "\"Cormorant Garamond\", Garamond, \"Times New Roman\", serif",
+        "fontSize": "24px",
+        "fontWeight": 500,
+        "lineHeight": 1.3
+      },
+      "body": {
+        "fontFamily": "Inter, -apple-system, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": 1.55
+      },
+      "caption": {
+        "fontFamily": "Inter, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": 500,
+        "lineHeight": 1.4
+      },
+      "button": {
+        "fontFamily": "Inter, -apple-system, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 500,
+        "lineHeight": 1
+      },
+      "mono": {
+        "fontFamily": "\"JetBrains Mono\", monospace",
+        "fontSize": "14px",
+        "fontWeight": 400
+      }
     },
-    "rounded": { "xs": "4px", "sm": "6px", "md": "8px", "lg": "12px", "xl": "16px", "pill": "9999px" },
-    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "rounded": {
+      "xs": "4px",
+      "sm": "6px",
+      "md": "8px",
+      "lg": "12px",
+      "xl": "16px",
+      "pill": "9999px"
+    },
+    "spacing": {
+      "xxs": "2px",
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "xxl": "48px",
+      "section": "96px"
+    },
     "components": {
-      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "10px 20px" },
-      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "32px" },
-      "input": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px" },
-      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.body}", "borderBottom": "1px solid {colors.hairline}", "height": "64px" }
+      "button-primary": {
+        "backgroundColor": "{colors.primary}",
+        "textColor": "{colors.on-primary}",
+        "typography": "{typography.button}",
+        "rounded": "{rounded.md}",
+        "padding": "10px 20px"
+      },
+      "card": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "rounded": "{rounded.lg}",
+        "padding": "32px"
+      },
+      "input": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "typography": "{typography.body}",
+        "rounded": "{rounded.md}",
+        "padding": "10px 12px"
+      },
+      "nav": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.body}",
+        "borderBottom": "1px solid {colors.hairline}",
+        "height": "64px"
+      }
     },
     "rules": [
       "使用暖奶油色 (#faf9f5) 作为画布背景，不是纯白",
@@ -129,10 +294,30 @@
       "不要压缩 section 间距到 96px 以下",
       "不要使用纯黑文字，用 #141413 保持温暖"
     ],
-    "keywords": ["文学", "编辑", "温暖", "奶油色", "杂志", "博客", "文章", "阅读", "写作", "出版", "内容", "故事", "散文", "诗集"],
+    "keywords": [
+      "文学",
+      "编辑",
+      "温暖",
+      "奶油色",
+      "杂志",
+      "博客",
+      "文章",
+      "阅读",
+      "写作",
+      "出版",
+      "内容",
+      "故事",
+      "散文",
+      "诗集"
+    ],
     "tone": "warmEditorial",
     "responsive": {
-      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "breakpoints": {
+        "mobile": "<768px",
+        "tablet": "768-1023px",
+        "desktop": "1024-1439px",
+        "wide": ">=1440px"
+      },
       "strategy": "桌面优先的编辑阅读体验；移动端 Display 字号降至 36px，section 间距降至 64px，奶油/深色交替节奏保留。"
     }
   },
@@ -165,20 +350,93 @@
       "warning": "#f5a623"
     },
     "typography": {
-      "display": { "fontFamily": "Geist, Inter, system-ui, -apple-system, sans-serif", "fontSize": "48px", "fontWeight": 600, "lineHeight": "48px", "letterSpacing": "-2.4px" },
-      "title": { "fontFamily": "Geist, Inter, system-ui, -apple-system, sans-serif", "fontSize": "24px", "fontWeight": 600, "lineHeight": "32px", "letterSpacing": "-0.96px" },
-      "body": { "fontFamily": "Geist, Inter, system-ui, -apple-system, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": "24px" },
-      "caption": { "fontFamily": "Geist, Inter, system-ui, -apple-system, sans-serif", "fontSize": "12px", "fontWeight": 400, "lineHeight": "16px" },
-      "button": { "fontFamily": "Geist, Inter, system-ui, -apple-system, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": "20px" },
-      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+      "display": {
+        "fontFamily": "Geist, Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "48px",
+        "fontWeight": 600,
+        "lineHeight": "48px",
+        "letterSpacing": "-2.4px"
+      },
+      "title": {
+        "fontFamily": "Geist, Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "24px",
+        "fontWeight": 600,
+        "lineHeight": "32px",
+        "letterSpacing": "-0.96px"
+      },
+      "body": {
+        "fontFamily": "Geist, Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": "24px"
+      },
+      "caption": {
+        "fontFamily": "Geist, Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": 400,
+        "lineHeight": "16px"
+      },
+      "button": {
+        "fontFamily": "Geist, Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 500,
+        "lineHeight": "20px"
+      },
+      "mono": {
+        "fontFamily": "\"JetBrains Mono\", monospace",
+        "fontSize": "14px",
+        "fontWeight": 400
+      }
     },
-    "rounded": { "xs": "4px", "sm": "4px", "md": "6px", "lg": "8px", "xl": "12px", "pill": "9999px" },
-    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "rounded": {
+      "xs": "4px",
+      "sm": "4px",
+      "md": "6px",
+      "lg": "8px",
+      "xl": "12px",
+      "pill": "9999px"
+    },
+    "spacing": {
+      "xxs": "2px",
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "xxl": "48px",
+      "section": "96px"
+    },
     "components": {
-      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "10px 20px", "height": "40px" },
-      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "24px" },
-      "input": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px", "height": "40px" },
-      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "borderBottom": "1px solid {colors.hairline}", "height": "64px" }
+      "button-primary": {
+        "backgroundColor": "{colors.primary}",
+        "textColor": "{colors.on-primary}",
+        "typography": "{typography.button}",
+        "rounded": "{rounded.md}",
+        "padding": "10px 20px",
+        "height": "40px"
+      },
+      "card": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "rounded": "{rounded.lg}",
+        "padding": "24px"
+      },
+      "input": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "typography": "{typography.body}",
+        "rounded": "{rounded.md}",
+        "padding": "10px 12px",
+        "height": "40px"
+      },
+      "nav": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.ink}",
+        "borderBottom": "1px solid {colors.hairline}",
+        "height": "64px"
+      }
     },
     "rules": [
       "白底 (#ffffff) 为主，近黑 (#171717) 为文字和按钮",
@@ -204,10 +462,30 @@
       "不要用纯黑 #000000，用近黑 #171717",
       "不要在正文使用 600 weight"
     ],
-    "keywords": ["开发者", "技术", "精确", "网格", "几何", "现代", "工程", "代码", "API", "文档", "开源", "工具链", "部署", "CLI"],
+    "keywords": [
+      "开发者",
+      "技术",
+      "精确",
+      "网格",
+      "几何",
+      "现代",
+      "工程",
+      "代码",
+      "API",
+      "文档",
+      "开源",
+      "工具链",
+      "部署",
+      "CLI"
+    ],
     "tone": "brutallyMinimal",
     "responsive": {
-      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "breakpoints": {
+        "mobile": "<768px",
+        "tablet": "768-1023px",
+        "desktop": "1024-1439px",
+        "wide": ">=1440px"
+      },
       "strategy": "桌面优先；移动端 Hero 渐变保留但 Display 降至 36px，导航折叠为汉堡菜单，网格降为单列。"
     }
   },
@@ -240,20 +518,92 @@
       "warning": "#f2994a"
     },
     "typography": {
-      "display": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "56px", "fontWeight": 600, "lineHeight": 1.1, "letterSpacing": "-1.8px" },
-      "title": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "28px", "fontWeight": 600, "lineHeight": 1.2, "letterSpacing": "-0.6px" },
-      "body": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.5, "letterSpacing": "-0.05px" },
-      "caption": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "12px", "fontWeight": 400, "lineHeight": 1.4 },
-      "button": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": 1.2 },
-      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+      "display": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "56px",
+        "fontWeight": 600,
+        "lineHeight": 1.1,
+        "letterSpacing": "-1.8px"
+      },
+      "title": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "28px",
+        "fontWeight": 600,
+        "lineHeight": 1.2,
+        "letterSpacing": "-0.6px"
+      },
+      "body": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": 1.5,
+        "letterSpacing": "-0.05px"
+      },
+      "caption": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": 400,
+        "lineHeight": 1.4
+      },
+      "button": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 500,
+        "lineHeight": 1.2
+      },
+      "mono": {
+        "fontFamily": "\"JetBrains Mono\", monospace",
+        "fontSize": "14px",
+        "fontWeight": 400
+      }
     },
-    "rounded": { "xs": "4px", "sm": "4px", "md": "6px", "lg": "8px", "xl": "12px", "pill": "9999px" },
-    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "rounded": {
+      "xs": "4px",
+      "sm": "4px",
+      "md": "6px",
+      "lg": "8px",
+      "xl": "12px",
+      "pill": "9999px"
+    },
+    "spacing": {
+      "xxs": "2px",
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "xxl": "48px",
+      "section": "96px"
+    },
     "components": {
-      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "8px 16px" },
-      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "24px" },
-      "input": { "backgroundColor": "{colors.surface-2}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "8px 12px" },
-      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.body}", "borderBottom": "1px solid {colors.hairline}", "height": "56px" }
+      "button-primary": {
+        "backgroundColor": "{colors.primary}",
+        "textColor": "{colors.on-primary}",
+        "typography": "{typography.button}",
+        "rounded": "{rounded.md}",
+        "padding": "8px 16px"
+      },
+      "card": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "rounded": "{rounded.lg}",
+        "padding": "24px"
+      },
+      "input": {
+        "backgroundColor": "{colors.surface-2}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "typography": "{typography.body}",
+        "rounded": "{rounded.md}",
+        "padding": "8px 12px"
+      },
+      "nav": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.body}",
+        "borderBottom": "1px solid {colors.hairline}",
+        "height": "56px"
+      }
     },
     "rules": [
       "使用极深黑 (#010102) 作为画布，不是纯黑",
@@ -279,10 +629,29 @@
       "不要使用超过 12px 的圆角",
       "不要在深色背景用深灰文字，保持 #f7f8f8 高对比"
     ],
-    "keywords": ["暗黑", "软件", "工艺", "精确", "工具", "生产力", "效率", "任务", "项目管理", "深色模式", "编辑器", "IDE", "开发者工具"],
+    "keywords": [
+      "暗黑",
+      "软件",
+      "工艺",
+      "精确",
+      "工具",
+      "生产力",
+      "效率",
+      "任务",
+      "项目管理",
+      "深色模式",
+      "编辑器",
+      "IDE",
+      "开发者工具"
+    ],
     "tone": "darkTech",
     "responsive": {
-      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "breakpoints": {
+        "mobile": "<768px",
+        "tablet": "768-1023px",
+        "desktop": "1024-1439px",
+        "wide": ">=1440px"
+      },
       "strategy": "桌面优先深色界面；移动端 Display 降至 40px，导航折叠，产品截图面板保持深色边框。"
     }
   },
@@ -315,20 +684,94 @@
       "warning": "#cc8e00"
     },
     "typography": {
-      "display": { "fontFamily": "\"SF Pro Display\", system-ui, -apple-system, sans-serif", "fontSize": "56px", "fontWeight": 300, "lineHeight": 1.03, "letterSpacing": "-1.4px" },
-      "title": { "fontFamily": "\"SF Pro Display\", system-ui, -apple-system, sans-serif", "fontSize": "26px", "fontWeight": 300, "lineHeight": 1.12, "letterSpacing": "-0.26px" },
-      "body": { "fontFamily": "\"SF Pro Display\", system-ui, -apple-system, sans-serif", "fontSize": "16px", "fontWeight": 300, "lineHeight": 1.4 },
-      "caption": { "fontFamily": "\"SF Pro Display\", system-ui, -apple-system, sans-serif", "fontSize": "12px", "fontWeight": 400, "lineHeight": 1.4 },
-      "button": { "fontFamily": "\"SF Pro Display\", system-ui, -apple-system, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": 1.0 },
-      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+      "display": {
+        "fontFamily": "\"SF Pro Display\", system-ui, -apple-system, sans-serif",
+        "fontSize": "56px",
+        "fontWeight": 300,
+        "lineHeight": 1.03,
+        "letterSpacing": "-1.4px"
+      },
+      "title": {
+        "fontFamily": "\"SF Pro Display\", system-ui, -apple-system, sans-serif",
+        "fontSize": "26px",
+        "fontWeight": 300,
+        "lineHeight": 1.12,
+        "letterSpacing": "-0.26px"
+      },
+      "body": {
+        "fontFamily": "\"SF Pro Display\", system-ui, -apple-system, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 300,
+        "lineHeight": 1.4
+      },
+      "caption": {
+        "fontFamily": "\"SF Pro Display\", system-ui, -apple-system, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": 400,
+        "lineHeight": 1.4
+      },
+      "button": {
+        "fontFamily": "\"SF Pro Display\", system-ui, -apple-system, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 500,
+        "lineHeight": 1
+      },
+      "mono": {
+        "fontFamily": "\"JetBrains Mono\", monospace",
+        "fontSize": "14px",
+        "fontWeight": 400
+      }
     },
-    "rounded": { "xs": "4px", "sm": "4px", "md": "6px", "lg": "8px", "xl": "12px", "pill": "9999px" },
-    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "rounded": {
+      "xs": "4px",
+      "sm": "4px",
+      "md": "6px",
+      "lg": "8px",
+      "xl": "12px",
+      "pill": "9999px"
+    },
+    "spacing": {
+      "xxs": "2px",
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "xxl": "48px",
+      "section": "96px"
+    },
     "components": {
-      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.pill}", "padding": "10px 20px", "height": "40px" },
-      "card": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "24px", "boxShadow": "0 2px 8px rgba(0,0,0,0.06)" },
-      "input": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline-input}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px", "height": "40px" },
-      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "borderBottom": "1px solid {colors.hairline}", "height": "64px" }
+      "button-primary": {
+        "backgroundColor": "{colors.primary}",
+        "textColor": "{colors.on-primary}",
+        "typography": "{typography.button}",
+        "rounded": "{rounded.pill}",
+        "padding": "10px 20px",
+        "height": "40px"
+      },
+      "card": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "rounded": "{rounded.lg}",
+        "padding": "24px",
+        "boxShadow": "0 2px 8px rgba(0,0,0,0.06)"
+      },
+      "input": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline-input}",
+        "typography": "{typography.body}",
+        "rounded": "{rounded.md}",
+        "padding": "10px 12px",
+        "height": "40px"
+      },
+      "nav": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.ink}",
+        "borderBottom": "1px solid {colors.hairline}",
+        "height": "64px"
+      }
     },
     "rules": [
       "白底为主，浅蓝灰 (#f6f9fc) 作为交替 section 背景",
@@ -354,10 +797,29 @@
       "不要用纯黑文字，用墨水色 #0d253d",
       "不要在数字排版省略 tabular-nums"
     ],
-    "keywords": ["金融", "支付", "专业", "商务", "基础设施", "银行", "交易", "账单", "企业", "B2B", "SaaS", "fintech", "数据"],
+    "keywords": [
+      "金融",
+      "支付",
+      "专业",
+      "商务",
+      "基础设施",
+      "银行",
+      "交易",
+      "账单",
+      "企业",
+      "B2B",
+      "SaaS",
+      "fintech",
+      "数据"
+    ],
     "tone": "luxuryRefined",
     "responsive": {
-      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "breakpoints": {
+        "mobile": "<768px",
+        "tablet": "768-1023px",
+        "desktop": "1024-1439px",
+        "wide": ">=1440px"
+      },
       "strategy": "桌面优先；移动端 Hero 渐变网格保留但 Display 降至 40px，section 交替背景节奏保留，数字仍用 tabular-nums。"
     }
   },
@@ -388,20 +850,91 @@
       "warning": "#f59e0b"
     },
     "typography": {
-      "display": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "56px", "fontWeight": 700, "lineHeight": 1.05, "letterSpacing": "-1px" },
-      "title": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "32px", "fontWeight": 600, "lineHeight": 1.15, "letterSpacing": "-0.3px" },
-      "body": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.6 },
-      "caption": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "13px", "fontWeight": 400, "lineHeight": 1.4 },
-      "button": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": 1.0 },
-      "mono": { "fontFamily": "\"JetBrains Mono\", \"Fira Code\", monospace", "fontSize": "14px", "fontWeight": 400 }
+      "display": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "56px",
+        "fontWeight": 700,
+        "lineHeight": 1.05,
+        "letterSpacing": "-1px"
+      },
+      "title": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "32px",
+        "fontWeight": 600,
+        "lineHeight": 1.15,
+        "letterSpacing": "-0.3px"
+      },
+      "body": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": 1.6
+      },
+      "caption": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": 400,
+        "lineHeight": 1.4
+      },
+      "button": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 500,
+        "lineHeight": 1
+      },
+      "mono": {
+        "fontFamily": "\"JetBrains Mono\", \"Fira Code\", monospace",
+        "fontSize": "14px",
+        "fontWeight": 400
+      }
     },
-    "rounded": { "xs": "4px", "sm": "4px", "md": "6px", "lg": "8px", "xl": "12px", "pill": "9999px" },
-    "spacing": { "xxs": "4px", "xs": "8px", "sm": "12px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "rounded": {
+      "xs": "4px",
+      "sm": "4px",
+      "md": "6px",
+      "lg": "8px",
+      "xl": "12px",
+      "pill": "9999px"
+    },
+    "spacing": {
+      "xxs": "4px",
+      "xs": "8px",
+      "sm": "12px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "xxl": "48px",
+      "section": "96px"
+    },
     "components": {
-      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "10px 20px" },
-      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "24px" },
-      "input": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px" },
-      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.body}", "borderBottom": "1px solid {colors.hairline}", "height": "64px" }
+      "button-primary": {
+        "backgroundColor": "{colors.primary}",
+        "textColor": "{colors.on-primary}",
+        "typography": "{typography.button}",
+        "rounded": "{rounded.md}",
+        "padding": "10px 20px"
+      },
+      "card": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "rounded": "{rounded.lg}",
+        "padding": "24px"
+      },
+      "input": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "typography": "{typography.body}",
+        "rounded": "{rounded.md}",
+        "padding": "10px 12px"
+      },
+      "nav": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.body}",
+        "borderBottom": "1px solid {colors.hairline}",
+        "height": "64px"
+      }
     },
     "rules": [
       "深暖黑 (#09090b, zinc-950) 作为画布，不是纯黑",
@@ -427,10 +960,29 @@
       "不要使用非 Lucide 的图标集",
       "不要在 Body 使用 700 weight，保持 400"
     ],
-    "keywords": ["动画", "开发者", "炫酷", "渐变", "组件", "特效", "展示", "演示", "粒子", "霓虹", "科技感", "未来", "创意"],
+    "keywords": [
+      "动画",
+      "开发者",
+      "炫酷",
+      "渐变",
+      "组件",
+      "特效",
+      "展示",
+      "演示",
+      "粒子",
+      "霓虹",
+      "科技感",
+      "未来",
+      "创意"
+    ],
     "tone": "darkTech",
     "responsive": {
-      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "breakpoints": {
+        "mobile": "<768px",
+        "tablet": "768-1023px",
+        "desktop": "1024-1439px",
+        "wide": ">=1440px"
+      },
       "strategy": "桌面优先；移动端 Display 降至 40px，动画特效降级为静态以保证性能，组件演示网格降为单列。"
     }
   },
@@ -460,20 +1012,95 @@
       "warning": "#ff8800"
     },
     "typography": {
-      "display": { "fontFamily": "Roboto, \"Helvetica Neue\", Arial, sans-serif", "fontSize": "80px", "fontWeight": 400, "lineHeight": 0.92, "letterSpacing": "normal", "textTransform": "uppercase" },
-      "title": { "fontFamily": "Roboto, \"Helvetica Neue\", Arial, sans-serif", "fontSize": "40px", "fontWeight": 400, "lineHeight": 1.15, "letterSpacing": "normal", "textTransform": "uppercase" },
-      "body": { "fontFamily": "Roboto, \"Helvetica Neue\", Arial, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.5 },
-      "caption": { "fontFamily": "Roboto, \"Helvetica Neue\", Arial, sans-serif", "fontSize": "12px", "fontWeight": 500, "lineHeight": 1.4, "letterSpacing": "0.225px", "textTransform": "uppercase" },
-      "button": { "fontFamily": "Roboto, \"Helvetica Neue\", Arial, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.5, "textTransform": "uppercase" },
-      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+      "display": {
+        "fontFamily": "Roboto, \"Helvetica Neue\", Arial, sans-serif",
+        "fontSize": "80px",
+        "fontWeight": 400,
+        "lineHeight": 0.92,
+        "letterSpacing": "normal",
+        "textTransform": "uppercase"
+      },
+      "title": {
+        "fontFamily": "Roboto, \"Helvetica Neue\", Arial, sans-serif",
+        "fontSize": "40px",
+        "fontWeight": 400,
+        "lineHeight": 1.15,
+        "letterSpacing": "normal",
+        "textTransform": "uppercase"
+      },
+      "body": {
+        "fontFamily": "Roboto, \"Helvetica Neue\", Arial, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": 1.5
+      },
+      "caption": {
+        "fontFamily": "Roboto, \"Helvetica Neue\", Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": 500,
+        "lineHeight": 1.4,
+        "letterSpacing": "0.225px",
+        "textTransform": "uppercase"
+      },
+      "button": {
+        "fontFamily": "Roboto, \"Helvetica Neue\", Arial, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": 1.5,
+        "textTransform": "uppercase"
+      },
+      "mono": {
+        "fontFamily": "\"JetBrains Mono\", monospace",
+        "fontSize": "14px",
+        "fontWeight": 400
+      }
     },
-    "rounded": { "xs": "0px", "sm": "0px", "md": "0px", "lg": "0px", "xl": "0px", "pill": "2px" },
-    "spacing": { "xxs": "2px", "xs": "2px", "sm": "4px", "md": "8px", "lg": "16px", "xl": "24px", "xxl": "32px", "section": "48px" },
+    "rounded": {
+      "xs": "0px",
+      "sm": "0px",
+      "md": "0px",
+      "lg": "0px",
+      "xl": "0px",
+      "pill": "2px"
+    },
+    "spacing": {
+      "xxs": "2px",
+      "xs": "2px",
+      "sm": "4px",
+      "md": "8px",
+      "lg": "16px",
+      "xl": "24px",
+      "xxl": "32px",
+      "section": "48px"
+    },
     "components": {
-      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "16px 32px", "textTransform": "uppercase" },
-      "card": { "backgroundColor": "{colors.surface-dark}", "textColor": "{colors.ink}", "rounded": "{rounded.lg}", "padding": "32px" },
-      "input": { "backgroundColor": "{colors.surface-dark}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "12px 16px" },
-      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "height": "64px" }
+      "button-primary": {
+        "backgroundColor": "{colors.primary}",
+        "textColor": "{colors.on-primary}",
+        "typography": "{typography.button}",
+        "rounded": "{rounded.md}",
+        "padding": "16px 32px",
+        "textTransform": "uppercase"
+      },
+      "card": {
+        "backgroundColor": "{colors.surface-dark}",
+        "textColor": "{colors.ink}",
+        "rounded": "{rounded.lg}",
+        "padding": "32px"
+      },
+      "input": {
+        "backgroundColor": "{colors.surface-dark}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "typography": "{typography.body}",
+        "rounded": "{rounded.md}",
+        "padding": "12px 16px"
+      },
+      "nav": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.ink}",
+        "height": "64px"
+      }
     },
     "rules": [
       "使用纯黑 (#000000) 作为主背景，不是深灰",
@@ -499,10 +1126,29 @@
       "不要在 Display 标题使用小写或低于 40px 的字号",
       "不要用深灰代替纯黑 #000000 作为主背景"
     ],
-    "keywords": ["豪华", "力量", "汽车", "运动", "黑色", "金色", "高端", "品牌", "奢侈", "速度", "激情", "性能", "赛车"],
+    "keywords": [
+      "豪华",
+      "力量",
+      "汽车",
+      "运动",
+      "黑色",
+      "金色",
+      "高端",
+      "品牌",
+      "奢侈",
+      "速度",
+      "激情",
+      "性能",
+      "赛车"
+    ],
     "tone": "brutalistRaw",
     "responsive": {
-      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "breakpoints": {
+        "mobile": "<768px",
+        "tablet": "768-1023px",
+        "desktop": "1024-1439px",
+        "wide": ">=1440px"
+      },
       "strategy": "桌面优先全幅影像；移动端 Display 降至 48px 但保持大写，金色 CTA 保持锐利矩形，黑色留白节奏保留。"
     }
   },
@@ -528,20 +1174,94 @@
       "warning": "#f5a623"
     },
     "typography": {
-      "display": { "fontFamily": "\"SF Pro Display\", -apple-system, BlinkMacSystemFont, sans-serif", "fontSize": "56px", "fontWeight": 600, "lineHeight": 1.07, "letterSpacing": "-0.005em" },
-      "title": { "fontFamily": "\"SF Pro Display\", -apple-system, BlinkMacSystemFont, sans-serif", "fontSize": "28px", "fontWeight": 600, "lineHeight": 1.14, "letterSpacing": "-0.021em" },
-      "body": { "fontFamily": "\"SF Pro Text\", -apple-system, BlinkMacSystemFont, sans-serif", "fontSize": "17px", "fontWeight": 400, "lineHeight": 1.47, "letterSpacing": "-0.022em" },
-      "caption": { "fontFamily": "\"SF Pro Text\", -apple-system, BlinkMacSystemFont, sans-serif", "fontSize": "12px", "fontWeight": 400, "lineHeight": 1.33, "letterSpacing": "-0.01em" },
-      "button": { "fontFamily": "\"SF Pro Text\", -apple-system, BlinkMacSystemFont, sans-serif", "fontSize": "14px", "fontWeight": 400, "lineHeight": 1.0 },
-      "mono": { "fontFamily": "\"SF Mono\", \"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+      "display": {
+        "fontFamily": "\"SF Pro Display\", -apple-system, BlinkMacSystemFont, sans-serif",
+        "fontSize": "56px",
+        "fontWeight": 600,
+        "lineHeight": 1.07,
+        "letterSpacing": "-0.005em"
+      },
+      "title": {
+        "fontFamily": "\"SF Pro Display\", -apple-system, BlinkMacSystemFont, sans-serif",
+        "fontSize": "28px",
+        "fontWeight": 600,
+        "lineHeight": 1.14,
+        "letterSpacing": "-0.021em"
+      },
+      "body": {
+        "fontFamily": "\"SF Pro Text\", -apple-system, BlinkMacSystemFont, sans-serif",
+        "fontSize": "17px",
+        "fontWeight": 400,
+        "lineHeight": 1.47,
+        "letterSpacing": "-0.022em"
+      },
+      "caption": {
+        "fontFamily": "\"SF Pro Text\", -apple-system, BlinkMacSystemFont, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": 400,
+        "lineHeight": 1.33,
+        "letterSpacing": "-0.01em"
+      },
+      "button": {
+        "fontFamily": "\"SF Pro Text\", -apple-system, BlinkMacSystemFont, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 400,
+        "lineHeight": 1
+      },
+      "mono": {
+        "fontFamily": "\"SF Mono\", \"JetBrains Mono\", monospace",
+        "fontSize": "14px",
+        "fontWeight": 400
+      }
     },
-    "rounded": { "xs": "4px", "sm": "4px", "md": "8px", "lg": "12px", "xl": "18px", "pill": "980px" },
-    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "rounded": {
+      "xs": "4px",
+      "sm": "4px",
+      "md": "8px",
+      "lg": "12px",
+      "xl": "18px",
+      "pill": "980px"
+    },
+    "spacing": {
+      "xxs": "2px",
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "xxl": "48px",
+      "section": "96px"
+    },
     "components": {
-      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.pill}", "padding": "12px 24px", "height": "44px" },
-      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "rounded": "{rounded.xl}", "padding": "32px" },
-      "input": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "12px 16px", "height": "44px" },
-      "nav": { "backgroundColor": "rgba(255,255,255,0.8)", "textColor": "{colors.ink}", "backdropFilter": "blur(20px)", "height": "48px" }
+      "button-primary": {
+        "backgroundColor": "{colors.primary}",
+        "textColor": "{colors.on-primary}",
+        "typography": "{typography.button}",
+        "rounded": "{rounded.pill}",
+        "padding": "12px 24px",
+        "height": "44px"
+      },
+      "card": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "rounded": "{rounded.xl}",
+        "padding": "32px"
+      },
+      "input": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "typography": "{typography.body}",
+        "rounded": "{rounded.md}",
+        "padding": "12px 16px",
+        "height": "44px"
+      },
+      "nav": {
+        "backgroundColor": "rgba(255,255,255,0.8)",
+        "textColor": "{colors.ink}",
+        "backdropFilter": "blur(20px)",
+        "height": "48px"
+      }
     },
     "rules": [
       "纯白 (#ffffff) 为主背景，浅灰 (#f5f5f7) 为交替 section",
@@ -567,10 +1287,29 @@
       "不要使用小于 8px 的圆角",
       "不要让段落超过 75ch 宽度"
     ],
-    "keywords": ["极简", "留白", "摄影", "产品", "展示", "干净", "优雅", "科技产品", "设备", "iPhone", "Mac", "简约", "高端"],
+    "keywords": [
+      "极简",
+      "留白",
+      "摄影",
+      "产品",
+      "展示",
+      "干净",
+      "优雅",
+      "科技产品",
+      "设备",
+      "iPhone",
+      "Mac",
+      "简约",
+      "高端"
+    ],
     "tone": "brutallyMinimal",
     "responsive": {
-      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "breakpoints": {
+        "mobile": "<768px",
+        "tablet": "768-1023px",
+        "desktop": "1024-1439px",
+        "wide": ">=1440px"
+      },
       "strategy": "桌面优先；移动端 Display 降至 40px，留白节奏保留，产品摄影保持全幅，导航栏毛玻璃保留。"
     }
   },
@@ -601,20 +1340,92 @@
       "warning": "#e5a800"
     },
     "typography": {
-      "display": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "36px", "fontWeight": 600, "lineHeight": 1.1, "letterSpacing": "-0.5px" },
-      "title": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "22px", "fontWeight": 600, "lineHeight": 1.2, "letterSpacing": "-0.2px" },
-      "body": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "15px", "fontWeight": 400, "lineHeight": 1.55 },
-      "caption": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "12px", "fontWeight": 500, "lineHeight": 1.4, "letterSpacing": "0.5px" },
-      "button": { "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": 1.0 },
-      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+      "display": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "36px",
+        "fontWeight": 600,
+        "lineHeight": 1.1,
+        "letterSpacing": "-0.5px"
+      },
+      "title": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "22px",
+        "fontWeight": 600,
+        "lineHeight": 1.2,
+        "letterSpacing": "-0.2px"
+      },
+      "body": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "15px",
+        "fontWeight": 400,
+        "lineHeight": 1.55
+      },
+      "caption": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": 500,
+        "lineHeight": 1.4,
+        "letterSpacing": "0.5px"
+      },
+      "button": {
+        "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 500,
+        "lineHeight": 1
+      },
+      "mono": {
+        "fontFamily": "\"JetBrains Mono\", monospace",
+        "fontSize": "14px",
+        "fontWeight": 400
+      }
     },
-    "rounded": { "xs": "4px", "sm": "4px", "md": "8px", "lg": "12px", "xl": "16px", "pill": "9999px" },
-    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "80px" },
+    "rounded": {
+      "xs": "4px",
+      "sm": "4px",
+      "md": "8px",
+      "lg": "12px",
+      "xl": "16px",
+      "pill": "9999px"
+    },
+    "spacing": {
+      "xxs": "2px",
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "xxl": "48px",
+      "section": "80px"
+    },
     "components": {
-      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "10px 20px" },
-      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "16px" },
-      "input": { "backgroundColor": "{colors.surface-elevated}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px" },
-      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "borderBottom": "1px solid {colors.hairline}", "height": "64px" }
+      "button-primary": {
+        "backgroundColor": "{colors.primary}",
+        "textColor": "{colors.on-primary}",
+        "typography": "{typography.button}",
+        "rounded": "{rounded.md}",
+        "padding": "10px 20px"
+      },
+      "card": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "rounded": "{rounded.lg}",
+        "padding": "16px"
+      },
+      "input": {
+        "backgroundColor": "{colors.surface-elevated}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "typography": "{typography.body}",
+        "rounded": "{rounded.md}",
+        "padding": "10px 12px"
+      },
+      "nav": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.ink}",
+        "borderBottom": "1px solid {colors.hairline}",
+        "height": "64px"
+      }
     },
     "rules": [
       "深暖黑 (#0d0d0d) 作为画布，避免纯 #000 的临床感",
@@ -640,10 +1451,28 @@
       "不要使用超过 16px 的圆角",
       "不要突破三个表面层级：黑画布 → 提升卡片 → 活跃表面"
     ],
-    "keywords": ["设计", "画廊", "展示", "作品集", "创意", "艺术", "获奖", "portfolio", "设计师", "摄影", "视觉", "展览"],
+    "keywords": [
+      "设计",
+      "画廊",
+      "展示",
+      "作品集",
+      "创意",
+      "艺术",
+      "获奖",
+      "portfolio",
+      "设计师",
+      "摄影",
+      "视觉",
+      "展览"
+    ],
     "tone": "darkTech",
     "responsive": {
-      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "breakpoints": {
+        "mobile": "<768px",
+        "tablet": "768-1023px",
+        "desktop": "1024-1439px",
+        "wide": ">=1440px"
+      },
       "strategy": "桌面优先 masonry 画廊；移动端网格降为单列，评分徽章缩小至 32px，电青色强调保留。"
     }
   },
@@ -672,20 +1501,92 @@
       "error": "#f3727f"
     },
     "typography": {
-      "display": { "fontFamily": "Inter, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "24px", "fontWeight": 700, "lineHeight": "normal" },
-      "title": { "fontFamily": "Inter, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "18px", "fontWeight": 600, "lineHeight": 1.3 },
-      "body": { "fontFamily": "Inter, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": "normal" },
-      "caption": { "fontFamily": "Inter, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "14px", "fontWeight": 400, "lineHeight": 1.5 },
-      "button": { "fontFamily": "Inter, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "14px", "fontWeight": 600, "lineHeight": 1.0, "letterSpacing": "1.4px", "textTransform": "uppercase" },
-      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+      "display": {
+        "fontFamily": "Inter, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif",
+        "fontSize": "24px",
+        "fontWeight": 700,
+        "lineHeight": "normal"
+      },
+      "title": {
+        "fontFamily": "Inter, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif",
+        "fontSize": "18px",
+        "fontWeight": 600,
+        "lineHeight": 1.3
+      },
+      "body": {
+        "fontFamily": "Inter, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": "normal"
+      },
+      "caption": {
+        "fontFamily": "Inter, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 400,
+        "lineHeight": 1.5
+      },
+      "button": {
+        "fontFamily": "Inter, -apple-system, Helvetica Neue, Helvetica, Arial, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 600,
+        "lineHeight": 1,
+        "letterSpacing": "1.4px",
+        "textTransform": "uppercase"
+      },
+      "mono": {
+        "fontFamily": "\"JetBrains Mono\", monospace",
+        "fontSize": "14px",
+        "fontWeight": 400
+      }
     },
-    "rounded": { "xs": "8px", "sm": "500px", "md": "500px", "lg": "8px", "xl": "12px", "pill": "9999px" },
-    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "rounded": {
+      "xs": "8px",
+      "sm": "500px",
+      "md": "500px",
+      "lg": "8px",
+      "xl": "12px",
+      "pill": "9999px"
+    },
+    "spacing": {
+      "xxs": "2px",
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "xxl": "48px",
+      "section": "96px"
+    },
     "components": {
-      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.pill}", "padding": "12px 32px", "textTransform": "uppercase", "letterSpacing": "1.4px" },
-      "card": { "backgroundColor": "{colors.surface-card}", "textColor": "{colors.ink}", "rounded": "{rounded.lg}", "padding": "16px" },
-      "input": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "boxShadow": "inset 0 1px 0 rgba(0,0,0,0.5)", "typography": "{typography.body}", "rounded": "{rounded.sm}", "padding": "12px 16px" },
-      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.body}", "height": "64px" }
+      "button-primary": {
+        "backgroundColor": "{colors.primary}",
+        "textColor": "{colors.on-primary}",
+        "typography": "{typography.button}",
+        "rounded": "{rounded.pill}",
+        "padding": "12px 32px",
+        "textTransform": "uppercase",
+        "letterSpacing": "1.4px"
+      },
+      "card": {
+        "backgroundColor": "{colors.surface-card}",
+        "textColor": "{colors.ink}",
+        "rounded": "{rounded.lg}",
+        "padding": "16px"
+      },
+      "input": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "boxShadow": "inset 0 1px 0 rgba(0,0,0,0.5)",
+        "typography": "{typography.body}",
+        "rounded": "{rounded.sm}",
+        "padding": "12px 16px"
+      },
+      "nav": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.body}",
+        "height": "64px"
+      }
     },
     "rules": [
       "近黑 (#121212) 沉浸式画布，UI 退到阴影后，内容成为颜色来源",
@@ -710,10 +1611,28 @@
       "不要在按钮标签省略大写和 1.4px 宽字距",
       "不要用轻量阴影，保持沉重感"
     ],
-    "keywords": ["音乐", "播放器", "暗黑", "沉浸", "专辑", "列表", "歌手", "播客", "娱乐", "音频", "媒体", "流媒体"],
+    "keywords": [
+      "音乐",
+      "播放器",
+      "暗黑",
+      "沉浸",
+      "专辑",
+      "列表",
+      "歌手",
+      "播客",
+      "娱乐",
+      "音频",
+      "媒体",
+      "流媒体"
+    ],
     "tone": "darkTech",
     "responsive": {
-      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "breakpoints": {
+        "mobile": "<768px",
+        "tablet": "768-1023px",
+        "desktop": "1024-1439px",
+        "wide": ">=1440px"
+      },
       "strategy": "桌面优先沉浸式；移动端导航降为底部 tab bar，专辑网格降为 2 列，翠绿 CTA 保持药丸形。"
     }
   },
@@ -741,20 +1660,88 @@
       "warning": "#f5a623"
     },
     "typography": {
-      "display": { "fontFamily": "Inter, -apple-system, Arial, sans-serif", "fontSize": "40px", "fontWeight": 500, "lineHeight": "48px" },
-      "title": { "fontFamily": "Inter, -apple-system, Arial, sans-serif", "fontSize": "22px", "fontWeight": 400, "lineHeight": "20px" },
-      "body": { "fontFamily": "Inter, -apple-system, Arial, sans-serif", "fontSize": "14px", "fontWeight": 400, "lineHeight": "20px" },
-      "caption": { "fontFamily": "Inter, -apple-system, Arial, sans-serif", "fontSize": "14px", "fontWeight": 400, "lineHeight": "20px" },
-      "button": { "fontFamily": "Inter, -apple-system, Arial, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": "16.8px" },
-      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+      "display": {
+        "fontFamily": "Inter, -apple-system, Arial, sans-serif",
+        "fontSize": "40px",
+        "fontWeight": 500,
+        "lineHeight": "48px"
+      },
+      "title": {
+        "fontFamily": "Inter, -apple-system, Arial, sans-serif",
+        "fontSize": "22px",
+        "fontWeight": 400,
+        "lineHeight": "20px"
+      },
+      "body": {
+        "fontFamily": "Inter, -apple-system, Arial, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 400,
+        "lineHeight": "20px"
+      },
+      "caption": {
+        "fontFamily": "Inter, -apple-system, Arial, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 400,
+        "lineHeight": "20px"
+      },
+      "button": {
+        "fontFamily": "Inter, -apple-system, Arial, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 500,
+        "lineHeight": "16.8px"
+      },
+      "mono": {
+        "fontFamily": "\"JetBrains Mono\", monospace",
+        "fontSize": "14px",
+        "fontWeight": 400
+      }
     },
-    "rounded": { "xs": "4px", "sm": "4px", "md": "4px", "lg": "4px", "xl": "4px", "pill": "4px" },
-    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "rounded": {
+      "xs": "4px",
+      "sm": "4px",
+      "md": "4px",
+      "lg": "4px",
+      "xl": "4px",
+      "pill": "4px"
+    },
+    "spacing": {
+      "xxs": "2px",
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "xxl": "48px",
+      "section": "96px"
+    },
     "components": {
-      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "10px 24px" },
-      "card": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "rounded": "{rounded.md}", "padding": "24px" },
-      "input": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px" },
-      "nav": { "backgroundColor": "transparent", "textColor": "{colors.ink}", "height": "56px", "position": "fixed" }
+      "button-primary": {
+        "backgroundColor": "{colors.primary}",
+        "textColor": "{colors.on-primary}",
+        "typography": "{typography.button}",
+        "rounded": "{rounded.md}",
+        "padding": "10px 24px"
+      },
+      "card": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.ink}",
+        "rounded": "{rounded.md}",
+        "padding": "24px"
+      },
+      "input": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "typography": "{typography.body}",
+        "rounded": "{rounded.md}",
+        "padding": "10px 12px"
+      },
+      "nav": {
+        "backgroundColor": "transparent",
+        "textColor": "{colors.ink}",
+        "height": "56px",
+        "position": "fixed"
+      }
     },
     "rules": [
       "纯白 (#ffffff) 为主背景，摄影是全部情感重量",
@@ -780,10 +1767,28 @@
       "不要使用 500 和 400 以外的 weight",
       "不要让导航栏有背景或边框"
     ],
-    "keywords": ["汽车", "电动车", "极简", "摄影", "产品", "未来", "科技", "环保", "能源", "太空", "马斯克", "创新"],
+    "keywords": [
+      "汽车",
+      "电动车",
+      "极简",
+      "摄影",
+      "产品",
+      "未来",
+      "科技",
+      "环保",
+      "能源",
+      "太空",
+      "马斯克",
+      "创新"
+    ],
     "tone": "brutallyMinimal",
     "responsive": {
-      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "breakpoints": {
+        "mobile": "<768px",
+        "tablet": "768-1023px",
+        "desktop": "1024-1439px",
+        "wide": ">=1440px"
+      },
       "strategy": "桌面优先全幅影像；移动端 Hero 保持 100vh，Display 降至 28px，导航栏保持悬浮无背景。"
     }
   },
@@ -813,20 +1818,93 @@
       "warning": "#ffa42b"
     },
     "typography": {
-      "display": { "fontFamily": "Inter, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "72px", "fontWeight": 500, "lineHeight": 0.9, "letterSpacing": "0", "textTransform": "uppercase" },
-      "title": { "fontFamily": "Inter, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "32px", "fontWeight": 500, "lineHeight": 1.2, "letterSpacing": "0" },
-      "body": { "fontFamily": "Inter, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.5, "letterSpacing": "0" },
-      "caption": { "fontFamily": "Inter, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "14px", "fontWeight": 400, "lineHeight": 1.4, "letterSpacing": "0" },
-      "button": { "fontFamily": "Inter, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "16px", "fontWeight": 500, "lineHeight": 1.5, "letterSpacing": "0" },
-      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+      "display": {
+        "fontFamily": "Inter, Helvetica Neue, Helvetica, Arial, sans-serif",
+        "fontSize": "72px",
+        "fontWeight": 500,
+        "lineHeight": 0.9,
+        "letterSpacing": "0",
+        "textTransform": "uppercase"
+      },
+      "title": {
+        "fontFamily": "Inter, Helvetica Neue, Helvetica, Arial, sans-serif",
+        "fontSize": "32px",
+        "fontWeight": 500,
+        "lineHeight": 1.2,
+        "letterSpacing": "0"
+      },
+      "body": {
+        "fontFamily": "Inter, Helvetica Neue, Helvetica, Arial, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": 1.5,
+        "letterSpacing": "0"
+      },
+      "caption": {
+        "fontFamily": "Inter, Helvetica Neue, Helvetica, Arial, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 400,
+        "lineHeight": 1.4,
+        "letterSpacing": "0"
+      },
+      "button": {
+        "fontFamily": "Inter, Helvetica Neue, Helvetica, Arial, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 500,
+        "lineHeight": 1.5,
+        "letterSpacing": "0"
+      },
+      "mono": {
+        "fontFamily": "\"JetBrains Mono\", monospace",
+        "fontSize": "14px",
+        "fontWeight": 400
+      }
     },
-    "rounded": { "xs": "8px", "sm": "9999px", "md": "9999px", "lg": "8px", "xl": "12px", "pill": "9999px" },
-    "spacing": { "xxs": "4px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "80px" },
+    "rounded": {
+      "xs": "8px",
+      "sm": "9999px",
+      "md": "9999px",
+      "lg": "8px",
+      "xl": "12px",
+      "pill": "9999px"
+    },
+    "spacing": {
+      "xxs": "4px",
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "xxl": "48px",
+      "section": "80px"
+    },
     "components": {
-      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.pill}", "padding": "12px 32px" },
-      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "rounded": "{rounded.lg}", "padding": "16px" },
-      "input": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.sm}", "padding": "12px 20px" },
-      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "height": "64px" }
+      "button-primary": {
+        "backgroundColor": "{colors.primary}",
+        "textColor": "{colors.on-primary}",
+        "typography": "{typography.button}",
+        "rounded": "{rounded.pill}",
+        "padding": "12px 32px"
+      },
+      "card": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "rounded": "{rounded.lg}",
+        "padding": "16px"
+      },
+      "input": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "typography": "{typography.body}",
+        "rounded": "{rounded.sm}",
+        "padding": "12px 20px"
+      },
+      "nav": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.ink}",
+        "height": "64px"
+      }
     },
     "rules": [
       "运动编辑风：towering 大写标题 burned into 影像",
@@ -851,10 +1929,28 @@
       "不要压缩 Display 字号到 72px 以下",
       "不要让 UI 抢夺影像的视觉主导地位"
     ],
-    "keywords": ["运动", "健身", "潮流", "品牌", "跑步", "篮球", "训练", "鞋", "服装", "能量", "动力", "年轻"],
+    "keywords": [
+      "运动",
+      "健身",
+      "潮流",
+      "品牌",
+      "跑步",
+      "篮球",
+      "训练",
+      "鞋",
+      "服装",
+      "能量",
+      "动力",
+      "年轻"
+    ],
     "tone": "maximalistChaos",
     "responsive": {
-      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "breakpoints": {
+        "mobile": "<768px",
+        "tablet": "768-1023px",
+        "desktop": "1024-1439px",
+        "wide": ">=1440px"
+      },
       "strategy": "桌面优先；移动端 Display 降至 48px 保持大写，产品卡片网格降为 2 列，药丸 CTA 保留。"
     }
   },
@@ -886,20 +1982,91 @@
       "warning": "#ffdb13"
     },
     "typography": {
-      "display": { "fontFamily": "Inter, \"Helvetica Neue\", Helvetica, Arial, sans-serif", "fontSize": "64px", "fontWeight": 500, "lineHeight": 1.1, "letterSpacing": "-1.92px" },
-      "title": { "fontFamily": "Inter, \"Helvetica Neue\", Helvetica, Arial, sans-serif", "fontSize": "36px", "fontWeight": 500, "lineHeight": 1.15, "letterSpacing": "-0.72px" },
-      "body": { "fontFamily": "Inter, \"Helvetica Neue\", Helvetica, Arial, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.55 },
-      "caption": { "fontFamily": "Inter, \"Helvetica Neue\", Helvetica, Arial, sans-serif", "fontSize": "14px", "fontWeight": 400, "lineHeight": 1.4 },
-      "button": { "fontFamily": "Inter, \"Helvetica Neue\", Helvetica, Arial, sans-serif", "fontSize": "16px", "fontWeight": 500, "lineHeight": 1.5 },
-      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+      "display": {
+        "fontFamily": "Inter, \"Helvetica Neue\", Helvetica, Arial, sans-serif",
+        "fontSize": "64px",
+        "fontWeight": 500,
+        "lineHeight": 1.1,
+        "letterSpacing": "-1.92px"
+      },
+      "title": {
+        "fontFamily": "Inter, \"Helvetica Neue\", Helvetica, Arial, sans-serif",
+        "fontSize": "36px",
+        "fontWeight": 500,
+        "lineHeight": 1.15,
+        "letterSpacing": "-0.72px"
+      },
+      "body": {
+        "fontFamily": "Inter, \"Helvetica Neue\", Helvetica, Arial, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": 1.55
+      },
+      "caption": {
+        "fontFamily": "Inter, \"Helvetica Neue\", Helvetica, Arial, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 400,
+        "lineHeight": 1.4
+      },
+      "button": {
+        "fontFamily": "Inter, \"Helvetica Neue\", Helvetica, Arial, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 500,
+        "lineHeight": 1.5
+      },
+      "mono": {
+        "fontFamily": "\"JetBrains Mono\", monospace",
+        "fontSize": "14px",
+        "fontWeight": 400
+      }
     },
-    "rounded": { "xs": "4px", "sm": "4px", "md": "6px", "lg": "8px", "xl": "12px", "pill": "9999px" },
-    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "rounded": {
+      "xs": "4px",
+      "sm": "4px",
+      "md": "6px",
+      "lg": "8px",
+      "xl": "12px",
+      "pill": "9999px"
+    },
+    "spacing": {
+      "xxs": "2px",
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "xxl": "48px",
+      "section": "96px"
+    },
     "components": {
-      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "10px 20px" },
-      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "24px" },
-      "input": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline-strong}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px" },
-      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "borderBottom": "1px solid {colors.hairline}", "height": "64px" }
+      "button-primary": {
+        "backgroundColor": "{colors.primary}",
+        "textColor": "{colors.on-primary}",
+        "typography": "{typography.button}",
+        "rounded": "{rounded.md}",
+        "padding": "10px 20px"
+      },
+      "card": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "rounded": "{rounded.lg}",
+        "padding": "24px"
+      },
+      "input": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline-strong}",
+        "typography": "{typography.body}",
+        "rounded": "{rounded.md}",
+        "padding": "10px 12px"
+      },
+      "nav": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.ink}",
+        "borderBottom": "1px solid {colors.hairline}",
+        "height": "64px"
+      }
     },
     "rules": [
       "白底为主，翡翠绿 (#3ecf8e) 为唯一主色",
@@ -924,10 +2091,27 @@
       "不要使用超过 12px 的圆角",
       "不要让 UI 喧宾夺主，产品截图是核心"
     ],
-    "keywords": ["数据库", "后端", "开发者", "开源", "工具", "API", "PostgreSQL", "实时", "BaaS", "基础设施", "技术"],
+    "keywords": [
+      "数据库",
+      "后端",
+      "开发者",
+      "开源",
+      "工具",
+      "API",
+      "PostgreSQL",
+      "实时",
+      "BaaS",
+      "基础设施",
+      "技术"
+    ],
     "tone": "brutallyMinimal",
     "responsive": {
-      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "breakpoints": {
+        "mobile": "<768px",
+        "tablet": "768-1023px",
+        "desktop": "1024-1439px",
+        "wide": ">=1440px"
+      },
       "strategy": "桌面优先；移动端 Display 降至 40px，产品截图面板保持边框，翡翠绿 CTA 保留。"
     }
   },
@@ -959,20 +2143,101 @@
       "warning": "#ffee00"
     },
     "typography": {
-      "display": { "fontFamily": "\"Rajdhani\", \"Orbitron\", Inter, sans-serif", "fontSize": "56px", "fontWeight": 700, "lineHeight": 1.05, "letterSpacing": "2px", "textTransform": "uppercase" },
-      "title": { "fontFamily": "\"Rajdhani\", \"Orbitron\", Inter, sans-serif", "fontSize": "28px", "fontWeight": 600, "lineHeight": 1.2, "letterSpacing": "1px", "textTransform": "uppercase" },
-      "body": { "fontFamily": "\"Rajdhani\", \"Orbitron\", Inter, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.6, "letterSpacing": "0.5px" },
-      "caption": { "fontFamily": "\"Rajdhani\", \"Orbitron\", Inter, sans-serif", "fontSize": "12px", "fontWeight": 500, "lineHeight": 1.4, "letterSpacing": "1px", "textTransform": "uppercase" },
-      "button": { "fontFamily": "\"Rajdhani\", \"Orbitron\", Inter, sans-serif", "fontSize": "14px", "fontWeight": 600, "lineHeight": 1.0, "letterSpacing": "2px", "textTransform": "uppercase" },
-      "mono": { "fontFamily": "\"JetBrains Mono\", \"Share Tech Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+      "display": {
+        "fontFamily": "\"Rajdhani\", \"Orbitron\", Inter, sans-serif",
+        "fontSize": "56px",
+        "fontWeight": 700,
+        "lineHeight": 1.05,
+        "letterSpacing": "2px",
+        "textTransform": "uppercase"
+      },
+      "title": {
+        "fontFamily": "\"Rajdhani\", \"Orbitron\", Inter, sans-serif",
+        "fontSize": "28px",
+        "fontWeight": 600,
+        "lineHeight": 1.2,
+        "letterSpacing": "1px",
+        "textTransform": "uppercase"
+      },
+      "body": {
+        "fontFamily": "\"Rajdhani\", \"Orbitron\", Inter, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": 1.6,
+        "letterSpacing": "0.5px"
+      },
+      "caption": {
+        "fontFamily": "\"Rajdhani\", \"Orbitron\", Inter, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": 500,
+        "lineHeight": 1.4,
+        "letterSpacing": "1px",
+        "textTransform": "uppercase"
+      },
+      "button": {
+        "fontFamily": "\"Rajdhani\", \"Orbitron\", Inter, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 600,
+        "lineHeight": 1,
+        "letterSpacing": "2px",
+        "textTransform": "uppercase"
+      },
+      "mono": {
+        "fontFamily": "\"JetBrains Mono\", \"Share Tech Mono\", monospace",
+        "fontSize": "14px",
+        "fontWeight": 400
+      }
     },
-    "rounded": { "xs": "0px", "sm": "0px", "md": "2px", "lg": "4px", "xl": "8px", "pill": "2px" },
-    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "rounded": {
+      "xs": "0px",
+      "sm": "0px",
+      "md": "2px",
+      "lg": "4px",
+      "xl": "8px",
+      "pill": "2px"
+    },
+    "spacing": {
+      "xxs": "2px",
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "xxl": "48px",
+      "section": "96px"
+    },
     "components": {
-      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "12px 24px", "boxShadow": "0 0 20px {colors.glow-pink}", "textTransform": "uppercase" },
-      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "24px", "boxShadow": "0 0 15px {colors.glow-cyan}" },
-      "input": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.accent-cyan}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "10px 12px" },
-      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "borderBottom": "1px solid {colors.hairline}", "height": "64px" }
+      "button-primary": {
+        "backgroundColor": "{colors.primary}",
+        "textColor": "{colors.on-primary}",
+        "typography": "{typography.button}",
+        "rounded": "{rounded.md}",
+        "padding": "12px 24px",
+        "boxShadow": "0 0 20px {colors.glow-pink}",
+        "textTransform": "uppercase"
+      },
+      "card": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "rounded": "{rounded.lg}",
+        "padding": "24px",
+        "boxShadow": "0 0 15px {colors.glow-cyan}"
+      },
+      "input": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.accent-cyan}",
+        "typography": "{typography.body}",
+        "rounded": "{rounded.md}",
+        "padding": "10px 12px"
+      },
+      "nav": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.ink}",
+        "borderBottom": "1px solid {colors.hairline}",
+        "height": "64px"
+      }
     },
     "rules": [
       "深空黑 (#0a0a0f) 画布，带微蓝紫 undertone",
@@ -998,10 +2263,28 @@
       "不要省略大写和宽字距，这是赛博朋克标识",
       "不要用纯黑 #000000，用 #0a0a0f 带蓝紫 undertone"
     ],
-    "keywords": ["赛博", "霓虹", "未来", "科技", "黑客", "科幻", "游戏", "像素", "故障", "电子", "虚拟", "元宇宙"],
+    "keywords": [
+      "赛博",
+      "霓虹",
+      "未来",
+      "科技",
+      "黑客",
+      "科幻",
+      "游戏",
+      "像素",
+      "故障",
+      "电子",
+      "虚拟",
+      "元宇宙"
+    ],
     "tone": "retroFuturistic",
     "responsive": {
-      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "breakpoints": {
+        "mobile": "<768px",
+        "tablet": "768-1023px",
+        "desktop": "1024-1439px",
+        "wide": ">=1440px"
+      },
       "strategy": "桌面优先；移动端 Display 降至 40px 保持大写宽字距，霓虹发光降级以保证性能，扫描线背景保留。"
     }
   },
@@ -1030,20 +2313,95 @@
       "warning": "#ffde00"
     },
     "typography": {
-      "display": { "fontFamily": "Inter, Arial Black, \"Helvetica Neue\", sans-serif", "fontSize": "64px", "fontWeight": 900, "lineHeight": 1.0, "letterSpacing": "-2px" },
-      "title": { "fontFamily": "Inter, Arial Black, \"Helvetica Neue\", sans-serif", "fontSize": "32px", "fontWeight": 800, "lineHeight": 1.1, "letterSpacing": "-1px" },
-      "body": { "fontFamily": "Inter, Arial Black, \"Helvetica Neue\", sans-serif", "fontSize": "18px", "fontWeight": 400, "lineHeight": 1.5 },
-      "caption": { "fontFamily": "Inter, Arial Black, \"Helvetica Neue\", sans-serif", "fontSize": "14px", "fontWeight": 700, "lineHeight": 1.3 },
-      "button": { "fontFamily": "Inter, Arial Black, \"Helvetica Neue\", sans-serif", "fontSize": "18px", "fontWeight": 700, "lineHeight": 1.0 },
-      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+      "display": {
+        "fontFamily": "Inter, Arial Black, \"Helvetica Neue\", sans-serif",
+        "fontSize": "64px",
+        "fontWeight": 900,
+        "lineHeight": 1,
+        "letterSpacing": "-2px"
+      },
+      "title": {
+        "fontFamily": "Inter, Arial Black, \"Helvetica Neue\", sans-serif",
+        "fontSize": "32px",
+        "fontWeight": 800,
+        "lineHeight": 1.1,
+        "letterSpacing": "-1px"
+      },
+      "body": {
+        "fontFamily": "Inter, Arial Black, \"Helvetica Neue\", sans-serif",
+        "fontSize": "18px",
+        "fontWeight": 400,
+        "lineHeight": 1.5
+      },
+      "caption": {
+        "fontFamily": "Inter, Arial Black, \"Helvetica Neue\", sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 700,
+        "lineHeight": 1.3
+      },
+      "button": {
+        "fontFamily": "Inter, Arial Black, \"Helvetica Neue\", sans-serif",
+        "fontSize": "18px",
+        "fontWeight": 700,
+        "lineHeight": 1
+      },
+      "mono": {
+        "fontFamily": "\"JetBrains Mono\", monospace",
+        "fontSize": "14px",
+        "fontWeight": 400
+      }
     },
-    "rounded": { "xs": "0px", "sm": "0px", "md": "0px", "lg": "0px", "xl": "0px", "pill": "0px" },
-    "spacing": { "xxs": "4px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "80px" },
+    "rounded": {
+      "xs": "0px",
+      "sm": "0px",
+      "md": "0px",
+      "lg": "0px",
+      "xl": "0px",
+      "pill": "0px"
+    },
+    "spacing": {
+      "xxs": "4px",
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "xxl": "48px",
+      "section": "80px"
+    },
     "components": {
-      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.md}", "padding": "12px 24px", "border": "3px solid {colors.ink}", "boxShadow": "4px 4px 0 {colors.ink}" },
-      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "3px solid {colors.ink}", "rounded": "{rounded.lg}", "padding": "24px", "boxShadow": "4px 4px 0 {colors.ink}" },
-      "input": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "3px solid {colors.ink}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "12px 16px", "boxShadow": "4px 4px 0 {colors.ink}" },
-      "nav": { "backgroundColor": "{colors.canvas}", "textColor": "{colors.ink}", "borderBottom": "4px solid {colors.ink}", "height": "64px" }
+      "button-primary": {
+        "backgroundColor": "{colors.primary}",
+        "textColor": "{colors.on-primary}",
+        "typography": "{typography.button}",
+        "rounded": "{rounded.md}",
+        "padding": "12px 24px",
+        "border": "3px solid {colors.ink}",
+        "boxShadow": "4px 4px 0 {colors.ink}"
+      },
+      "card": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "border": "3px solid {colors.ink}",
+        "rounded": "{rounded.lg}",
+        "padding": "24px",
+        "boxShadow": "4px 4px 0 {colors.ink}"
+      },
+      "input": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "border": "3px solid {colors.ink}",
+        "typography": "{typography.body}",
+        "rounded": "{rounded.md}",
+        "padding": "12px 16px",
+        "boxShadow": "4px 4px 0 {colors.ink}"
+      },
+      "nav": {
+        "backgroundColor": "{colors.canvas}",
+        "textColor": "{colors.ink}",
+        "borderBottom": "4px solid {colors.ink}",
+        "height": "64px"
+      }
     },
     "rules": [
       "亮黄 (#ffde00) 作为主背景，或纯白/纯黑",
@@ -1070,10 +2428,28 @@
       "不要在 Display 使用低于 800 的 weight",
       "不要用低饱和度色彩，强调色必须高饱和"
     ],
-    "keywords": ["粗野", "大胆", "高对比", "黄色", "黑色", "边框", "Memphis", "孟菲斯", "艺术", "前卫", "实验", "激进"],
+    "keywords": [
+      "粗野",
+      "大胆",
+      "高对比",
+      "黄色",
+      "黑色",
+      "边框",
+      "Memphis",
+      "孟菲斯",
+      "艺术",
+      "前卫",
+      "实验",
+      "激进"
+    ],
     "tone": "brutalistRaw",
     "responsive": {
-      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "breakpoints": {
+        "mobile": "<768px",
+        "tablet": "768-1023px",
+        "desktop": "1024-1439px",
+        "wide": ">=1440px"
+      },
       "strategy": "桌面优先；移动端 Display 降至 48px 保持 900 weight，粗边框和硬阴影保留，亮黄画布保留。"
     }
   },
@@ -1102,20 +2478,93 @@
       "warning": "#f59e0b"
     },
     "typography": {
-      "display": { "fontFamily": "Inter, -apple-system, sans-serif", "fontSize": "48px", "fontWeight": 600, "lineHeight": 1.1, "letterSpacing": "-1px" },
-      "title": { "fontFamily": "Inter, -apple-system, sans-serif", "fontSize": "24px", "fontWeight": 500, "lineHeight": 1.2 },
-      "body": { "fontFamily": "Inter, -apple-system, sans-serif", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.5 },
-      "caption": { "fontFamily": "Inter, -apple-system, sans-serif", "fontSize": "12px", "fontWeight": 400, "lineHeight": 1.4 },
-      "button": { "fontFamily": "Inter, -apple-system, sans-serif", "fontSize": "14px", "fontWeight": 500, "lineHeight": 1.0 },
-      "mono": { "fontFamily": "\"JetBrains Mono\", monospace", "fontSize": "14px", "fontWeight": 400 }
+      "display": {
+        "fontFamily": "Inter, -apple-system, sans-serif",
+        "fontSize": "48px",
+        "fontWeight": 600,
+        "lineHeight": 1.1,
+        "letterSpacing": "-1px"
+      },
+      "title": {
+        "fontFamily": "Inter, -apple-system, sans-serif",
+        "fontSize": "24px",
+        "fontWeight": 500,
+        "lineHeight": 1.2
+      },
+      "body": {
+        "fontFamily": "Inter, -apple-system, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": 1.5
+      },
+      "caption": {
+        "fontFamily": "Inter, -apple-system, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": 400,
+        "lineHeight": 1.4
+      },
+      "button": {
+        "fontFamily": "Inter, -apple-system, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 500,
+        "lineHeight": 1
+      },
+      "mono": {
+        "fontFamily": "\"JetBrains Mono\", monospace",
+        "fontSize": "14px",
+        "fontWeight": 400
+      }
     },
-    "rounded": { "xs": "8px", "sm": "12px", "md": "16px", "lg": "24px", "xl": "32px", "pill": "9999px" },
-    "spacing": { "xxs": "2px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px", "xxl": "48px", "section": "96px" },
+    "rounded": {
+      "xs": "8px",
+      "sm": "12px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "pill": "9999px"
+    },
+    "spacing": {
+      "xxs": "2px",
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "xxl": "48px",
+      "section": "96px"
+    },
     "components": {
-      "button-primary": { "backgroundColor": "{colors.primary}", "textColor": "{colors.on-primary}", "typography": "{typography.button}", "rounded": "{rounded.pill}", "padding": "12px 24px" },
-      "card": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "rounded": "{rounded.lg}", "padding": "24px", "backdropFilter": "blur(20px) saturate(180%)" },
-      "input": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "border": "1px solid {colors.hairline}", "typography": "{typography.body}", "rounded": "{rounded.md}", "padding": "12px 16px", "backdropFilter": "blur(20px) saturate(180%)" },
-      "nav": { "backgroundColor": "{colors.surface}", "textColor": "{colors.ink}", "borderBottom": "1px solid {colors.hairline}", "backdropFilter": "blur(20px) saturate(180%)", "height": "64px" }
+      "button-primary": {
+        "backgroundColor": "{colors.primary}",
+        "textColor": "{colors.on-primary}",
+        "typography": "{typography.button}",
+        "rounded": "{rounded.pill}",
+        "padding": "12px 24px"
+      },
+      "card": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "rounded": "{rounded.lg}",
+        "padding": "24px",
+        "backdropFilter": "blur(20px) saturate(180%)"
+      },
+      "input": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "border": "1px solid {colors.hairline}",
+        "typography": "{typography.body}",
+        "rounded": "{rounded.md}",
+        "padding": "12px 16px",
+        "backdropFilter": "blur(20px) saturate(180%)"
+      },
+      "nav": {
+        "backgroundColor": "{colors.surface}",
+        "textColor": "{colors.ink}",
+        "borderBottom": "1px solid {colors.hairline}",
+        "backdropFilter": "blur(20px) saturate(180%)",
+        "height": "64px"
+      }
     },
     "rules": [
       "使用鲜艳渐变背景（紫/粉/青），玻璃卡片悬浮其上",
@@ -1142,11 +2591,223 @@
       "不要用深色文字，文字必须纯白带透明度",
       "不要用实色卡片背景，必须半透明玻璃"
     ],
-    "keywords": ["玻璃", "透明", "模糊", "现代", "悬浮", "层次", "渐变", "UI", "卡片", "仪表板", "后台", "dashboard"],
+    "keywords": [
+      "玻璃",
+      "透明",
+      "模糊",
+      "现代",
+      "悬浮",
+      "层次",
+      "渐变",
+      "UI",
+      "卡片",
+      "仪表板",
+      "后台",
+      "dashboard"
+    ],
     "tone": "luxuryRefined",
     "responsive": {
-      "breakpoints": { "mobile": "<768px", "tablet": "768-1023px", "desktop": "1024-1439px", "wide": ">=1440px" },
+      "breakpoints": {
+        "mobile": "<768px",
+        "tablet": "768-1023px",
+        "desktop": "1024-1439px",
+        "wide": ">=1440px"
+      },
       "strategy": "桌面优先；移动端 Display 降至 36px，玻璃模糊保留但 saturate 降至 150% 保证性能，渐变背景保留。"
     }
+  },
+  {
+    "id": "liquid-glass",
+    "name": "Liquid Glass",
+    "description": "苹果 WWDC25 液态玻璃设计语言。SVG滤镜管线：feTurbulence→feSpecularLighting→feDisplacementMap(scale=120)。四层div结构：effect(滤镜+blur)/tint(着色)/shine(边缘高光)/content(内容)。核心规则：(1)默认=磨砂玻璃(有blur) (2)按下=高透玻璃(去blur) (3)feSpecularLighting光学镜面高光(非手写CSS) (4)feDisplacementMap scale=120强度折射 (5)光线折射渐变是backdrop-filter值渐变非opacity淡入淡出。浅色明亮基调——多彩壁纸背景+白色半透玻璃",
+    "version": "1.0",
+    "colors": {
+      "primary": "rgba(10,132,255,0.12)",
+      "on-primary": "rgba(0,0,0,0.85)",
+      "canvas": "#f5f0eb",
+      "surface": "rgba(255,255,255,0.55)",
+      "surface-raised": "rgba(255,255,255,0.65)",
+      "ink": "rgba(0,0,0,0.85)",
+      "body": "rgba(0,0,0,0.6)",
+      "muted": "rgba(0,0,0,0.35)",
+      "hairline": "rgba(0,0,0,0.06)",
+      "hairline-soft": "rgba(0,0,0,0.03)",
+      "primary-hover": "rgba(10,132,255,0.22)",
+      "accent": "#0a84ff",
+      "accent-secondary": "#5e5ce6",
+      "glass-tint": "rgba(120,180,255,0.04)",
+      "highlight-edge": "rgba(255,255,255,0.65)",
+      "shadow-deep": "0 8px 30px rgba(0,0,0,0.08)",
+      "success": "#30d158",
+      "error": "#ff453a",
+      "warning": "#ffd60a"
+    },
+    "typography": {
+      "display": {
+        "fontFamily": "-apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif",
+        "fontSize": "48px",
+        "fontWeight": 600,
+        "lineHeight": 1.08,
+        "letterSpacing": "-0.02em"
+      },
+      "title": {
+        "fontFamily": "-apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif",
+        "fontSize": "28px",
+        "fontWeight": 600,
+        "lineHeight": 1.15,
+        "letterSpacing": "-0.015em"
+      },
+      "body": {
+        "fontFamily": "-apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif",
+        "fontSize": "17px",
+        "fontWeight": 400,
+        "lineHeight": 1.47,
+        "letterSpacing": "-0.01em"
+      },
+      "caption": {
+        "fontFamily": "-apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": 400,
+        "lineHeight": 1.38
+      },
+      "button": {
+        "fontFamily": "-apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif",
+        "fontSize": "15px",
+        "fontWeight": 500,
+        "lineHeight": 1,
+        "letterSpacing": "-0.01em"
+      },
+      "mono": {
+        "fontFamily": "'SF Mono', 'JetBrains Mono', monospace",
+        "fontSize": "14px",
+        "fontWeight": 400
+      }
+    },
+    "rounded": {
+      "xs": "8px",
+      "sm": "12px",
+      "md": "20px",
+      "lg": "28px",
+      "xl": "44px",
+      "pill": "9999px"
+    },
+    "spacing": {
+      "xxs": "4px",
+      "xs": "8px",
+      "sm": "12px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "xxl": "48px",
+      "section": "80px"
+    },
+    "components": {
+      "button-primary": {
+        "backgroundColor": "rgba(255,255,255,0.55)",
+        "textColor": "rgba(0,0,0,0.85)",
+        "typography": "{typography.button}",
+        "rounded": "{rounded.pill}",
+        "padding": "14px 28px",
+        "backdropFilter": "blur(12px) saturate(1.5)",
+        "boxShadow": "inset 0 1px 1px rgba(255,255,255,0.55), inset 0 -1px 1px rgba(0,0,0,0.08), 0 4px 20px rgba(0,0,0,0.08)",
+        "activeBackdropFilter": "saturate(1.2) brightness(1.08)",
+        "note": "按下时去掉blur变高透玻璃，这是苹果Liquid Glass按钮的核心特征"
+      },
+      "card": {
+        "backgroundColor": "rgba(255,255,255,0.55)",
+        "textColor": "rgba(0,0,0,0.85)",
+        "border": "1px solid rgba(255,255,255,0.4)",
+        "rounded": "{rounded.lg}",
+        "padding": "28px",
+        "backdropFilter": "blur(16px) saturate(1.8) brightness(1.06)",
+        "boxShadow": "inset 0 1px 1px rgba(255,255,255,0.5), inset 0 -1px 1px rgba(0,0,0,0.06), 0 8px 30px rgba(0,0,0,0.06)"
+      },
+      "input": {
+        "backgroundColor": "rgba(255,255,255,0.45)",
+        "textColor": "rgba(0,0,0,0.85)",
+        "border": "1px solid rgba(0,0,0,0.08)",
+        "typography": "{typography.body}",
+        "rounded": "{rounded.md}",
+        "padding": "12px 16px",
+        "height": "48px",
+        "backdropFilter": "blur(12px) saturate(1.5)"
+      },
+      "nav": {
+        "backgroundColor": "rgba(255,255,255,0.5)",
+        "textColor": "rgba(0,0,0,0.7)",
+        "borderBottom": "1px solid rgba(0,0,0,0.05)",
+        "backdropFilter": "blur(32px) saturate(1.6) brightness(1.05)",
+        "height": "64px"
+      }
+    },
+    "rules": [
+      "页面背景必须色彩丰富——多彩渐变(暖橙+蓝+淡紫)/壁纸/纹理图，玻璃才有折射素材。禁止深色单色背景",
+      "所有玻璃组件用四层div结构：effect(滤镜+blur) + tint(着色) + shine(边缘高光) + content(内容)",
+      "必须包含SVG滤镜#liquid-glass-filter：feTurbulence→feComponentTransfer(gamma=10)→feGaussianBlur(sd=4)→feSpecularLighting(surfaceScale=6)→feComposite→feDisplacementMap(scale=120)",
+      "镜面高光由feSpecularLighting光学计算生成(基于turbulence噪声图表面法线)，非手写CSS box-shadow模拟",
+      "滤镜只挂在effect层(filter:url(#liquid-glass-filter))，不污染content层",
+      "默认态/卡片=磨砂玻璃：effect层backdrop-filter:blur(12-16px) saturate(1.8)",
+      "按钮按下态=高透玻璃：effect层去掉blur()只留saturate(1.2)",
+      "动效用弹性弹簧cubic-bezier(0.175,0.885,0.32,2.2)，光线折射渐变是backdrop-filter值渐变非opacity淡入淡出",
+      "圆角≥20px优先pill/28px；字体-apple-system/SF Pro；间距≥16px",
+      "禁止：纯色背景、硬阴影、直角、扁平卡片、单一backdrop-filter无SVG滤镜"
+    ],
+    "dos": [
+      "背景用多彩渐变(暖橙+蓝+淡紫 模拟iOS壁纸)+动态光点 或彩色纹理图",
+      "每个玻璃元素用wrapper(effect+tint+shine+content)四层div结构，滤镜挂在effect层",
+      "effect层用backdrop-filter:blur(12px) saturate(1.5)，tint层用linear-gradient(180deg)半透渐变着色",
+      "shine层用inset box-shadow做边缘菲涅尔高光：上边亮白色、下边暗化",
+      "镜面高光由feSpecularLighting自动计算，fePointLight在(-200,-200,300)位置",
+      "feDisplacementMap scale=120强度折射，x/y通道用softMap的R/G驱动",
+      "按钮按下时effect层去blur()变高透玻璃，shine层暗化边缘增强分离度",
+      "动效用cubic-bezier(0.175,0.885,0.32,2.2)弹性弹簧，圆角≥20px优先pill/28px"
+    ],
+    "donts": [
+      "不要用深色单色背景，不要用纯白背景——需多彩渐变或纹理图提供折射素材",
+      "按钮按下时不要保留blur()——苹果Liquid Glass按钮active态是高透玻璃只留saturate(1.2)",
+      "不要省略SVG滤镜——纯CSS backdrop-filter只是毛玻璃，不是Liquid Glass",
+      "不要把滤镜挂在content层上——滤镜只挂在独立的effect层",
+      "不要用单一div结构——必须四层(effect/tint/shine/content)",
+      "不要用手写CSS box-shadow替代feSpecularLighting——光学镜面高光是SVG滤镜核心",
+      "不要使用小圆角(<20px)或直角，不要用硬阴影",
+      "不要用Inter或其他字体替代-apple-system/SF Pro"
+    ],
+    "keywords": [
+      "液态玻璃",
+      "liquid glass",
+      "iOS 26",
+      "iOS 27",
+      "WWDC",
+      "苹果",
+      "apple",
+      "glass effect",
+      "折射",
+      "refraction",
+      "菲涅尔",
+      "fresnel",
+      "feSpecularLighting",
+      "feTurbulence",
+      "feDisplacementMap",
+      "四层结构",
+      "材料感",
+      "玻璃按钮",
+      "glassmorphism",
+      "液态",
+      "fluid",
+      "specular",
+      "native",
+      "iPhone"
+    ],
+    "tone": "liquidGlass",
+    "responsive": {
+      "breakpoints": {
+        "mobile": "<768px",
+        "tablet": "768-1023px",
+        "desktop": "1024-1439px",
+        "wide": ">=1440px"
+      },
+      "strategy": "桌面优先；移动端 Display 降至 36px，backdrop-filter blur 降至 12px 保证性能，saturate 降至 1.3，背景渐变保留。"
+    },
+    "svgFilter": "<filter id='liquid-glass-filter' x='-20%' y='-20%' width='140%' height='140%' filterUnits='objectBoundingBox'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.012' numOctaves='1' seed='5' result='turbulence'/><feComponentTransfer in='turbulence' result='displacementMap'><feFuncR type='gamma' amplitude='1' exponent='10' offset='0.5'/><feFuncG type='gamma' amplitude='1' exponent='10' offset='0.5'/><feFuncB type='gamma' amplitude='0' exponent='1' offset='0.5'/></feComponentTransfer><feGaussianBlur in='displacementMap' stdDeviation='4' result='softMap'/><feSpecularLighting in='softMap' surfaceScale='6' specularConstant='1' specularExponent='80' lighting-color='white' result='specLight'><fePointLight x='-200' y='-200' z='300'/></feSpecularLighting><feComposite in='SourceGraphic' in2='specLight' operator='arithmetic' k1='0' k2='1' k3='1' k4='0' result='litImage'/><feDisplacementMap in='litImage' in2='softMap' scale='120' xChannelSelector='R' yChannelSelector='G'/></filter>"
   }
 ]
