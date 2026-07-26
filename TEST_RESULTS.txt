@@ -1,0 +1,63 @@
+PASS: No visible CDN library UI
+PASS: No stale CDN initializer
+PASS: Dependencies are internal allowlist only
+PASS: Only HTTPS dependency entries
+PASS: Exactly two primary AI modes
+PASS: Deep Thinking nested inside AI
+PASS: Deep Thinking keeps conversation history
+PASS: Agent respects selected model
+PASS: Project-rule priority is explicit
+PASS: Project rules reach normal AI
+PASS: Project rules reach Agent
+PASS: Project context generation is awaited
+PASS: Project terminology is consistent
+PASS: Preview always sandboxed
+PASS: Preview messages validate source frame
+PASS: AI HTML uses sanitizer and fallback
+PASS: No document.write initialization
+PASS: API requests omit browser credentials
+PASS: API endpoint requires HTTPS
+PASS: Sensitive URL query parameters blocked
+PASS: Agent protocol includes normalizeToolDefinition
+PASS: Agent protocol includes normalizeAssistantToolCalls
+PASS: Agent protocol includes parseToolArguments
+PASS: Agent protocol includes safeApiToolName
+PASS: Empty tool name triggers compatibility retry
+PASS: Unknown native tools return paired results
+PASS: Complete must be isolated
+PASS: Completion requires post-edit validation
+PASS: Agent budgets do not claim completion
+PASS: Repeat tool calls are blocked
+PASS: Fallback does not duplicate assistant message
+PASS: Fallback without tools remains unconfirmed
+PASS: Agent code blocks are not auto-applied
+PASS: Large files use segmented analysis
+PASS: Normal AI blocks oversized whole-file prompts
+PASS: Formatting uses Prettier
+PASS: Search/image tools need explicit intent
+PASS: Unsupported GSAP plugins not promised
+PASS: Public API prompt matches actual shortlist
+PASS: MCP same-name tools route by server
+PASS: MCP keys are session-only
+PASS: MCP requests omit credentials
+PASS: MCP unsafe URLs blocked
+PASS: External MCP tools default read-only
+PASS: Viewport supports notches and keyboard
+PASS: Dynamic viewport and safe areas
+PASS: Mobile editor/split/preview navigation
+PASS: Mobile AI drawer entry
+PASS: Mobile view state reflects actual layout
+PASS: Mobile split ratio stored separately
+PASS: Mobile controls have touch sizing
+PASS: iOS inputs avoid auto zoom
+PASS: Landscape phone behavior handled
+PASS: No duplicate HTML IDs
+PASS: All static buttons declare type
+PASS: All form controls have accessible names
+PASS: ARIA references resolve
+PASS: No undefined CSS variables
+PASS: No missing init functions
+PASS: All required local assets exist
+PASS: All JavaScript parses
+
+61/61 checks passed
