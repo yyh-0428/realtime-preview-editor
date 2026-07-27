@@ -1,9 +1,52 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-werkstatt-build="agent-ai-upgraded-final-2026-07-26">
+<!-- Hallmark · pre-emit critique: P5 H5 E4 S5 R5 V4 -->
+<html lang="zh-CN" data-werkstatt-build="motion-polished-2026-07-27" data-color-mode="light" data-theme="amber" class="theme-preload">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="color-scheme" content="light dark">
 <title>Werkstatt — 实时预览编辑器</title>
+
+<!-- Apply the saved appearance before CSS or external resources can paint. -->
+<script>
+(function bootstrapAppearance() {
+  var root = document.documentElement;
+  var mode = 'light';
+  var theme = 'amber';
+  var validThemes = ['amber', 'slate', 'forest', 'ink', 'plum', 'ochre'];
+  var themeColors = {
+    amber: ['#D4A853', '#E0BC6B'],
+    slate: ['#7BA4C0', '#95B8D2'],
+    forest: ['#8DAF82', '#A3C098'],
+    ink: ['#D0756E', '#DF8E88'],
+    plum: ['#A89BC4', '#BBB0D4'],
+    ochre: ['#D4956A', '#E0A880']
+  };
+  try {
+    var storedMode = localStorage.getItem('editor_color_mode');
+    var storedTheme = localStorage.getItem('editor_theme');
+    if (storedMode === 'light' || storedMode === 'dark') mode = storedMode;
+    if (validThemes.indexOf(storedTheme) !== -1) theme = storedTheme;
+  } catch (_) {
+    /* Storage can be unavailable in private or restricted contexts. */
+  }
+  root.setAttribute('data-color-mode', mode);
+  root.setAttribute('data-theme', theme);
+  root.style.colorScheme = mode;
+  if (themeColors[theme]) {
+    root.style.setProperty('--accent', themeColors[theme][0]);
+    root.style.setProperty('--accent-hover', themeColors[theme][1]);
+  }
+})();
+</script>
+<style>
+/* Suppress theme transitions until the stored appearance is fully restored. */
+html.theme-preload *,
+html.theme-preload *::before,
+html.theme-preload *::after {
+  transition: none !important;
+}
+</style>
 
 <!-- Fonts: DM Sans (UI) + JetBrains Mono (code) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,6 +58,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
 
 <style>
+/* Hallmark · pre-emit critique: P5 H4 E5 S5 R5 V4 */
 /* ============================================================
    WERKSTATT DESIGN SYSTEM — 匠人工坊
    A warm, human-centered code workspace.
@@ -98,9 +142,19 @@
   /* Accent: Terracotta — warm, distinctive, unexpected in a code editor */
   --accent:              #D4845A;
   --accent-hover:        #E0966E;
-  --accent-active:       #C4754C;
-  --accent-subtle:       rgba(212, 132, 90, 0.10);
-  --accent-glow:         rgba(212, 132, 90, 0.18);
+  --accent-active:       color-mix(in srgb, var(--accent) 84%, #111 16%);
+  --accent-subtle:       color-mix(in srgb, var(--accent) 13%, transparent);
+  --accent-glow:         color-mix(in srgb, var(--accent) 24%, transparent);
+  --accent-border:       color-mix(in srgb, var(--accent) 42%, transparent);
+  --accent-on:           #171512;
+
+  /* Theme swatches are tokens, not one-off inline colours. */
+  --theme-amber:         #D4A853;
+  --theme-slate:         #7BA4C0;
+  --theme-forest:        #8DAF82;
+  --theme-ink:           #D0756E;
+  --theme-plum:          #A89BC4;
+  --theme-ochre:         #D4956A;
 
   /* Semantic */
   --semantic-success:    #7DA37D;
@@ -155,9 +209,11 @@
 
   --accent:              #D4845A;
   --accent-hover:        #C87850;
-  --accent-active:       #B86840;
-  --accent-subtle:       rgba(192, 112, 69, 0.08);
-  --accent-glow:         rgba(192, 112, 69, 0.14);
+  --accent-active:       color-mix(in srgb, var(--accent) 82%, #111 18%);
+  --accent-subtle:       color-mix(in srgb, var(--accent) 10%, transparent);
+  --accent-glow:         color-mix(in srgb, var(--accent) 19%, transparent);
+  --accent-border:       color-mix(in srgb, var(--accent) 38%, transparent);
+  --accent-on:           #171512;
 
   --semantic-success:    #5C8C5C;
   --semantic-success-bg: rgba(92, 140, 92, 0.08);
@@ -223,7 +279,7 @@ html, body {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  color: #1A1816;
+  color: var(--accent-on);
 }
 .brand-mark svg { width: var(--icon-sm); height: var(--icon-sm); }
 
@@ -353,9 +409,9 @@ html, body {
 .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 
 .btn-accent {
-  background: var(--accent); color: #1A1816; font-weight: var(--font-weight-semibold);
+  background: var(--accent); color: var(--accent-on); font-weight: var(--font-weight-semibold);
 }
-.btn-accent:hover { background: var(--accent-hover); color: #1A1816; }
+.btn-accent:hover { background: var(--accent-hover); color: var(--accent-on); }
 .btn-accent:active { background: var(--accent-active); }
 
 .btn-stop {
@@ -624,11 +680,11 @@ html, body {
 .thinking-toggle input:focus + .thinking-toggle-track {
   box-shadow: 0 0 0 2px var(--accent-subtle);
 }
-.thinking-toggle .agent-track { border: 1px solid rgba(99, 102, 241, 0.3); }
+.thinking-toggle .agent-track { border: 1px solid var(--accent-border); }
 .thinking-toggle input:checked + .thinking-toggle-track.agent-track {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: var(--accent);
 }
-.agent-mode-active .ai-chat-input-wrap { border-color: rgba(99, 102, 241, 0.4); }
+.agent-mode-active .ai-chat-input-wrap { border-color: var(--accent-border); }
 
 .ai-mode-row { display: block; }
 .ai-mode-switch {
@@ -654,12 +710,12 @@ html, body {
 
 .agent-status-bar {
   display: none; align-items: center; gap: 6px; padding: 4px 8px;
-  font-size: 11px; color: var(--text-secondary); background: rgba(99, 102, 241, 0.08);
+  font-size: 11px; color: var(--text-secondary); background: var(--accent-subtle);
   border-radius: 4px; margin-bottom: 6px;
 }
 .agent-mode-active .agent-status-bar { display: flex; }
-.agent-status-bar .agent-step { color: #6366f1; font-weight: 600; }
-.agent-status-bar .agent-dot { width: 6px; height: 6px; border-radius: 50%; background: #6366f1; animation: pulse-dot 1.2s infinite; }
+.agent-status-bar .agent-step { color: var(--accent); font-weight: 600; }
+.agent-status-bar .agent-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse-dot 1.2s infinite; }
 @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
 /* Agent message icons */
@@ -1509,6 +1565,523 @@ html, body {
 }
 .preview-panel:-webkit-full-screen .preview-iframe-wrapper { height: 100vh !important; padding-top: var(--space-8); }
 .preview-panel:-webkit-full-screen .preview-placeholder { height: 100vh; padding-top: var(--space-8); }
+
+/* ============================================================
+   HALLMARK REFINEMENT · editorial utility workspace
+   Tone: quiet, tactile, precise · anchor: warm terracotta
+   Structural fingerprint: compact command bar / ruled work panes / typographic AI rail
+   ============================================================ */
+:root {
+  --control-height: 32px;
+  --control-height-touch: 44px;
+  --panel-header-height: 36px;
+  --workspace-rule: color-mix(in srgb, var(--border-default) 72%, transparent);
+  --surface-quiet: color-mix(in srgb, var(--bg-surface) 74%, var(--bg-editor));
+  --surface-selected: color-mix(in srgb, var(--accent) 9%, var(--bg-surface));
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.toolbar {
+  min-height: 48px;
+  padding-block: 7px;
+  gap: var(--space-4);
+  box-shadow: 0 1px 0 var(--border-subtle);
+}
+.toolbar-left { gap: 10px; }
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  background: var(--accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-primary) 9%, transparent);
+}
+.toolbar-title { font-size: 15px; letter-spacing: -0.025em; }
+.toolbar-sep { margin-inline: 2px; opacity: .45; }
+.theme-picker {
+  gap: 5px;
+  padding: 3px 7px;
+  background: transparent;
+  border-color: var(--border-default);
+}
+.theme-dot {
+  width: 13px;
+  height: 13px;
+  min-width: 13px;
+  min-height: 13px;
+}
+.theme-dot { background: var(--swatch, var(--accent)); }
+.theme-dot[data-theme="amber"] { --swatch: var(--theme-amber); }
+.theme-dot[data-theme="slate"] { --swatch: var(--theme-slate); }
+.theme-dot[data-theme="forest"] { --swatch: var(--theme-forest); }
+.theme-dot[data-theme="ink"] { --swatch: var(--theme-ink); }
+.theme-dot[data-theme="plum"] { --swatch: var(--theme-plum); }
+.theme-dot[data-theme="ochre"] { --swatch: var(--theme-ochre); }
+.theme-dot:hover { transform: none; box-shadow: 0 0 0 3px var(--accent-subtle); }
+.theme-dot[aria-checked="true"] {
+  transform: none;
+  box-shadow: 0 0 0 2px var(--bg-toolbar), 0 0 0 4px var(--accent);
+}
+.toolbar-status { opacity: .82; }
+
+.toolbar-actions { gap: 7px; flex-wrap: nowrap; }
+.toolbar-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  padding: 2px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-input) 72%, transparent);
+}
+.toolbar-group .btn {
+  min-height: 28px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.toolbar-group .btn-accent {
+  box-shadow: none;
+  background: var(--accent);
+}
+.panel-toggle-group {
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-input) 72%, transparent);
+  padding: 2px;
+  gap: 1px;
+}
+.panel-toggle { min-width: 29px; min-height: 28px; padding: 4px 7px; }
+
+.side-panel { background: var(--surface-quiet); }
+.panel-tabs {
+  position: relative;
+  padding: 0 8px;
+  gap: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+.panel-tab {
+  min-height: 42px;
+  padding: 8px 12px;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+}
+.panel-tab:hover { background: transparent; }
+.panel-tab.active {
+  color: var(--text-primary);
+  background: transparent;
+  border-bottom-color: var(--accent);
+  box-shadow: none;
+}
+.panel-tab.active .btn-icon { color: var(--accent); }
+.snippets-header {
+  min-height: 38px;
+  padding: 7px 12px;
+  background: var(--surface-quiet);
+}
+.snippet-item { border-radius: 5px; padding: 10px 11px; }
+.snippet-item:hover { background: var(--bg-surface-raised); }
+
+.ai-config-bar {
+  gap: 6px;
+  padding: 10px;
+  background: var(--surface-quiet);
+}
+.ai-config-row { gap: 6px; }
+.ai-endpoint-input,
+.ai-key-input,
+.ai-model-select,
+.ai-design-select {
+  min-height: var(--control-height);
+  border-radius: 5px;
+  border-color: var(--border-default);
+  background: var(--bg-surface);
+}
+.ai-endpoint-input:focus,
+.ai-key-input:focus,
+.ai-model-select:focus,
+.ai-design-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-subtle);
+}
+
+.ai-mode-row { display: block; }
+.ai-mode-switch {
+  height: 36px;
+  min-height: 36px;
+  padding: 3px;
+  gap: 3px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--bg-input) 78%, var(--bg-editor));
+}
+.ai-mode-option {
+  width: 100%;
+  height: 28px;
+  min-height: 28px;
+  padding: 4px 8px;
+  gap: 6px;
+  white-space: nowrap;
+  line-height: 1;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  align-self: center;
+}
+.ai-mode-option .btn-icon {
+  display: block;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  opacity: .8;
+}
+.ai-mode-option:hover { background: transparent; color: var(--text-primary); }
+.ai-mode-option.active {
+  color: var(--accent);
+  background: var(--accent-subtle);
+  border-color: var(--accent-border);
+  box-shadow: none;
+}
+.ai-mode-option.active .btn-icon { color: var(--accent); opacity: 1; }
+#panelAi.agent-mode-active .ai-mode-option[data-ai-mode="agent"] { color: var(--accent); }
+#panelAi.agent-mode-active .ai-chat-input { border-color: var(--accent-border); }
+
+.ai-thinking-row { min-height: 24px; }
+.thinking-toggle { gap: 7px; }
+.thinking-toggle-track { width: 27px; height: 15px; }
+.thinking-toggle-thumb { width: 11px; height: 11px; }
+.thinking-toggle input:checked + .thinking-toggle-track .thinking-toggle-thumb { transform: translateX(12px); }
+.agent-status-bar {
+  min-height: 28px;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--accent-subtle);
+}
+.agent-status-bar .agent-step { color: var(--accent); }
+.agent-status-bar .agent-dot { background: var(--accent); }
+
+.ai-chat-area { background: var(--bg-surface); }
+.ai-empty-state {
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 0;
+  padding: 30px 16px 20px;
+  text-align: left;
+  color: var(--text-secondary);
+}
+.ai-empty-mark {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 14px;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+}
+.ai-empty-mark svg { width: 19px; height: 19px; }
+.ai-empty-copy { display: grid; gap: 6px; }
+.ai-empty-copy strong {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.02em;
+}
+.ai-empty-copy span { font-size: 12px; line-height: 1.65; color: var(--text-tertiary); }
+.ai-empty-hints {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1px 10px;
+  margin-top: 18px;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.empty-hint-chip {
+  min-width: 0;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+}
+.empty-hint-chip:nth-child(-n+4) { border-bottom: 1px solid var(--border-subtle); }
+.empty-hint-chip code {
+  font: 10px/1.2 var(--font-code);
+  color: var(--accent);
+  background: transparent;
+}
+.empty-hint-chip span { font-size: 11px; color: var(--text-tertiary); }
+.empty-hint-chip:hover,
+.empty-hint-chip:focus-visible { color: var(--text-primary); background: transparent; }
+.empty-hint-chip:hover span { color: var(--text-primary); }
+
+.ai-snapshot-bar { min-height: 34px; }
+.ai-input-bar {
+  gap: 7px;
+  padding: 8px;
+  background: var(--surface-quiet);
+  border-top-color: var(--border-default);
+}
+.ai-chat-input {
+  min-height: 34px;
+  border-radius: 6px;
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  padding: 8px 10px;
+}
+#btnAiSend { min-height: 34px; border-radius: 6px; }
+
+.editor-panel,
+.preview-panel { border-color: var(--workspace-rule); }
+.editor-panel-header,
+.preview-panel-header {
+  min-height: var(--panel-header-height);
+  height: var(--panel-header-height);
+  padding: 0 11px;
+  background: var(--surface-quiet);
+  border-bottom-color: var(--workspace-rule);
+  font-size: 11px;
+  letter-spacing: .02em;
+}
+.document-identity,
+.editor-header-actions,
+.preview-title {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.document-identity { flex: 1 1 auto; overflow: hidden; }
+.document-file-icon {
+  width: 22px;
+  height: 22px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 22px;
+  color: var(--accent);
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-border);
+  border-radius: 5px;
+}
+.document-file-icon svg { width: 12px; height: 12px; }
+.document-name-control { min-width: 0; display: flex; align-items: center; }
+.current-file-button {
+  min-width: 0;
+  max-width: 38ch;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: text;
+  font: 10.5px var(--font-code);
+  font-variant-numeric: tabular-nums;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.current-file-button:hover { background: var(--bg-surface); border-color: var(--border-subtle); color: var(--text-primary); }
+.current-file-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.current-file-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: inherit;
+}
+.current-file-extension { color: var(--accent); flex: 0 0 auto; }
+.current-file-input {
+  width: min(34ch, 42vw);
+  height: 26px;
+  padding: 0 7px;
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  outline: none;
+  font: 10.5px var(--font-code);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.document-save-indicator {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: var(--semantic-success);
+  transition: background var(--duration-fast), transform var(--duration-fast), opacity var(--duration-fast);
+}
+.document-save-indicator.saving { background: var(--accent); transform: scale(1.25); animation: dotPulse .8s ease-in-out infinite; }
+.document-metrics {
+  color: var(--text-tertiary);
+  font: 10px var(--font-code);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.editor-header-actions { margin-inline-start: auto; flex: 0 0 auto; }
+.language-picker select {
+  min-width: 92px;
+  height: 26px;
+  padding: 0 24px 0 8px;
+  border: 1px solid var(--border-default);
+  border-radius: 5px;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font: 11px var(--font-ui);
+  outline: none;
+  cursor: pointer;
+}
+.language-picker select:focus-visible { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-subtle); }
+.format-detection-badge {
+  color: var(--accent);
+  font-size: 10px;
+  white-space: nowrap;
+}
+.preview-panel-header { justify-content: flex-start; gap: 8px; }
+.preview-panel-header .dot { width: 6px; height: 6px; }
+.preview-subtitle {
+  min-width: 0;
+  margin-inline-start: 2px;
+  color: var(--text-tertiary);
+  font: 10px var(--font-code);
+  white-space: nowrap;
+}
+.preview-fullscreen-btn { margin-inline-start: auto; }
+
+.resizer,
+.resizer-left { background: transparent; }
+.resizer::after,
+.resizer-left::after {
+  content: '';
+  position: absolute;
+  background: var(--border-default);
+  transition: background var(--duration-fast), transform var(--duration-fast);
+}
+.resizer::after { inset: 0 2px; }
+.resizer-left::after { inset: 0 2px; }
+.resizer:hover::after,
+.resizer-left:hover::after { background: var(--accent); transform: scaleX(1.25); }
+
+.modal-box {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-lg);
+}
+.modal-header { border-bottom-color: var(--border-subtle); }
+
+@media (max-width: 1180px) {
+  .toolbar-status { display: none; }
+  .theme-picker { display: none; }
+  .toolbar-group .btn span { display: none; }
+  .toolbar-group .btn { width: 30px; justify-content: center; padding-inline: 0; }
+}
+
+@media (max-width: 768px) {
+  .toolbar { min-height: calc(52px + var(--werkstatt-safe-top)); }
+  .toolbar-actions { gap: 4px; }
+  .toolbar-group { padding: 0; border: 0; background: transparent; }
+  .toolbar-group .btn,
+  .panel-toggle { width: 44px; min-width: 44px; min-height: 44px; }
+  .panel-tab { min-height: 44px; }
+  .ai-mode-switch { height: 44px; min-height: 44px; }
+  .ai-mode-option { height: 36px; min-height: 36px; font-size: 13px; }
+  .ai-mode-option .btn-icon { width: 16px; height: 16px; flex-basis: 16px; }
+  .ai-config-bar { padding: 10px; }
+  .ai-config-row > .ai-endpoint-input,
+  .ai-config-row > .ai-key-input,
+  .ai-config-row > .ai-model-select,
+  .ai-config-row > input,
+  .ai-config-row > select { min-height: 44px; }
+  .editor-panel-header,
+  .preview-panel-header { min-height: 40px; height: 40px; }
+  .language-picker select { min-width: 104px; height: 32px; font-size: 13px; }
+  .format-detection-badge { display: none !important; }
+  .current-file-label { max-width: 18ch; }
+  .empty-hint-chip { min-height: 44px; }
+}
+
+@media (max-width: 420px) {
+  .toolbar-title { max-width: 76px; }
+  .toolbar-group-file { display: none; }
+  .current-file-label { max-width: 12ch; }
+  .preview-subtitle { display: none; }
+  .ai-empty-hints { grid-template-columns: 1fr; }
+  .empty-hint-chip:nth-child(-n+5) { border-bottom: 1px solid var(--border-subtle); }
+}
+
+
+/* Final compactness corrections discovered in viewport verification. */
+.lang-tabs[hidden] { display: none !important; }
+.current-file-label { text-transform: none; letter-spacing: 0; }
+.ai-design-row { flex-wrap: nowrap; }
+.ai-design-row .ai-design-select { flex: 1 1 auto; width: 0; min-width: 0; }
+.design-badge { display: none !important; }
+#btnMcpManage,
+#btnProjectContext {
+  width: auto !important;
+  min-width: 36px;
+  height: 32px;
+  min-height: 32px;
+  flex: 0 0 auto;
+  padding: 4px 7px !important;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .ai-config-row { flex-wrap: nowrap; }
+  .ai-config-row > .ai-endpoint-input {
+    flex: 1 1 auto;
+    width: 0;
+    min-width: 0;
+  }
+  .ai-config-row > .ai-key-input {
+    flex: 1 1 auto;
+    width: 0;
+    min-width: 0;
+  }
+  .ai-config-row > .ai-model-select {
+    flex: 0 0 112px;
+    width: 112px;
+    min-width: 112px;
+  }
+  .ai-design-row .ai-design-select {
+    flex: 1 1 auto;
+    width: 0;
+    min-width: 0;
+  }
+  #btnMcpManage,
+  #btnProjectContext {
+    width: 44px !important;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0 !important;
+    justify-content: center;
+  }
+  #btnMcpManage span,
+  #btnProjectContext span { display: none; }
+}
+
 </style>
 <style id="werkstatt-mobile-responsive-v2">
 /* Werkstatt mobile responsive patch v2 — 2026-07-26 */
@@ -2022,6 +2595,12 @@ textarea {
     padding-inline: 10px;
   }
 
+  .document-file-icon { width: 20px; height: 20px; flex-basis: 20px; }
+  .current-file-button { max-width: 30vw; padding-inline: 4px; }
+  .document-metrics { display: none; }
+  .format-detection-badge { display: none; }
+  .language-picker select { min-width: 78px; }
+
   .mobile-nav-btn {
     font-size: 11px;
   }
@@ -2141,7 +2720,747 @@ textarea {
   .workspace.preview-focused .resizer { display: none !important; }
 }
 
+
+/* Viewport-verified final overrides — intentionally last in the main stylesheet. */
+@media (max-width: 768px) {
+  #panelAi .ai-config-row { flex-wrap: nowrap !important; }
+  #panelAi .ai-config-row > .ai-endpoint-input,
+  #panelAi .ai-config-row > .ai-key-input {
+    flex: 1 1 auto !important;
+    width: 0 !important;
+    min-width: 0 !important;
+  }
+  #panelAi .ai-config-row > .ai-model-select {
+    flex: 0 0 112px !important;
+    width: 112px !important;
+    min-width: 112px !important;
+  }
+  #panelAi .ai-design-row > .ai-design-select {
+    flex: 1 1 auto !important;
+    width: 0 !important;
+    min-width: 0 !important;
+  }
+  #panelAi .ai-mode-row { display: block !important; }
+  #panelAi .ai-thinking-row { justify-content: space-between; }
+}
+
+@media (max-width: 360px) {
+  #panelAi .ai-config-bar { gap: 6px; padding: 8px; }
+  #panelAi .ai-config-row > .ai-model-select {
+    flex-basis: 104px !important;
+    width: 104px !important;
+    min-width: 104px !important;
+  }
+}
+
 </style>
+
+<style id="werkstatt-hallmark-shape-polish">
+/* Hallmark · pre-emit critique: P5 H4 E5 S5 R5 V4
+   Workbench utility UI · one containment layer · restrained accent · complete states */
+
+/* Theme-aware neutral papers: the selected colour also tints the workspace,
+   while the accent remains a highlighter rather than a large fill. */
+:root { --theme-hue: 58; --control-radius: 8px; --control-radius-sm: 7px; --control-border: 1px solid var(--border-default); }
+:root[data-theme="amber"] { --theme-hue: 78; }
+:root[data-theme="slate"] { --theme-hue: 240; }
+:root[data-theme="forest"] { --theme-hue: 145; }
+:root[data-theme="ink"] { --theme-hue: 24; }
+:root[data-theme="plum"] { --theme-hue: 305; }
+:root[data-theme="ochre"] { --theme-hue: 55; }
+
+:root[data-color-mode="light"] {
+  --bg-base: oklch(97.2% 0.007 var(--theme-hue));
+  --bg-surface: oklch(98.7% 0.004 var(--theme-hue));
+  --bg-surface-raised: oklch(95.8% 0.009 var(--theme-hue));
+  --bg-surface-overlay: oklch(94.2% 0.011 var(--theme-hue));
+  --bg-editor: oklch(99.1% 0.003 var(--theme-hue));
+  --bg-toolbar: oklch(98.1% 0.006 var(--theme-hue));
+  --bg-input: oklch(97% 0.007 var(--theme-hue));
+  --border-subtle: color-mix(in oklch, var(--text-primary) 5%, transparent);
+  --border-default: color-mix(in oklch, var(--text-primary) 9%, transparent);
+  --border-strong: color-mix(in oklch, var(--text-primary) 14%, transparent);
+  --shadow-sm: 0 1px 2px color-mix(in oklch, var(--text-primary) 7%, transparent);
+  --shadow-md: 0 8px 24px color-mix(in oklch, var(--text-primary) 9%, transparent);
+}
+
+:root[data-color-mode="dark"] {
+  --bg-base: oklch(14.2% 0.010 var(--theme-hue));
+  --bg-surface: oklch(17% 0.011 var(--theme-hue));
+  --bg-surface-raised: oklch(20% 0.012 var(--theme-hue));
+  --bg-surface-overlay: oklch(23% 0.013 var(--theme-hue));
+  --bg-editor: oklch(12.7% 0.009 var(--theme-hue));
+  --bg-toolbar: oklch(15.6% 0.010 var(--theme-hue));
+  --bg-input: oklch(18.2% 0.011 var(--theme-hue));
+  --border-subtle: color-mix(in oklch, var(--text-primary) 6%, transparent);
+  --border-default: color-mix(in oklch, var(--text-primary) 10%, transparent);
+  --border-strong: color-mix(in oklch, var(--text-primary) 15%, transparent);
+}
+
+/* Shared control geometry and states. Constant borders prevent layout shift. */
+.btn,
+.panel-toggle,
+.btn-icon-only,
+.preview-fullscreen-btn,
+.ai-snapshot-btn,
+.current-file-button,
+.language-picker select,
+.ai-mode-option,
+.empty-hint-chip,
+.mobile-nav-btn {
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  white-space: nowrap;
+}
+
+.btn {
+  min-height: 32px;
+  border-radius: var(--control-radius);
+  padding: 6px 10px;
+  line-height: 1;
+}
+.btn:focus-visible,
+.panel-toggle:focus-visible,
+.btn-icon-only:focus-visible,
+.preview-fullscreen-btn:focus-visible,
+.ai-snapshot-btn:focus-visible,
+.current-file-button:focus-visible,
+.language-picker select:focus-visible,
+.ai-mode-option:focus-visible,
+.empty-hint-chip:focus-visible,
+.mobile-nav-btn:focus-visible,
+.theme-dot:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+.btn:active,
+.panel-toggle:active,
+.btn-icon-only:active,
+.preview-fullscreen-btn:active,
+.ai-snapshot-btn:active { transform: translateY(1px); }
+.btn:disabled,
+.btn-icon-only:disabled,
+.ai-snapshot-btn:disabled { opacity: .48; cursor: not-allowed; transform: none; }
+
+/* Command bar: remove card-in-card trays. Groups are separated by one hairline only. */
+.toolbar {
+  min-height: 50px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  box-shadow: none;
+}
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--accent-on) 12%, transparent);
+}
+.toolbar-actions { gap: 0; }
+.toolbar-group,
+.panel-toggle-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.toolbar-group {
+  position: relative;
+  margin-inline-start: 9px;
+  padding-inline-start: 10px;
+}
+.toolbar-group::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 1px;
+  background: var(--border-default);
+}
+.toolbar-group .btn,
+.panel-toggle {
+  min-width: 32px;
+  min-height: 32px;
+  height: 32px;
+  border-radius: var(--control-radius);
+  padding: 6px 8px;
+  background: transparent;
+  color: var(--text-secondary);
+}
+.toolbar-group .btn:not(#btnFormat) {
+  width: 32px;
+  padding-inline: 0;
+  justify-content: center;
+}
+.toolbar-group .btn:not(#btnFormat) > span { display: none; }
+.panel-toggle { width: 32px; padding-inline: 0; }
+.panel-toggle.active {
+  color: var(--accent);
+  background: var(--accent-subtle);
+  border-color: var(--accent-border);
+}
+#btnFormat,
+.toolbar-group .btn-accent {
+  color: var(--accent);
+  background: var(--accent-subtle);
+  border-color: var(--accent-border);
+  box-shadow: none;
+}
+#btnFormat:hover,
+.toolbar-group .btn-accent:hover {
+  color: var(--accent);
+  background: color-mix(in oklch, var(--accent) 17%, transparent);
+  border-color: var(--accent);
+}
+#btnRefresh,
+#btnCopy,
+#btnClear,
+#btnImport,
+#btnDownload { color: var(--text-secondary); }
+#btnClear:hover { color: var(--semantic-error); background: var(--semantic-error-bg); border-color: color-mix(in oklch, var(--semantic-error) 35%, transparent); }
+#btnCopy:hover,
+#btnRefresh:hover,
+#btnImport:hover,
+#btnDownload:hover { color: var(--text-primary); background: var(--bg-surface-raised); border-color: var(--border-subtle); }
+
+.theme-picker {
+  gap: 6px;
+  padding: 5px 7px;
+  border: 0;
+  border-radius: var(--control-radius);
+  background: var(--bg-surface-raised);
+}
+.theme-dot {
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  min-height: 12px;
+  border: 1px solid color-mix(in oklch, var(--text-primary) 12%, transparent);
+}
+.theme-dot[aria-checked="true"] {
+  box-shadow: 0 0 0 2px var(--bg-toolbar), 0 0 0 3px var(--accent);
+}
+
+/* Status feedback: a quiet notice, not a promotional pill. */
+.toast {
+  top: 10px;
+  padding: 8px 12px;
+  border-radius: var(--control-radius);
+  border: 1px solid var(--border-default);
+  border-left-width: 3px;
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-md);
+}
+.toast.success { border-color: var(--border-default); border-left-color: var(--semantic-success); }
+.toast.error { border-color: var(--border-default); border-left-color: var(--semantic-error); }
+
+/* Sidebar: one containment layer, quieter rows, no permanent red affordances. */
+.side-panel { background: var(--bg-surface); }
+.panel-tabs { padding-inline: 10px; background: var(--bg-surface); }
+.panel-tab {
+  min-height: 42px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--text-tertiary);
+}
+.panel-tab.active { color: var(--text-primary); border-bottom-color: var(--accent); }
+.snippets-header { background: var(--bg-surface); border-bottom-color: var(--border-subtle); }
+.snippets-body { padding: 0 10px; gap: 0; }
+.snippet-item {
+  border: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: 0;
+  padding: 13px 2px 12px;
+}
+.snippet-item:hover { border-color: var(--border-subtle); background: transparent; }
+.snippet-delete {
+  color: var(--text-tertiary);
+  opacity: .42;
+  border-radius: 6px;
+}
+.snippet-delete:hover,
+.snippet-delete:focus-visible { color: var(--semantic-error); opacity: 1; background: var(--semantic-error-bg); }
+#btnSaveSnippet {
+  width: calc(100% - 20px) !important;
+  min-height: 36px;
+  margin: 8px 10px;
+  justify-content: center;
+  color: var(--text-primary);
+  background: var(--bg-surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--control-radius);
+  box-shadow: none;
+}
+#btnSaveSnippet .btn-icon { color: var(--accent); }
+#btnSaveSnippet:hover { color: var(--accent); background: var(--accent-subtle); border-color: var(--accent-border); }
+
+/* The file identity reads as one active document control rather than loose chips. */
+.editor-panel-header,
+.preview-panel-header {
+  min-height: 40px;
+  height: 40px;
+  padding: 5px 9px;
+  background: var(--bg-toolbar);
+}
+.document-identity {
+  flex: 0 1 auto;
+  max-width: min(48%, 430px);
+  height: 30px;
+  gap: 6px;
+  padding: 0 7px;
+  overflow: hidden;
+  border: 1px solid var(--workspace-rule);
+  border-radius: var(--control-radius);
+  background: var(--bg-surface);
+}
+.document-file-icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  padding: 0;
+  color: var(--accent);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+.document-file-icon svg { width: 14px; height: 14px; }
+.current-file-button {
+  height: 28px;
+  max-width: 34ch;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.current-file-button:hover { background: transparent; border-color: transparent; }
+.current-file-input {
+  height: 28px;
+  border-width: 1px;
+  border-radius: var(--control-radius-sm);
+  outline: 2px solid transparent;
+  outline-offset: 1px;
+}
+.current-file-input:focus { outline-color: var(--accent); border-color: var(--border-default); }
+.document-save-indicator { width: 5px; height: 5px; flex-basis: 5px; }
+.editor-header-actions { gap: 9px; }
+.document-metrics { color: var(--text-tertiary); }
+.language-picker { position: relative; display: inline-flex; align-items: center; color: var(--text-tertiary); }
+.language-picker::after {
+  content: "";
+  position: absolute;
+  right: 10px;
+  width: 5px;
+  height: 5px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  pointer-events: none;
+}
+.language-picker select {
+  min-width: 98px;
+  height: 30px;
+  padding: 0 25px 0 10px;
+  appearance: none;
+  border: 1px solid var(--border-default);
+  border-radius: var(--control-radius);
+  background: var(--bg-surface);
+}
+.language-picker select:hover { background: var(--bg-surface-raised); }
+.preview-fullscreen-btn,
+.btn-icon-only {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  border-radius: var(--control-radius);
+  color: var(--text-tertiary);
+  background: transparent;
+}
+.preview-fullscreen-btn:hover,
+.btn-icon-only:hover { color: var(--text-primary); background: var(--bg-surface-raised); border-color: var(--border-subtle); }
+.modal-close-btn svg { width: 15px; height: 15px; }
+
+/* AI rail: equal-height controls and tab-like modes, not a generic pill switch. */
+.ai-config-bar { gap: 7px; padding: 10px; background: var(--bg-surface); }
+.ai-endpoint-input,
+.ai-key-input,
+.ai-model-select,
+.ai-design-select {
+  min-height: 34px;
+  height: 34px;
+  border-width: 1px;
+  border-radius: var(--control-radius);
+  outline: 2px solid transparent;
+  outline-offset: 1px;
+  background: var(--bg-input);
+}
+.ai-endpoint-input:hover,
+.ai-key-input:hover,
+.ai-model-select:hover,
+.ai-design-select:hover { background: var(--bg-surface-raised); }
+.ai-endpoint-input:focus,
+.ai-key-input:focus,
+.ai-model-select:focus,
+.ai-design-select:focus {
+  outline-color: var(--accent);
+  border-color: var(--border-default);
+  box-shadow: none;
+}
+.ai-mode-switch {
+  height: 39px;
+  min-height: 39px;
+  padding: 0;
+  gap: 0;
+  border: 0;
+  border-bottom: 1px solid var(--border-default);
+  border-radius: 0;
+  background: transparent;
+}
+.ai-mode-option {
+  height: 39px;
+  min-height: 39px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-tertiary);
+}
+.ai-mode-option:hover { color: var(--text-primary); background: transparent; }
+.ai-mode-option.active {
+  color: var(--accent);
+  background: transparent;
+  border-color: transparent;
+  border-bottom-color: var(--accent);
+}
+.thinking-toggle-track {
+  width: 28px;
+  height: 16px;
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface-raised);
+}
+.thinking-toggle-thumb { width: 10px; height: 10px; top: 2px; left: 2px; background: var(--text-tertiary); }
+.thinking-toggle input:checked + .thinking-toggle-track { border-color: var(--accent); background: var(--accent); }
+.thinking-toggle input:checked + .thinking-toggle-track .thinking-toggle-thumb { transform: translateX(12px); background: var(--accent-on); }
+#btnMcpManage,
+#btnProjectContext {
+  width: auto !important;
+  min-width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0 8px !important;
+  opacity: 1 !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--control-radius) !important;
+  background: transparent !important;
+  color: var(--text-tertiary) !important;
+}
+#btnMcpManage:hover,
+#btnProjectContext:hover { color: var(--text-primary) !important; background: var(--bg-surface-raised) !important; border-color: var(--border-subtle) !important; }
+.ai-snapshot-bar { min-height: 38px; padding-inline: 10px; }
+.ai-snapshot-btn { min-height: 30px; border-radius: var(--control-radius-sm); border-color: transparent; }
+.ai-snapshot-btn:hover:not(:disabled) { color: var(--accent); background: var(--accent-subtle); border-color: var(--accent-border); }
+.ai-input-bar { padding: 9px; gap: 8px; background: var(--bg-surface); }
+.ai-chat-input {
+  min-height: 38px;
+  border-radius: var(--control-radius);
+  outline: 2px solid transparent;
+  outline-offset: 1px;
+  background: var(--bg-input);
+}
+.ai-chat-input:focus { outline-color: var(--accent); border-color: var(--border-default); box-shadow: none; }
+#btnAiSend {
+  min-height: 38px;
+  border-radius: var(--control-radius);
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-on);
+}
+#btnAiSend:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+/* Mobile: preserve 44 px hit targets, but remove oversized selected colour blocks. */
+@media (max-width: 768px) {
+  .toolbar { padding-inline: 8px; }
+  .toolbar-group { margin-inline-start: 4px; padding-inline-start: 5px; }
+  .toolbar-group::before { top: 9px; bottom: 9px; }
+  .toolbar-group .btn,
+  .panel-toggle,
+  .btn-icon-only,
+  .preview-fullscreen-btn { width: 44px; min-width: 44px; min-height: 44px; height: 44px; border-radius: 10px; }
+  #btnFormat { width: 44px; padding-inline: 0; justify-content: center; }
+  #btnFormat > span { display: none; }
+  #btnToggleSidebar { border-color: transparent; background: transparent; }
+  .editor-panel-header,
+  .preview-panel-header { height: 42px; min-height: 42px; padding-block: 5px; }
+  .document-identity { height: 32px; max-width: calc(100% - 112px); }
+  .language-picker select { height: 32px; min-width: 100px; }
+  .ai-mode-switch { height: 44px; min-height: 44px; }
+  .ai-mode-option { height: 44px; min-height: 44px; }
+  #btnMcpManage,
+  #btnProjectContext { width: 44px !important; min-width: 44px; height: 44px; min-height: 44px; padding: 0 !important; }
+  .mobile-nav-bar { padding-top: 3px; background: var(--bg-toolbar); }
+  .mobile-nav-btn {
+    position: relative;
+    border-radius: 8px;
+    background: transparent !important;
+  }
+  .mobile-nav-btn::before {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: 50%;
+    width: 18px;
+    height: 2px;
+    border-radius: 2px;
+    background: transparent;
+    transform: translateX(-50%);
+  }
+  .mobile-nav-btn.active,
+  .mobile-nav-btn[aria-current="page"],
+  .mobile-nav-btn.drawer-active { color: var(--accent); background: transparent !important; }
+  .mobile-nav-btn.active::before,
+  .mobile-nav-btn[aria-current="page"]::before,
+  .mobile-nav-btn.drawer-active::before { background: var(--accent); }
+}
+
+@media (max-width: 480px) {
+  .toolbar-group::before { display: none; }
+  .toolbar-group { margin-inline-start: 0; padding-inline-start: 0; }
+  .document-identity { max-width: calc(100% - 108px); padding-inline: 6px; }
+  .document-file-icon { display: none; }
+  .current-file-button { max-width: 26vw; }
+}
+
+@media (pointer: coarse) {
+  .snippet-delete { opacity: .75; }
+}
+
+@media (hover: hover) {
+  .btn:hover,
+  .panel-toggle:hover,
+  .btn-icon-only:hover,
+  .preview-fullscreen-btn:hover,
+  .ai-snapshot-btn:hover { transform: translateY(-1px); }
+  .btn:active,
+  .panel-toggle:active,
+  .btn-icon-only:active,
+  .preview-fullscreen-btn:active,
+  .ai-snapshot-btn:active { transform: translateY(1px); }
+}
+</style>
+
+
+<style id="werkstatt-motion-polish">
+/* Hallmark motion language: three purposeful primitives only.
+   1) tactile controls, 2) state indicators, 3) contained surface entrances. */
+:root {
+  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --motion-ease-toggle: cubic-bezier(0.65, 0, 0.35, 1);
+  --motion-micro: 120ms;
+  --motion-short: 220ms;
+  --motion-long: 420ms;
+}
+
+/* Primitive 1 — tactile controls. Only transform and opacity move;
+   colour and border shifts communicate state without changing geometry. */
+.btn,
+.panel-toggle,
+.btn-icon-only,
+.preview-fullscreen-btn,
+.ai-snapshot-btn,
+.current-file-button,
+.ai-mode-option,
+.empty-hint-chip,
+.mobile-nav-btn,
+.theme-dot {
+  transition-property: transform, opacity, color, background-color, border-color;
+  transition-duration: var(--motion-micro);
+  transition-timing-function: var(--motion-ease-out);
+}
+
+.btn .btn-icon,
+.panel-toggle .btn-icon,
+.btn-icon-only svg,
+.preview-fullscreen-btn .btn-icon,
+.ai-mode-option .btn-icon,
+.mobile-nav-btn .btn-icon {
+  transform-origin: center;
+  transition: transform var(--motion-short) var(--motion-ease-out),
+              opacity var(--motion-micro) var(--motion-ease-out);
+}
+
+@media (hover: hover) {
+  .btn:not(:disabled):hover,
+  .panel-toggle:hover,
+  .btn-icon-only:not(:disabled):hover,
+  .preview-fullscreen-btn:hover,
+  .ai-snapshot-btn:not(:disabled):hover,
+  .empty-hint-chip:hover {
+    transform: translateY(-1px);
+  }
+
+  .btn:not(:disabled):active,
+  .panel-toggle:active,
+  .btn-icon-only:not(:disabled):active,
+  .preview-fullscreen-btn:active,
+  .ai-snapshot-btn:not(:disabled):active,
+  .empty-hint-chip:active {
+    transform: translateY(1px) scale(.985);
+    transition-duration: 80ms;
+  }
+
+  #btnRefresh:hover .btn-icon,
+  #btnRefreshModels:hover svg { transform: rotate(24deg); }
+  #btnImport:hover .btn-icon { transform: translateY(-1.5px); }
+  #btnDownload:hover .btn-icon { transform: translateY(1.5px); }
+  #btnCopy:hover .btn-icon { transform: translate(1px, -1px); }
+  #btnAiSend:hover .btn-icon { transform: translate(1.5px, -1.5px); }
+  #btnColorMode:not(.switching):hover .btn-icon { transform: rotate(12deg); }
+  #btnFormat:hover .btn-icon { transform: scale(.94); }
+
+  .theme-dot:hover { transform: scale(1.12); }
+  .theme-dot:active { transform: scale(.94); transition-duration: 80ms; }
+}
+
+/* Primitive 2 — indicators move; content does not slide sideways. */
+.ai-mode-switch {
+  position: relative;
+  isolation: isolate;
+}
+.ai-mode-switch::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  bottom: -1px;
+  width: 50%;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--accent);
+  transform: translateX(0);
+  transform-origin: center;
+  transition: transform var(--motion-short) var(--motion-ease-toggle),
+              opacity var(--motion-micro) var(--motion-ease-out);
+  pointer-events: none;
+}
+#panelAi.agent-mode-active .ai-mode-switch::after { transform: translateX(100%); }
+.ai-mode-option.active { border-bottom-color: transparent; }
+.ai-mode-option.active .btn-icon { transform: translateY(-1px); }
+
+.panel-tab {
+  position: relative;
+  border-bottom-color: transparent !important;
+}
+.panel-tab::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--accent);
+  opacity: 0;
+  transform: scaleX(.35);
+  transition: transform var(--motion-short) var(--motion-ease-out),
+              opacity var(--motion-micro) var(--motion-ease-out);
+  pointer-events: none;
+}
+.panel-tab.active::after { opacity: 1; transform: scaleX(1); }
+
+.mobile-nav-btn::before {
+  opacity: 0;
+  transform: translateX(-50%) scaleX(.35);
+  transform-origin: center;
+  transition: transform var(--motion-short) var(--motion-ease-out),
+              opacity var(--motion-micro) var(--motion-ease-out),
+              background-color var(--motion-micro) var(--motion-ease-out);
+}
+.mobile-nav-btn.active::before,
+.mobile-nav-btn[aria-current="page"]::before,
+.mobile-nav-btn.drawer-active::before {
+  opacity: 1;
+  transform: translateX(-50%) scaleX(1);
+}
+
+/* Primitive 3 — contained surfaces enter as a unit. */
+.panel-content.active {
+  animation: werkstatt-panel-enter var(--motion-short) var(--motion-ease-out) both;
+}
+.side-panel {
+  transition: transform var(--motion-long) var(--motion-ease-out),
+              opacity var(--motion-short) var(--motion-ease-out);
+}
+.side-panel-backdrop {
+  transition: opacity var(--motion-short) var(--motion-ease-out);
+}
+@keyframes werkstatt-panel-enter {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-overlay {
+  transition: opacity var(--motion-long) var(--motion-ease-out);
+}
+.modal-box {
+  opacity: 0;
+  transform: translateY(8px) scale(.97);
+  transition: transform var(--motion-long) var(--motion-ease-out),
+              opacity var(--motion-short) var(--motion-ease-out);
+}
+.modal-overlay.active .modal-box {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.toast {
+  opacity: 0;
+  transition: transform var(--motion-long) var(--motion-ease-out),
+              opacity var(--motion-short) var(--motion-ease-out);
+}
+.toast.show { opacity: 1; }
+
+/* Functional feedback remains subtle and one-shot where possible. */
+.document-save-indicator:not(.saving) {
+  transition: transform var(--motion-short) var(--motion-ease-out),
+              opacity var(--motion-micro) var(--motion-ease-out),
+              background-color var(--motion-micro) var(--motion-ease-out);
+}
+.document-save-indicator.saving { animation-timing-function: var(--motion-ease-toggle); }
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-content.active { animation: none !important; }
+  .modal-box,
+  .modal-overlay.active .modal-box,
+  .btn:hover,
+  .panel-toggle:hover,
+  .btn-icon-only:hover,
+  .preview-fullscreen-btn:hover,
+  .ai-snapshot-btn:hover,
+  .theme-dot:hover,
+  .ai-mode-option.active .btn-icon {
+    transform: none !important;
+  }
+  .ai-mode-switch::after,
+  #panelAi.agent-mode-active .ai-mode-switch::after,
+  .panel-tab::after,
+  .panel-tab.active::after,
+  .mobile-nav-btn::before,
+  .mobile-nav-btn.active::before,
+  .mobile-nav-btn[aria-current="page"]::before,
+  .mobile-nav-btn.drawer-active::before {
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+
 </head>
 <body>
     <!-- SVG Icons -->
@@ -2164,6 +3483,8 @@ textarea {
         <symbol id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></symbol>
         <symbol id="icon-lightning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></symbol>
         <symbol id="icon-sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/><path d="M18 14l.7 2.3L21 17l-2.3.7L18 20l-.7-2.3L15 17l2.3-.7z"/></symbol>
+        <symbol id="icon-ai-compose" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 5.5h8a2 2 0 0 1 2 2v1"/><path d="M5.5 5.5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1"/><path d="M7 9h5M7 12h6M7 15h4"/><path d="M18.5 7.5c.35 1.75 1.25 2.65 3 3-1.75.35-2.65 1.25-3 3-.35-1.75-1.25-2.65-3-3 1.75-.35 2.65-1.25 3-3Z"/></symbol>
+        <symbol id="icon-agent-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M7 6h4.5a3 3 0 0 1 3 3v1.5"/><path d="M17 6h-1.5"/><path d="M14.5 10.5A5.5 5.5 0 0 1 12 16"/><path d="M7 6v4a6 6 0 0 0 4.2 5.72"/></symbol>
         <symbol id="icon-layout-sidebar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="8" height="16" rx="1.5"/><rect x="15" y="8" width="7" height="8" rx="0.8"/><line x1="15" y1="12" x2="22" y2="12"/></symbol>
         <symbol id="icon-code-brackets" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 7 3 12 8 17"/><polyline points="16 7 21 12 16 17"/><line x1="13" y1="3" x2="11" y2="21" stroke-width="1" opacity="0.25"/></symbol>
         <symbol id="icon-screen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></symbol>
@@ -2185,12 +3506,12 @@ textarea {
                     <svg class="btn-icon" id="iconColorMode"><use href="#icon-sun"></use></svg>
                 </button>
                 <div class="theme-picker" role="radiogroup" aria-label="主题切换">
-                    <button type="button" class="theme-dot" data-theme="amber" aria-label="琥珀" aria-checked="true" role="radio" style="background:#D4A853" title="琥珀"></button>
-                    <button type="button" class="theme-dot" data-theme="slate" aria-label="冷钢" aria-checked="false" role="radio" style="background:#7BA4C0" title="冷钢"></button>
-                    <button type="button" class="theme-dot" data-theme="forest" aria-label="深林" aria-checked="false" role="radio" style="background:#8DAF82" title="深林"></button>
-                    <button type="button" class="theme-dot" data-theme="ink" aria-label="墨韵" aria-checked="false" role="radio" style="background:#D0756E" title="墨韵"></button>
-                    <button type="button" class="theme-dot" data-theme="plum" aria-label="紫烟" aria-checked="false" role="radio" style="background:#A89BC4" title="紫烟"></button>
-                    <button type="button" class="theme-dot" data-theme="ochre" aria-label="陶土" aria-checked="false" role="radio" style="background:#D4956A" title="陶土"></button>
+                    <button type="button" class="theme-dot" data-theme="amber" aria-label="琥珀" aria-checked="true" role="radio" title="琥珀"></button>
+                    <button type="button" class="theme-dot" data-theme="slate" aria-label="冷钢" aria-checked="false" role="radio" title="冷钢"></button>
+                    <button type="button" class="theme-dot" data-theme="forest" aria-label="深林" aria-checked="false" role="radio" title="深林"></button>
+                    <button type="button" class="theme-dot" data-theme="ink" aria-label="墨韵" aria-checked="false" role="radio" title="墨韵"></button>
+                    <button type="button" class="theme-dot" data-theme="plum" aria-label="紫烟" aria-checked="false" role="radio" title="紫烟"></button>
+                    <button type="button" class="theme-dot" data-theme="ochre" aria-label="陶土" aria-checked="false" role="radio" title="陶土"></button>
                 </div>
                 <span class="toolbar-status" id="statusIndicator">
                     <span class="status-dot idle" id="statusDot"></span>
@@ -2198,35 +3519,38 @@ textarea {
                 </span>
             </div>
             <div class="toolbar-actions">
-                <div class="panel-toggle-group" title="面板显示切换">
-                    <button type="button" class="btn panel-toggle active" id="btnToggleSidebar" data-target="sidePanel" aria-label="切换侧栏">
+                <div class="panel-toggle-group" title="面板显示切换" aria-label="面板显示切换">
+                    <button type="button" class="btn panel-toggle active" id="btnToggleSidebar" data-target="sidePanel" aria-label="切换侧栏" title="侧栏">
                         <svg class="btn-icon"><use href="#icon-layout-sidebar"/></svg>
                     </button>
-                    <button type="button" class="btn panel-toggle active" id="btnToggleEditor" data-target="editor" aria-label="切换编辑器">
+                    <button type="button" class="btn panel-toggle active" id="btnToggleEditor" data-target="editor" aria-label="切换编辑器" title="编辑器">
                         <svg class="btn-icon"><use href="#icon-code-brackets"/></svg>
                     </button>
-                    <button type="button" class="btn panel-toggle active" id="btnTogglePreview" data-target="preview" aria-label="切换预览">
+                    <button type="button" class="btn panel-toggle active" id="btnTogglePreview" data-target="preview" aria-label="切换预览" title="预览">
                         <svg class="btn-icon"><use href="#icon-screen"/></svg>
                     </button>
                 </div>
-                <span class="toolbar-sep"></span>
-                <button type="button" class="btn btn-danger" id="btnClear" title="清空代码">
-                    <svg class="btn-icon"><use href="#icon-trash"></use></svg> 清空
-                </button>
-                <button type="button" class="btn btn-success" id="btnCopy" title="复制代码">
-                    <svg class="btn-icon"><use href="#icon-copy"></use></svg> 复制
-                </button>
-                <button type="button" class="btn" id="btnRefresh" title="刷新预览">
-                    <svg class="btn-icon"><use href="#icon-refresh"></use></svg> 刷新
-                </button>
-                <button type="button" class="btn btn-accent" id="btnFormat"><svg class="btn-icon"><use href="#icon-format"/></svg> 格式化</button>
-                <button type="button" class="btn" id="btnDownload" title="下载文件">
-                    <svg class="btn-icon"><use href="#icon-download"></use></svg> 下载
-                </button>
-                <button type="button" class="btn" id="btnImport" title="导入文件">
-                    <svg class="btn-icon"><use href="#icon-upload"></use></svg> 导入
-                </button>
-                <input type="file" id="fileInput" aria-label="打开代码文件" accept=".html,.css,.js,.ts,.tsx,.scss,.md,.json" style="display:none">
+                <div class="toolbar-group toolbar-group-edit" aria-label="编辑操作">
+                    <button type="button" class="btn btn-accent" id="btnFormat" title="格式化代码"><svg class="btn-icon"><use href="#icon-format"/></svg><span>格式化</span></button>
+                    <button type="button" class="btn" id="btnRefresh" title="刷新预览">
+                        <svg class="btn-icon"><use href="#icon-refresh"></use></svg><span>刷新</span>
+                    </button>
+                    <button type="button" class="btn btn-success" id="btnCopy" title="复制代码">
+                        <svg class="btn-icon"><use href="#icon-copy"></use></svg><span>复制</span>
+                    </button>
+                    <button type="button" class="btn btn-danger" id="btnClear" title="清空代码">
+                        <svg class="btn-icon"><use href="#icon-trash"></use></svg><span>清空</span>
+                    </button>
+                </div>
+                <div class="toolbar-group toolbar-group-file" aria-label="文件操作">
+                    <button type="button" class="btn" id="btnImport" title="导入文件">
+                        <svg class="btn-icon"><use href="#icon-upload"></use></svg><span>导入</span>
+                    </button>
+                    <button type="button" class="btn" id="btnDownload" title="下载文件">
+                        <svg class="btn-icon"><use href="#icon-download"></use></svg><span>下载</span>
+                    </button>
+                </div>
+                <input type="file" id="fileInput" aria-label="打开代码文件" accept=".html,.htm,.css,.js,.ts,.tsx,.scss,.md,.markdown,.json,.txt" style="display:none">
             </div>
         </header>
 
@@ -2241,7 +3565,7 @@ textarea {
                         <svg class="btn-icon"><use href="#icon-book"></use></svg> 片段
                     </button>
                     <button type="button" class="panel-tab" data-panel="ai" aria-label="AI 助手">
-                        <svg class="btn-icon"><use href="#icon-sparkle"></use></svg> AI
+                        <svg class="btn-icon"><use href="#icon-ai-compose"></use></svg> AI
                     </button>
                 </div>
                 <!-- Snippets -->
@@ -2256,7 +3580,7 @@ textarea {
                     <div class="snippets-body" id="snippetsList"></div>
                     <div style="padding:var(--space-2); border-top:1px solid var(--border-subtle);">
                         <button type="button" class="btn btn-accent" id="btnSaveSnippet" style="width:100%;justify-content:center;">
-                            <svg class="btn-icon"><use href="#icon-plus"></use></svg> 保存当前代码
+                            <svg class="btn-icon"><use href="#icon-plus"></use></svg><span>保存片段</span>
                         </button>
                     </div>
                 </div>
@@ -2280,11 +3604,11 @@ textarea {
                         <div class="ai-config-row ai-mode-row">
                             <div class="ai-mode-switch" role="tablist" aria-label="AI 工作模式">
                                 <button type="button" class="ai-mode-option active" id="aiModeAi" data-ai-mode="ai" role="tab" aria-selected="true" title="快速回答、解释与局部代码修改">
-                                    <svg class="btn-icon" aria-hidden="true"><use href="#icon-sparkle"></use></svg>
+                                    <svg class="btn-icon" aria-hidden="true"><use href="#icon-ai-compose"></use></svg>
                                     <span>AI 模式</span>
                                 </button>
                                 <button type="button" class="ai-mode-option" id="aiModeAgent" data-ai-mode="agent" role="tab" aria-selected="false" title="多步骤执行、工具调用、自动验证与任务级回滚">
-                                    <svg class="btn-icon" aria-hidden="true"><use href="#icon-lightning"></use></svg>
+                                    <svg class="btn-icon" aria-hidden="true"><use href="#icon-agent-route"></use></svg>
                                     <span>Agent 模式</span>
                                 </button>
                             </div>
@@ -2328,7 +3652,7 @@ textarea {
                             </button>
                             <button type="button" class="btn-icon-only" id="btnProjectContext" title="项目规范（PRODUCT.md / DESIGN.md —— 约束产品与视觉规则）" aria-label="项目规范" style="padding:4px 6px;opacity:0.7;font-size:11px;border:1px solid var(--hairline);border-radius:var(--radius-sm);background:transparent;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;gap:4px;">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
-                                <span id="ctxBadge">项目规范</span>
+                                <span id="ctxBadge">规范</span>
                             </button>
                         </div>
 
@@ -2340,15 +3664,20 @@ textarea {
                     </div>
                     <div class="ai-chat-area" id="aiChatArea">
                         <div class="ai-empty-state" id="aiEmptyState">
-                            <svg class="big-icon"><use href="#icon-sparkle"></use></svg>
-                            <span>输入自然语言指令<br>AI 将帮你修改代码</span>
-                            <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:280px;" id="aiEmptyHints">
-                                <button type="button" class="empty-hint-chip" data-cmd="/audit" style="padding:3px 10px;font-size:11px;border:1px solid var(--hairline);border-radius:12px;background:transparent;color:var(--text-secondary);cursor:pointer;transition:border-color 0.15s, color 0.15s, background-color 0.15s;">/audit 设计审计</button>
-                                <button type="button" class="empty-hint-chip" data-cmd="/polish" style="padding:3px 10px;font-size:11px;border:1px solid var(--hairline);border-radius:12px;background:transparent;color:var(--text-secondary);cursor:pointer;transition:border-color 0.15s, color 0.15s, background-color 0.15s;">/polish 打磨</button>
-                                <button type="button" class="empty-hint-chip" data-cmd="/critique" style="padding:3px 10px;font-size:11px;border:1px solid var(--hairline);border-radius:12px;background:transparent;color:var(--text-secondary);cursor:pointer;transition:border-color 0.15s, color 0.15s, background-color 0.15s;">/critique 评审</button>
-                                <button type="button" class="empty-hint-chip" data-cmd="/bolder" style="padding:3px 10px;font-size:11px;border:1px solid var(--hairline);border-radius:12px;background:transparent;color:var(--text-secondary);cursor:pointer;transition:border-color 0.15s, color 0.15s, background-color 0.15s;">/bolder 加强</button>
-                                <button type="button" class="empty-hint-chip" data-cmd="/quieter" style="padding:3px 10px;font-size:11px;border:1px solid var(--hairline);border-radius:12px;background:transparent;color:var(--text-secondary);cursor:pointer;transition:border-color 0.15s, color 0.15s, background-color 0.15s;">/quieter 收敛</button>
-                                <button type="button" class="empty-hint-chip" data-cmd="/help" style="padding:3px 10px;font-size:11px;border:1px solid var(--hairline);border-radius:12px;background:transparent;color:var(--text-secondary);cursor:pointer;transition:border-color 0.15s, color 0.15s, background-color 0.15s;">/help 全部指令</button>
+                            <div class="ai-empty-mark" aria-hidden="true">
+                                <svg><use href="#icon-ai-compose"></use></svg>
+                            </div>
+                            <div class="ai-empty-copy">
+                                <strong>从一次明确修改开始</strong>
+                                <span>描述目标、范围和不能改变的部分，AI 会直接在当前代码上工作。</span>
+                            </div>
+                            <div class="ai-empty-hints" id="aiEmptyHints" aria-label="快捷指令">
+                                <button type="button" class="empty-hint-chip" data-cmd="/audit"><code>/audit</code><span>设计审计</span></button>
+                                <button type="button" class="empty-hint-chip" data-cmd="/polish"><code>/polish</code><span>细节打磨</span></button>
+                                <button type="button" class="empty-hint-chip" data-cmd="/critique"><code>/critique</code><span>专业评审</span></button>
+                                <button type="button" class="empty-hint-chip" data-cmd="/bolder"><code>/bolder</code><span>增强表达</span></button>
+                                <button type="button" class="empty-hint-chip" data-cmd="/quieter"><code>/quieter</code><span>收敛界面</span></button>
+                                <button type="button" class="empty-hint-chip" data-cmd="/help"><code>/help</code><span>全部指令</span></button>
                             </div>
                         </div>
                     </div>
@@ -2374,7 +3703,35 @@ textarea {
             <main class="main-content" id="mainContent">
                 <section class="editor-panel" id="editorPanel">
                     <div class="editor-panel-header">
-                        <div class="lang-tabs"></div>
+                        <div class="document-identity">
+                            <span class="document-file-icon" aria-hidden="true"><svg><use href="#icon-document"></use></svg></span>
+                            <span class="document-name-control">
+                                <button type="button" class="current-file-button" id="currentFileButton" title="单击重命名；扩展名由文档类型决定" aria-label="重命名当前文件">
+                                    <span class="current-file-label" id="currentFileLabel">index</span><span class="current-file-extension" id="currentFileExtension">.html</span>
+                                </button>
+                                <input class="current-file-input" id="currentFileInput" aria-label="文件名" autocomplete="off" spellcheck="false" hidden>
+                            </span>
+                            <span class="document-save-indicator" id="documentSaveIndicator" role="status" aria-label="已自动保存" title="已自动保存到本机"></span>
+                            <div class="lang-tabs" hidden aria-hidden="true"></div>
+                        </div>
+                        <div class="editor-header-actions">
+                            <span class="document-metrics" id="documentMetrics">1 行 · 0 B</span>
+                            <span class="format-detection-badge" id="formatDetectionBadge" hidden>自动识别</span>
+                            <label class="language-picker" title="选择文档类型">
+                                <span class="sr-only">文档类型</span>
+                                <select id="languageSelect" aria-label="文档类型" title="自动识别文档类型；也可以手动锁定">
+                                    <option value="auto">自动 · HTML</option>
+                                    <option value="html">HTML</option>
+                                    <option value="md">Markdown</option>
+                                    <option value="css">CSS</option>
+                                    <option value="js">JavaScript</option>
+                                    <option value="ts">TypeScript</option>
+                                    <option value="tsx">TSX</option>
+                                    <option value="scss">SCSS</option>
+                                    <option value="json">JSON</option>
+                                </select>
+                            </label>
+                        </div>
                     </div>
                     <div class="editor-wrapper">
                         <div id="codeEditor"></div>
@@ -2385,7 +3742,7 @@ textarea {
 
                 <section class="preview-panel" id="previewPanel">
                     <div class="preview-panel-header">
-                        <span class="dot"></span> 实时预览
+                        <span class="preview-title"><span class="dot"></span> 实时预览</span><span class="preview-subtitle" id="previewSubtitle">HTML</span>
                         <button type="button" class="preview-fullscreen-btn" id="btnFullscreen" aria-label="全屏预览" title="全屏预览">
                             <svg class="btn-icon"><use href="#icon-maximize"></use></svg>
                         </button>
@@ -2450,7 +3807,7 @@ textarea {
         <div class="modal-box" style="max-width:520px;">
             <h3 id="mcpModalTitle" style="display:flex;align-items:center;justify-content:space-between;">
                 MCP 服务器管理
-                <button type="button" class="btn-icon-only" id="btnCloseMcp" aria-label="关闭" style="padding:4px;font-size:18px;line-height:1;">×</button>
+                <button type="button" class="btn-icon-only modal-close-btn" id="btnCloseMcp" aria-label="关闭" title="关闭"><svg><use href="#icon-close"></use></svg></button>
             </h3>
             <p style="color:var(--text-muted);font-size:12px;margin:4px 0 12px;">连接外部 MCP 服务器，扩展 Agent 的工具能力。支持 SSE 和 HTTP 传输。</p>
 
@@ -2485,7 +3842,7 @@ textarea {
         <div class="modal-box" style="max-width:560px;">
             <h3 id="ctxModalTitle" style="display:flex;align-items:center;justify-content:space-between;">
                 项目规范
-                <button type="button" class="btn-icon-only" id="btnCloseCtx" aria-label="关闭" style="padding:4px;font-size:18px;line-height:1;">×</button>
+                <button type="button" class="btn-icon-only modal-close-btn" id="btnCloseCtx" aria-label="关闭" title="关闭"><svg><use href="#icon-close"></use></svg></button>
             </h3>
             <p style="color:var(--text-muted);font-size:12px;margin:4px 0 12px;">定义产品定位与设计规范，Agent 将以此为锚点生成更贴合的界面。缺失时 Agent 会主动访谈生成。</p>
 
@@ -2845,17 +4202,77 @@ textarea {
   })[ch]);
 
   if (typeof window.marked === 'undefined') {
+    const inlineMarkdown = (input) => {
+      const codeTokens = [];
+      let text = escapeHtml(input).replace(/`([^`\n]+)`/g, (_, value) => {
+        const key = `\u0000CODE${codeTokens.length}\u0000`;
+        codeTokens.push('<code>' + value + '</code>');
+        return key;
+      });
+      text = text
+        .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/__([^_\n]+)__/g, '<strong>$1</strong>')
+        .replace(/(^|[\s（(])\*([^*\n]+)\*(?=$|[\s，。！？,.!?)）])/g, '$1<em>$2</em>')
+        .replace(/(^|[\s（(])_([^_\n]+)_(?=$|[\s，。！？,.!?)）])/g, '$1<em>$2</em>')
+        .replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" rel="noreferrer">$1</a>');
+      codeTokens.forEach((token, index) => { text = text.replace(`\u0000CODE${index}\u0000`, token); });
+      return text;
+    };
+
     window.marked = {
       setOptions() {},
       parse(source) {
-        const escaped = escapeHtml(source);
-        return escaped
-          .replace(/^###\s+(.+)$/gm, '<h3>$1</h3>')
-          .replace(/^##\s+(.+)$/gm, '<h2>$1</h2>')
-          .replace(/^#\s+(.+)$/gm, '<h1>$1</h1>')
-          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-          .replace(/`([^`]+)`/g, '<code>$1</code>')
-          .split(/\n{2,}/).map((block) => /^<h[1-3]>/.test(block) ? block : '<p>' + block.replace(/\n/g, '<br>') + '</p>').join('');
+        const lines = String(source || '').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').split('\n');
+        const out = [];
+        let paragraph = [];
+        let listType = '';
+        let inFence = false;
+        let fenceLang = '';
+        let fenceLines = [];
+        const flushParagraph = () => {
+          if (!paragraph.length) return;
+          out.push('<p>' + paragraph.map(inlineMarkdown).join('<br>') + '</p>');
+          paragraph = [];
+        };
+        const closeList = () => {
+          if (!listType) return;
+          out.push('</' + listType + '>');
+          listType = '';
+        };
+        for (const rawLine of lines) {
+          const fence = rawLine.match(/^\s*```\s*([\w-]*)\s*$/);
+          if (fence) {
+            flushParagraph(); closeList();
+            if (!inFence) { inFence = true; fenceLang = fence[1] || ''; fenceLines = []; }
+            else {
+              const cls = fenceLang ? ' class="language-' + fenceLang + '"' : '';
+              out.push('<pre><code' + cls + '>' + escapeHtml(fenceLines.join('\n')) + '</code></pre>');
+              inFence = false; fenceLang = ''; fenceLines = [];
+            }
+            continue;
+          }
+          if (inFence) { fenceLines.push(rawLine); continue; }
+          if (!rawLine.trim()) { flushParagraph(); closeList(); continue; }
+          const heading = rawLine.match(/^(#{1,6})\s+(.+)$/);
+          if (heading) { flushParagraph(); closeList(); const n = heading[1].length; out.push('<h' + n + '>' + inlineMarkdown(heading[2]) + '</h' + n + '>'); continue; }
+          const quote = rawLine.match(/^>\s?(.*)$/);
+          if (quote) { flushParagraph(); closeList(); out.push('<blockquote><p>' + inlineMarkdown(quote[1]) + '</p></blockquote>'); continue; }
+          if (/^\s*(?:---+|___+|\*\*\*+)\s*$/.test(rawLine)) { flushParagraph(); closeList(); out.push('<hr>'); continue; }
+          const unordered = rawLine.match(/^\s*[-+*]\s+(.+)$/);
+          const ordered = rawLine.match(/^\s*\d+[.)]\s+(.+)$/);
+          if (unordered || ordered) {
+            flushParagraph();
+            const nextType = ordered ? 'ol' : 'ul';
+            if (listType && listType !== nextType) closeList();
+            if (!listType) { listType = nextType; out.push('<' + listType + '>'); }
+            out.push('<li>' + inlineMarkdown((ordered || unordered)[1]) + '</li>');
+            continue;
+          }
+          paragraph.push(rawLine);
+        }
+        if (inFence) out.push('<pre><code>' + escapeHtml(fenceLines.join('\n')) + '</code></pre>');
+        flushParagraph(); closeList();
+        return out.join('\n');
       }
     };
   }
@@ -3030,6 +4447,15 @@ textarea {
     const mainContent = document.getElementById('mainContent');
     const dragOverlay = document.getElementById('dragOverlay');
     const previewContainer = document.getElementById('previewContainer');
+    const languageSelect = document.getElementById('languageSelect');
+    const currentFileButton = document.getElementById('currentFileButton');
+    const currentFileLabel = document.getElementById('currentFileLabel');
+    const currentFileExtension = document.getElementById('currentFileExtension');
+    const currentFileInput = document.getElementById('currentFileInput');
+    const documentSaveIndicator = document.getElementById('documentSaveIndicator');
+    const documentMetrics = document.getElementById('documentMetrics');
+    const formatDetectionBadge = document.getElementById('formatDetectionBadge');
+    const previewSubtitle = document.getElementById('previewSubtitle');
 
     // ==================== CodeMirror 5 ====================
     const editor = CodeMirror(editorContainer, {
@@ -3195,7 +4621,9 @@ textarea {
             } else {
                 safeStorage.remove(key);
             }
+            safeStorage.set(FILE_NAME_PREFIX + currentLang, currentFileName);
             rebuildLangTabs();
+            setDocumentSaveState('saved');
         } catch (e) { console.error(e); }
     }
 
@@ -3340,20 +4768,17 @@ textarea {
     const btnColorMode = document.getElementById('btnColorMode');
     const iconColorMode = document.getElementById('iconColorMode');
 
-    function getSystemColorMode() {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-
     function loadColorMode() {
         try {
             const stored = safeStorage.get(COLOR_MODE_KEY);
             if (stored && (stored === 'light' || stored === 'dark')) return stored;
         } catch (e) { console.error(e); }
-        return getSystemColorMode();
+        return 'light';
     }
 
     function applyColorMode(mode) {
         document.documentElement.setAttribute('data-color-mode', mode);
+        document.documentElement.style.colorScheme = mode;
         const use = iconColorMode.querySelector('use');
         if (mode === 'light') {
             use.setAttribute('href', '#icon-moon');
@@ -3376,14 +4801,9 @@ textarea {
 
     btnColorMode.addEventListener('click', toggleColorMode);
 
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-        try {
-            const stored = safeStorage.get(COLOR_MODE_KEY);
-            if (!stored || (stored !== 'light' && stored !== 'dark')) {
-                applyColorMode(e.matches ? 'dark' : 'light');
-            }
-        } catch (ex) {}
-    });
+    // Light is the intentional product default. The interface only follows an
+    // explicit user choice, so an operating-system theme change cannot flip it
+    // unexpectedly after the page has loaded.
 
     // ==================== Theme ====================
     const THEME_STORAGE_KEY = 'editor_theme';
@@ -3460,6 +4880,9 @@ textarea {
         applyColorMode(colorMode);
         const currentTheme = loadTheme();
         applyTheme(currentTheme);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            document.documentElement.classList.remove('theme-preload');
+        }));
         document.querySelectorAll('.theme-dot').forEach(dot => {
             dot.addEventListener('click', () => setTheme(dot.getAttribute('data-theme')));
         });
@@ -3479,34 +4902,220 @@ textarea {
         json: { mode: 'application/json', label: 'JSON', ext: '.json' },
     };
     const LANG_STORAGE = 'editor_current_lang';
+    const DOCUMENT_TYPE_MODE_STORAGE = 'editor_document_type_mode';
     const CODE_PREFIX = 'editor_code_';
+    const FILE_NAME_PREFIX = 'editor_file_name_';
     let currentLang = 'html';
     let currentFileName = 'index.html';
+    let documentTypeMode = 'auto';
     let babelReady = false;
     let sassReady = false;
 
     function detectLang(ext) {
-        const map = { ts: 'ts', tsx: 'tsx', scss: 'scss', md: 'md', json: 'json', html: 'html', htm: 'html', css: 'css', js: 'js' };
+        const map = { ts: 'ts', tsx: 'tsx', scss: 'scss', md: 'md', markdown: 'md', json: 'json', html: 'html', htm: 'html', css: 'css', js: 'js' };
         return map[ext] || 'html';
     }
 
-    function looksLikeHtml(code) {
-        const trimmed = (code || '').trim().toLowerCase();
-        return trimmed.startsWith('<!doctype') || trimmed.startsWith('<html') || trimmed.startsWith('<body') || trimmed.startsWith('<!--') || /^<\w+/.test(trimmed);
+    function getDocumentTypeLabel(lang) {
+        const labels = { html: 'HTML', md: 'Markdown', css: 'CSS', js: 'JavaScript', ts: 'TypeScript', tsx: 'TSX', scss: 'SCSS', json: 'JSON' };
+        return labels[lang] || (LANG_CONFIG[lang]?.label || 'HTML');
+    }
+
+    function htmlConfidence(code) {
+        const text = String(code || '').replace(/^\uFEFF/, '').trim();
+        if (!text) return 0;
+        let score = 0;
+        if (/^<!doctype\s+html\b/i.test(text)) score += 8;
+        if (/<html(?:\s[^>]*)?>[\s\S]*<\/html\s*>/i.test(text)) score += 7;
+        if (/<head(?:\s[^>]*)?>[\s\S]*<\/head\s*>/i.test(text)) score += 4;
+        if (/<body(?:\s[^>]*)?>[\s\S]*<\/body\s*>/i.test(text)) score += 4;
+        if (/<(?:main|section|article|header|footer|nav|form|table|div)(?:\s[^>]*)?>[\s\S]*<\/(?:main|section|article|header|footer|nav|form|table|div)\s*>/i.test(text)) score += 3;
+        if (/<(?:style|script)(?:\s[^>]*)?>[\s\S]*<\/(?:style|script)\s*>/i.test(text)) score += 2;
+        if (/^<!--[\s\S]*?-->/i.test(text)) score += 2;
+        if (/^<[a-z][\w:-]*(?:\s[^>]*)?>[\s\S]*<\/[a-z][\w:-]*\s*>$/i.test(text)) score += 2;
+        return score;
+    }
+
+    function looksLikeHtml(code) { return htmlConfidence(code) >= 3; }
+
+    function markdownConfidence(code) {
+        const text = String(code || '').replace(/^\uFEFF/, '');
+        if (!text.trim()) return 0;
+        let score = 0;
+        const headings = text.match(/^#{1,6}\s+\S.*$/gm) || [];
+        const quotes = text.match(/^>\s+\S.*$/gm) || [];
+        const lists = text.match(/^\s*(?:[-+*]|\d+[.)])\s+\S.*$/gm) || [];
+        if (headings.length) score += Math.min(4, headings.length + 1);
+        if (quotes.length) score += Math.min(3, quotes.length + 1);
+        if (lists.length >= 2) score += 2;
+        else if (lists.length === 1) score += 1;
+        if (/```[\s\S]*?```/.test(text) || /^~~~\w*\s*$/m.test(text)) score += 3;
+        if (/\*\*[^*\n]+\*\*/.test(text) || /__[^_\n]+__/.test(text)) score += 1;
+        if (/(^|\s)[*_][^*_\n]+[*_](?=\s|$|[，。！？,.!?])/m.test(text)) score += 1;
+        if (/\[[^\]\n]+\]\([^\s)]+(?:\s+"[^"]*")?\)/.test(text)) score += 1;
+        if (/^\s*(?:---+|___+|\*\*\*+)\s*$/m.test(text)) score += 1;
+        if (/^\|.+\|\s*$[\r\n]+^\|\s*:?-{3,}/m.test(text)) score += 2;
+        const htmlScore = htmlConfidence(text);
+        if (htmlScore >= 7) score = Math.max(0, score - 5);
+        return score;
+    }
+
+    function looksLikeMarkdown(code) {
+        const mdScore = markdownConfidence(code);
+        const htmlScore = htmlConfidence(code);
+        return mdScore >= 2 && mdScore >= htmlScore;
+    }
+
+    function detectDocumentLanguage(code, options = {}) {
+        const text = String(code || '').replace(/^\uFEFF/, '');
+        const trimmed = text.trim();
+        if (!trimmed) return { lang: currentLang || 'html', confidence: 0, reason: 'empty' };
+
+        if (options.fileName) {
+            const match = String(options.fileName).toLowerCase().match(/\.([a-z0-9]+)$/);
+            const ext = match ? match[1] : '';
+            if (ext && Object.prototype.hasOwnProperty.call({ html:1, htm:1, md:1, markdown:1, css:1, js:1, ts:1, tsx:1, scss:1, json:1 }, ext)) {
+                const lang = ext === 'markdown' ? 'md' : detectLang(ext);
+                return { lang, confidence: 100, reason: 'extension' };
+            }
+        }
+
+        const htmlScore = htmlConfidence(text);
+        const mdScore = markdownConfidence(text);
+        if (htmlScore >= 5 && htmlScore >= mdScore + 2) {
+            return { lang: 'html', confidence: htmlScore, reason: 'html-structure' };
+        }
+        if (mdScore >= 2 && (mdScore >= htmlScore || htmlScore <= 3)) {
+            return { lang: 'md', confidence: mdScore, reason: 'markdown-syntax' };
+        }
+        if (htmlScore >= 3 && mdScore === 0) {
+            return { lang: 'html', confidence: htmlScore, reason: 'html-fragment' };
+        }
+
+        if (/^[\[{]/.test(trimmed)) {
+            try {
+                JSON.parse(trimmed);
+                return { lang: 'json', confidence: 6, reason: 'json-parse' };
+            } catch (e) { /* keep current type */ }
+        }
+        return { lang: currentLang || 'html', confidence: 0, reason: 'ambiguous' };
+    }
+
+    function loadDocumentTypeMode() {
+        const saved = safeStorage.get(DOCUMENT_TYPE_MODE_STORAGE, 'auto');
+        return saved === 'manual' ? 'manual' : 'auto';
+    }
+
+    function setDocumentTypeMode(mode, options = {}) {
+        documentTypeMode = mode === 'manual' ? 'manual' : 'auto';
+        if (options.persist !== false) safeStorage.set(DOCUMENT_TYPE_MODE_STORAGE, documentTypeMode);
+        updateLanguageUi();
+    }
+
+    function splitCurrentFileName() {
+        const cfg = LANG_CONFIG[currentLang] || LANG_CONFIG.html;
+        const name = String(currentFileName || ('untitled' + cfg.ext));
+        const expectedExt = cfg.ext || '';
+        if (expectedExt && name.toLowerCase().endsWith(expectedExt.toLowerCase())) {
+            return { base: name.slice(0, -expectedExt.length) || 'untitled', ext: expectedExt };
+        }
+        const match = name.match(/^(.*?)(\.[^.]+)?$/);
+        return { base: (match && match[1]) || 'untitled', ext: (match && match[2]) || expectedExt };
+    }
+
+    function formatByteSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(bytes < 10240 ? 1 : 0) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function updateDocumentMetrics() {
+        if (!documentMetrics) return;
+        const code = getCode();
+        const lines = code ? code.split(/\r\n?|\n/).length : 1;
+        let bytes;
+        try { bytes = new TextEncoder().encode(code).length; }
+        catch (e) { bytes = unescape(encodeURIComponent(code)).length; }
+        documentMetrics.textContent = lines + ' 行 · ' + formatByteSize(bytes);
+        documentMetrics.title = lines + ' 行，UTF-8 大小 ' + formatByteSize(bytes);
+    }
+
+    function setDocumentSaveState(state) {
+        if (!documentSaveIndicator) return;
+        const saving = state === 'saving';
+        documentSaveIndicator.classList.toggle('saving', saving);
+        documentSaveIndicator.setAttribute('aria-label', saving ? '正在自动保存' : '已自动保存');
+        documentSaveIndicator.title = saving ? '正在自动保存到本机' : '已自动保存到本机';
+    }
+
+    function updateLanguageUi(options = {}) {
+        const cfg = LANG_CONFIG[currentLang] || LANG_CONFIG.html;
+        const displayLabel = getDocumentTypeLabel(currentLang);
+        const isAuto = documentTypeMode === 'auto';
+        if (languageSelect) {
+            const autoOption = languageSelect.querySelector('option[value="auto"]');
+            if (autoOption) autoOption.textContent = '自动 · ' + displayLabel;
+            languageSelect.value = isAuto ? 'auto' : currentLang;
+            languageSelect.title = isAuto
+                ? '当前自动识别为 ' + displayLabel + '；选择具体类型可手动锁定'
+                : '当前已手动锁定为 ' + displayLabel + '；选择“自动”恢复自动识别';
+            languageSelect.setAttribute('aria-label', isAuto ? '文档类型：自动识别为 ' + displayLabel : '文档类型：手动锁定为 ' + displayLabel);
+        }
+        const fileParts = splitCurrentFileName();
+        if (currentFileLabel) currentFileLabel.textContent = fileParts.base;
+        if (currentFileExtension) currentFileExtension.textContent = fileParts.ext;
+        if (currentFileButton) currentFileButton.title = currentFileName + ' · 单击重命名；扩展名由文档类型决定';
+        updateDocumentMetrics();
+        if (formatDetectionBadge) {
+            const showDetection = options.showDetection === true && isAuto;
+            formatDetectionBadge.hidden = !showDetection;
+            formatDetectionBadge.textContent = showDetection ? '自动识别为 ' + displayLabel : '';
+        }
+        if (previewSubtitle) previewSubtitle.textContent = displayLabel + (isAuto ? ' · 自动' : ' · 手动');
     }
 
     function getStorageKey(lang) { return CODE_PREFIX + lang; }
 
-    function switchLanguage(lang, fileName) {
-        saveEditorCode();
+    function switchLanguage(lang, fileName, options = {}) {
+        if (!LANG_CONFIG[lang]) lang = 'html';
+        const previousLang = currentLang;
+        if (options.saveCurrent !== false && previousLang && previousLang !== lang) saveEditorCode();
         currentLang = lang;
-        currentFileName = fileName || ('index' + LANG_CONFIG[lang].ext);
+        currentFileName = fileName || safeStorage.get(FILE_NAME_PREFIX + lang) || ('index' + LANG_CONFIG[lang].ext);
+        safeStorage.set(FILE_NAME_PREFIX + lang, currentFileName);
         const cfg = LANG_CONFIG[lang];
         editor.setOption('mode', cfg.mode);
         safeStorage.set(LANG_STORAGE, lang);
         rebuildLangTabs();
-        // 切换语言后立即更新预览（不等 change 事件）
-        updatePreview();
+        updateLanguageUi({ showDetection: options.showDetection === true });
+        if (options.deferPreview !== true) updatePreview();
+    }
+
+    function autoDetectDocumentLanguage(options = {}) {
+        if (documentTypeMode !== 'auto' && options.force !== true) return false;
+        const code = getCode();
+        const detection = detectDocumentLanguage(code, { fileName: options.fileName || '' });
+        const nextLang = detection.lang;
+        if (!LANG_CONFIG[nextLang]) return false;
+        if (nextLang === currentLang) {
+            updateLanguageUi({ showDetection: options.showDetection === true });
+            return false;
+        }
+
+        const previousLang = currentLang;
+        const previousKey = getStorageKey(previousLang);
+        const previousStoredCode = safeStorage.get(previousKey);
+        const baseName = (currentFileName || 'untitled').replace(/\.[^.]+$/, '') || 'untitled';
+        switchLanguage(nextLang, baseName + LANG_CONFIG[nextLang].ext, {
+            saveCurrent: false,
+            deferPreview: true,
+            showDetection: true
+        });
+        if (previousStoredCode === code) safeStorage.remove(previousKey);
+        if (options.silent !== true) {
+            showToast('已自动识别为 ' + getDocumentTypeLabel(nextLang) + '；可在类型菜单中手动锁定', 'success');
+        }
+        return true;
     }
 
     const LANG_COLORS = { html: '#e44d26', css: '#264de4', js: '#f7df1e', ts: '#3178c6', tsx: '#61dafb', scss: '#c6538c', md: '#42b983', json: '#f5a623' };
@@ -3535,9 +5144,10 @@ textarea {
             const empty = document.createElement('span');
             empty.className = 'lang-tab';
             empty.style.color = 'var(--text-tertiary)';
-            empty.textContent = 'No files';
+            empty.textContent = LANG_CONFIG[currentLang]?.label || 'HTML';
             container.appendChild(empty);
         }
+        updateLanguageUi();
     }
 
     function getHtmlShell(body, css) {
@@ -3552,15 +5162,54 @@ textarea {
 
     function compileMd(code) {
         let html;
+        const normalized = String(code || '').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
         if (typeof marked !== 'undefined') {
             try {
-                html = marked.parse(code);
+                html = marked.parse(normalized);
                 html = highlightCodeBlocks(html);
-            } catch (e) { html = '<pre>' + code.replace(/</g, '&lt;') + '</pre>'; }
+            } catch (e) { html = '<pre>' + normalized.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</pre>'; }
         } else {
-            html = '<pre>' + code.replace(/</g, '&lt;') + '</pre>';
+            html = '<pre>' + normalized.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</pre>';
         }
-        return '<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">\n<style>body{max-width:820px;margin:0 auto;padding:32px 24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;line-height:1.8;color:#1a1a1a;background:#fff}h1{font-size:2em;font-weight:700;margin:1em 0 0.5em;border-bottom:2px solid #eee;padding-bottom:0.3em}h2{font-size:1.5em;font-weight:600;margin:1.2em 0 0.5em;border-bottom:1px solid #eee;padding-bottom:0.2em}h3{font-size:1.25em;font-weight:600;margin:1em 0 0.4em}h4{font-size:1em;font-weight:600;margin:0.8em 0 0.3em}p{margin:0.6em 0}pre{background:#f6f8fa;padding:16px;border-radius:8px;overflow-x:auto;border:1px solid #e1e4e8}code{background:#f0f0f0;padding:2px 6px;border-radius:4px;font-size:.9em;font-family:"SF Mono",Menlo,Consolas,monospace}pre code{background:transparent;padding:0;font-size:.9em}img{max-width:100%;border-radius:8px}table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.95em}th,td{border:1px solid #d0d7de;padding:8px 12px;text-align:left}th{background:#f6f8fa;font-weight:600}tr:nth-child(even){background:#fafbfc}blockquote{border-left:4px solid #dfe2e5;margin:1em 0;padding:8px 16px;color:#555;background:#fafbfc}a{color:#0969da;text-decoration:none}a:hover{text-decoration:underline}hr{border:none;border-top:2px solid #eee;margin:2em 0}ul,ol{padding-left:2em;margin:0.5em 0}li{margin:0.25em 0}strong{font-weight:650}del{color:#999}</style>\n</head>\n<body>' + html + '</body>\n</html>';
+        return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{box-sizing:border-box}
+html,body{min-height:100%;margin:0;background:#fff;color:#1a1a1a}
+body{max-width:820px;margin:0 auto;padding:32px 24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;line-height:1.8;overflow-wrap:anywhere;text-rendering:optimizeLegibility}
+h1{font-size:2em;font-weight:700;line-height:1.3;margin:1em 0 .5em;border-bottom:2px solid #eee;padding-bottom:.3em}
+h2{font-size:1.5em;font-weight:600;line-height:1.35;margin:1.2em 0 .5em;border-bottom:1px solid #eee;padding-bottom:.2em}
+h3{font-size:1.25em;font-weight:600;line-height:1.4;margin:1em 0 .4em}
+h4,h5,h6{font-size:1em;font-weight:600;line-height:1.4;margin:.8em 0 .3em}
+p{margin:.6em 0}
+pre{background:#f6f8fa;padding:16px;border-radius:8px;overflow-x:auto;border:1px solid #e1e4e8;line-height:1.6}
+code{background:#f0f0f0;padding:2px 6px;border-radius:4px;font-size:.9em;font-family:"SF Mono",Menlo,Consolas,"Liberation Mono",monospace}
+pre code{background:transparent;padding:0;font-size:.9em}
+img{display:block;max-width:100%;height:auto;border-radius:8px;margin:1em auto}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.95em;display:block;overflow-x:auto}
+th,td{border:1px solid #d0d7de;padding:8px 12px;text-align:left}
+th{background:#f6f8fa;font-weight:600}
+tr:nth-child(even){background:#fafbfc}
+blockquote{border-left:4px solid #dfe2e5;margin:1em 0;padding:8px 16px;color:#555;background:#fafbfc}
+blockquote>:first-child{margin-top:0}
+blockquote>:last-child{margin-bottom:0}
+a{color:#0969da;text-decoration:none}
+a:hover{text-decoration:underline}
+hr{border:none;border-top:2px solid #eee;margin:2em 0}
+ul,ol{padding-left:2em;margin:.5em 0}
+li{margin:.25em 0}
+strong{font-weight:650}
+del{color:#999}
+body>:first-child{margin-top:0}
+body>:last-child{margin-bottom:0}
+@media(max-width:640px){body{padding:24px 18px}h1{font-size:1.75em}h2{font-size:1.35em}pre{padding:14px}}
+</style>
+</head>
+<body>${html}</body>
+</html>`;
     }
 
     async function compileTs(code, lang) {
@@ -3632,15 +5281,19 @@ textarea {
         const lang = detectLang(ext);
         const reader = new FileReader();
         reader.onload = async () => {
-            const code = reader.result;
+            const code = String(reader.result || '').replace(/^﻿/, '');
+            setDocumentTypeMode('auto');
+            const detection = detectDocumentLanguage(code, { fileName: file.name });
+            const detectedLang = detection.lang || lang;
+            switchLanguage(detectedLang, file.name.replace(/\.[^.]+$/, '') + LANG_CONFIG[detectedLang].ext, { deferPreview: true, saveCurrent: false, showDetection: true });
             setCode(code);
             editor.refresh();
-            switchLanguage(lang, file.name);
+            updateLanguageUi({ showDetection: true });
             showStatus('编译中…', 'syncing');
             try {
-                const compiled = await compileCode(lang);
+                const compiled = await compileCode(detectedLang);
                 updatePreviewWith(compiled);
-                showStatus(LANG_CONFIG[lang].label + ' → 预览', 'ready');
+                showStatus(LANG_CONFIG[detectedLang].label + ' → 预览', 'ready');
             } catch (err) {
                 showToast(err.message, '');
                 showStatus('编译失败', 'error');
@@ -3718,13 +5371,9 @@ textarea {
             if (saved && LANG_CONFIG[saved]) {
                 const code = safeStorage.get(getStorageKey(saved));
                 if (code && code.trim()) {
-                    // 若保存的语言不是 HTML，但内容明显是 HTML，则自动切回 HTML 模式预览
-                    if (saved !== 'html' && looksLikeHtml(code)) {
-                        switchLanguage('html');
-                        setCode(code);
-                        return true;
-                    }
-                    switchLanguage(saved); setCode(code); return true;
+                    switchLanguage(saved, null, { deferPreview: true });
+                    setCode(code);
+                    return true;
                 }
             }
         } catch (e) { console.error(e); }
@@ -3763,6 +5412,7 @@ textarea {
     })();
 
     function init() {
+        documentTypeMode = loadDocumentTypeMode();
         loadRatio();
         applyRatio();
         const panelWidth = loadPanelWidth();
@@ -3774,43 +5424,16 @@ textarea {
             const savedCode = loadEditorCode();
             setCode(savedCode || defaultCode);
         }
-        // 兜底：若编辑器内容明显是 HTML，但当前语言不是 HTML，自动切回 HTML 模式
-        if (currentLang !== 'html' && looksLikeHtml(getCode())) {
-            switchLanguage('html');
-        }
+        if (documentTypeMode === 'auto') autoDetectDocumentLanguage({ force: true, silent: true });
+        updateLanguageUi();
         updatePreview();
         showStatus('就绪', 'ready');
         initSnippets();
         initMCPBridge();          // 初始化 MCP 桥接（支持外部工具服务器扩展）
         initMcpUI();              // 初始化 MCP 管理面板 UI（按钮/模态框/事件）
         initCtxUI();              // 初始化项目规范 UI（PRODUCT.md / DESIGN.md）
-        loadExternalDesignSystems(); // 加载外部 DESIGN.md 格式设计系统（数据外置）
         editor.refresh();
         editor.focus();
-    }
-
-    // ==================== 外部设计系统加载（数据外置） ====================
-    // 尝试加载 data/design-systems.json（DESIGN.md 标准格式），失败则回退到内联 DESIGN_SYSTEMS
-    let externalDesignSystems = null;
-    function loadExternalDesignSystems() {
-        if (_isFileProtocol) return; // file:// 下 fetch 受 CORS 限制，跳过
-        fetch('data/design-systems.json')
-            .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    externalDesignSystems = data;
-                    console.log('[Werkstatt] 已加载外部设计系统: ' + data.length + ' 套（DESIGN.md 格式）');
-                }
-            })
-            .catch(() => { /* 静默失败，使用内联数据 */ });
-    }
-    // 获取设计系统的 DESIGN.md 格式数据（供 get_skill 工具返回给 AI）
-    function getDesignSystemMdFormat(systemId) {
-        if (externalDesignSystems) {
-            const found = externalDesignSystems.find(s => s.id === systemId);
-            if (found) return JSON.stringify(found, null, 2);
-        }
-        return null;
     }
 
     function injectPreviewCsp(html) {
@@ -3850,11 +5473,15 @@ textarea {
         const _orig = updatePreview;
         let previewToken = 0; // 编译版本号，防止异步竞态
         updatePreview = async function() {
-            // 即使 currentLang 不是 html，只要编辑器内容明显是 HTML 就按原始 HTML 预览
-            if (currentLang === 'html' || !LANG_CONFIG[currentLang] || looksLikeHtml(getCode())) { _orig(); return; }
+            const code = getCode();
+            if (documentTypeMode === 'auto') autoDetectDocumentLanguage({ silent: true });
+            const previewLang = currentLang;
+            updateLanguageUi();
+            // HTML remains raw preview; every other recognized type goes through its compiler.
+            if (previewLang === 'html' || !LANG_CONFIG[previewLang] || (previewLang !== 'md' && looksLikeHtml(code))) { _orig(); return; }
             const myToken = ++previewToken;
             try {
-                const compiled = await compileCode(currentLang);
+                const compiled = await compileCode(previewLang);
                 // 如果在编译期间又触发了新的预览请求，丢弃这次过期的结果
                 if (myToken !== previewToken) return;
                 updatePreviewWith(compiled);
@@ -4205,9 +5832,6 @@ textarea {
             }
         };
     })();
-    function loadRememberKey() { return false; }
-    function saveRememberKey() {}
-
     function loadAiEndpoint() { return safeStorage.get(AI_ENDPOINT_STORAGE) || DEFAULT_ENDPOINT; }
     function saveAiEndpoint(ep) { safeStorage.set(AI_ENDPOINT_STORAGE, ep); }
     function loadAiKey() {
@@ -4221,9 +5845,6 @@ textarea {
     function saveAiModel(m) { safeStorage.set(AI_MODEL_STORAGE, m); }
     function loadDesignSystem() { return safeStorage.get(AI_DESIGN_SYSTEM_STORAGE, 'auto'); }
     function saveDesignSystem(ds) { safeStorage.set(AI_DESIGN_SYSTEM_STORAGE, ds); }
-
-    // knobs UI removed; stub kept for system prompt references
-    function getKnobsPrompt() { return ''; }
 
     function loadModelsCache() { return safeStorage.json(AI_MODELS_CACHE); }
     function saveModelsCache(ep, models) { safeStorage.setJson(AI_MODELS_CACHE, { endpoint: ep, models: models, ts: Date.now() }); }
@@ -5295,173 +6916,6 @@ async function loadData() {
         }
     };
 
-    const COMPONENT_MOTION_SPEC = {
-        lightModern: {
-            components: `组件规范（必须生成可运行代码）：
-- Button: display:inline-flex; align-items:center; justify-content:center; height:40px; padding:10px 20px; border-radius:${r=>r.md}; font:Button; cursor:pointer; transition:background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; border:1px solid transparent;
-  - Primary: background:Primary; color:OnPrimary; hover:background加深15%
-  - Secondary/Ghost: background:transparent; border:1px solid Hairline; hover:bg SurfaceRaised
-- Card: background:Surface; border:1px solid Hairline; border-radius:${r=>r.lg}; padding:24px; overflow:hidden;
-- Input: height:40px; padding:10px 14px; border:1px solid Hairline; border-radius:${r=>r.md}; background:Surface; font:Body; focus:border-color Primary; focus:outline:none; focus:ring 2px Primary/20%
-- Badge: display:inline-flex; padding:2px 10px; border-radius:${r=>r.pill}; font:Caption; font-weight:500
-  - Filled: bg Primary; color OnPrimary  |  Outline: bg transparent; border 1px solid Hairline
-- Nav: 固定顶栏; height:64px; padding:0 24px; border-bottom:1px solid Hairline; background:Canvas/80% backdrop-blur(12px); z-index:50`,
-            motion: `动效规范（必须使用有效CSS，禁止无效语法）：
-- 统一过渡: 按实际属性设置 transition，例如 background-color、color、border-color、transform 或 opacity，时长 0.2-0.25s
-- Hover: transform: translateY(-2px); opacity变化; 背景色渐变; 禁止用 filter: blur 做hover主效果
-- 按钮点击: active: scale(0.97)
-- 卡片悬停: box-shadow加深 或 border-color变Primary; translateY(-2px)
-- 焦点环: outline:none; box-shadow: 0 0 0 2px Primary/25% 或 0 0 0 3px Primary/20%
-- 入场动画: @keyframes fadeInUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} } animation: fadeInUp 0.4s ease forwards
-- 加载: 骨架屏用线性渐变 shimmer background-size:200%100%; animation:shimmer 1.5s infinite linear`
-        },
-        darkTech: {
-            components: `组件规范（必须生成可运行代码）：
-- Button: height:36px; padding:8px 16px; border-radius:${r=>r.md}; font:Button; cursor:pointer; transition:background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; border:1px solid transparent;
-  - Primary: bg Primary; color OnPrimary; hover:brightness(1.15)
-  - Ghost: bg transparent; border:1px solid Hairline; hover:bg SurfaceElevated
-- Card: bg Surface; border:1px solid Hairline; border-radius:${r=>r.lg}; padding:20px;
-- Input: height:36px; padding:8px 12px; border:1px solid Hairline; border-radius:${r=>r.md}; bg Canvas; color Ink; font:Body; focus:border-color Primary
-- Badge: padding:2px 8px; border-radius:${r=>r.pill}; font:Caption; font-weight:500
-- Nav: height:48px; padding:0 20px; border-bottom:1px solid Hairline; bg Canvas/90% backdrop-blur(8px)`,
-            motion: `动效规范（必须使用有效CSS）：
-- 统一过渡: 0.15s ease 或 0.2s cubic-bezier(0.16,1,0.3,1)
-- Hover: brightness(1.1) 或 border-color变亮; 深色模式慎用 box-shadow，主要靠边框和亮度
-- 按钮点击: active: scale(0.96)
-- 焦点环: box-shadow: 0 0 0 2px Primary/30%
-- 入场: opacity 0→1 + translateY(8px→0); duration 0.3s
-- 数据/图表: 线条/柱状图使用 stroke-dasharray 描边动画; 禁止用闪烁强对比色`
-        },
-        warmEditorial: {
-            components: `组件规范（必须生成可运行代码）：
-- Button: height:44px; padding:10px 24px; border-radius:${r=>r.md}; font:Button; cursor:pointer; transition:background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
-  - Primary: bg Primary; color OnPrimary; hover:bg PrimaryDeep
-  - Text: bg transparent; underline; hover:bg SurfaceRaised
-- Card: bg Surface; border:none; border-radius:${r=>r.lg}; padding:32px; box-shadow: 0 1px 3px rgba(0,0,0,0.04)
-- Input: height:44px; padding:10px 16px; border:1px solid Hairline; border-radius:${r=>r.md}; bg Surface; font:Body; focus:border-color Primary
-- Nav: height:72px; padding:0 32px; bg Canvas; border-bottom:none`,
-            motion: `动效规范（必须使用有效CSS）：
-- 统一过渡: 0.3s ease-out
-- Hover: 温和变化，色温偏移; 避免机械弹跳，使用 editorial 从容感
-- 按钮点击: active: scale(0.98)
-- 焦点环: box-shadow: 0 0 0 3px Primary/15%
-- 入场: opacity + translateY(16px→0); duration 0.5s ease-out;  stagger 0.1s
-- 滚动: 段落/图片使用 reveal-on-scroll 淡入效果`
-        },
-        brutal: {
-            components: `组件规范（必须生成可运行代码）：
-- Button: height:auto; padding:12px 24px; border-radius:0px; font:Button; font-weight:700; cursor:pointer; border:2px solid Ink; box-shadow:4px 4px 0 Ink; background:Primary; color:OnPrimary; transition:background-color 0.1s ease, color 0.1s ease, border-color 0.1s ease, transform 0.1s ease, box-shadow 0.1s ease;
-  - hover: translate(2px,2px); box-shadow:2px 2px 0 Ink
-  - active: translate(4px,4px); box-shadow:0 0 0 Ink
-  - Secondary: bg Surface; color Ink
-- Card: bg Surface; border:2px solid Ink; border-radius:0px; padding:24px; box-shadow:4px 4px 0 Ink
-- Input: height:auto; padding:12px; border:2px solid Ink; border-radius:0px; bg Surface; font:Body
-- Badge: padding:4px 12px; border:2px solid Ink; border-radius:0px; font:Caption; font-weight:700; bg Primary; color OnPrimary`,
-            motion: `动效规范（必须使用有效CSS）：
-- 统一过渡: 0.1s linear 或 无过渡（即时反馈）
-- Hover: 硬位移 translate(x,y) + 阴影同步缩减; 禁止渐变/模糊/透明度主效果
-- 按钮点击: 即时 translate(4px,4px); box-shadow归零
-- 焦点环: outline:2px solid Ink; outline-offset:2px
-- 入场: 无淡入; 即时出现或硬切; 可选 @keyframes hardSlide { from{transform:translateX(-100%)} to{transform:translateX(0)} }
-- 整体风格: 拒绝柔和动画，拒绝圆角，拒绝阴影虚化`
-        },
-        neon: {
-            components: `组件规范（必须生成可运行代码）：
-- Button: height:40px; padding:10px 20px; border-radius:${r=>r.md}; font:Button; cursor:pointer; border:1px solid Primary; background:rgba(255,0,255,0.1); color:Primary; text-shadow:0 0 8px Primary; transition:background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  - hover: background:rgba(255,0,255,0.2); box-shadow:0 0 16px Primary
-  - Primary: bg Primary; color Canvas; text-shadow:none
-- Card: bg Surface; border:1px solid Hairline; border-radius:${r=>r.md}; padding:20px; box-shadow: inset 0 0 20px rgba(255,0,255,0.05)
-- Input: height:40px; padding:10px 14px; border:1px solid Hairline; border-radius:${r=>r.md}; bg Canvas; color:Ink; caret-color:Primary; font:Body; focus:border-color Primary; focus:box-shadow:0 0 12px Primary/30%
-- Badge: padding:2px 10px; border:1px solid Primary; border-radius:${r=>r.pill}; font:Caption; color:Primary; text-shadow:0 0 6px Primary`,
-            motion: `动效规范（必须使用有效CSS）：
-- 统一过渡: 0.15s ease
-- Hover: 霓虹亮度提升 text-shadow / box-shadow 强度增加; 可选 glitch 位移 (0.05s 随机 x offset)
-- 按钮点击: active: scale(0.95)
-- 焦点环: box-shadow: 0 0 12px Primary/40%
-- 入场: @keyframes neonFadeIn { from{opacity:0;text-shadow:none} to{opacity:1;text-shadow:0 0 8px Primary} } duration 0.5s
-- 扫描线: 可选 ::before 伪元素做扫描线 background:linear-gradient(transparent 50%,rgba(0,255,255,0.02)50%); background-size:100% 4px; pointer-events:none
-- 故障: hover 时 2px 色偏 text-shadow: -2px 0 Cyan, 2px 0 Primary; clip-path 微抖; 持续时间 0.2s`
-        },
-        glass: {
-            components: `组件规范（必须生成可运行代码）：
-- Button: height:40px; padding:10px 20px; border-radius:${r=>r.pill}; font:Button; cursor:pointer; border:1px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.15); backdrop-filter:blur(12px); color:#fff; transition:background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-  - hover: background:rgba(255,255,255,0.25); transform:scale(1.02)
-  - Primary: bg rgba(255,255,255,0.9); color Canvas; border:none
-- Card: background:rgba(255,255,255,0.1); backdrop-filter:blur(20px) saturate(180%); border:1px solid rgba(255,255,255,0.2); border-radius:${r=>r.lg}; padding:24px;
-- Input: height:40px; padding:10px 14px; border:1px solid rgba(255,255,255,0.2); border-radius:${r=>r.md}; background:rgba(255,255,255,0.08); backdrop-filter:blur(8px); color:#fff; font:Body; focus:border-color rgba(255,255,255,0.5); focus:bg rgba(255,255,255,0.15)
-- Nav: height:64px; padding:0 24px; background:rgba(255,255,255,0.05); backdrop-filter:blur(20px); border-bottom:1px solid rgba(255,255,255,0.1)`,
-            motion: `动效规范（必须使用有效CSS）：
-- 统一过渡: 0.3s cubic-bezier(0.16,1,0.3,1)
-- Hover: transform:scale(1.02); background亮度提升; 柔和光晕 box-shadow:0 8px 32px rgba(255,255,255,0.1)
-- 按钮点击: active: scale(0.98)
-- 焦点环: box-shadow: 0 0 0 3px rgba(255,255,255,0.25)
-- 入场: opacity 0→1 + translateY(20px→0) + blur(8px→0); duration 0.6s ease-out; stagger 0.08s
-- 悬浮感: 卡片使用 translateY(-4px) + 更亮边框 + 更大模糊阴影 hover
-- 背景: 必须使用鲜艳的 body background:linear-gradient(135deg,#8b5cf6,#ec4899,#06b6d4) 或类似渐变作为底层`
-        },
-        liquidGlass: {
-            components: `组件规范（必须生成可运行代码）：
-
-// ===== Liquid Glass SVG 滤镜管线（参照 Apple Metal shader + lucasromerodb/liquid-glass-effect-macos） =====
-// 管线顺序：feTurbulence(分形噪声) → feComponentTransfer(gamma挤压) → feGaussianBlur(软化) → feSpecularLighting(光学镜面高光) → feComposite(叠加) → feDisplacementMap(折射位移,scale=120)
-// 四层结构：effect(滤镜+blur) + tint(着色) + shine(边缘高光) + content(内容)，滤镜只挂在effect层上
-// 基调：浅色明亮。多彩渐变背景（暖橙+蓝+淡紫），白色半透玻璃，深色文字。
-
-【SVG 滤镜 — 必须放在 <svg><filter id="liquid-glass-filter"> 中】
-<feTurbulence type="fractalNoise" baseFrequency="0.012 0.012" numOctaves="1" seed="5" result="turbulence"/>
-<feComponentTransfer in="turbulence" result="displacementMap">
-  <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5"/>
-  <feFuncG type="gamma" amplitude="1" exponent="10" offset="0.5"/>
-  <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5"/>
-</feComponentTransfer>
-<feGaussianBlur in="displacementMap" stdDeviation="4" result="softMap"/>
-<feSpecularLighting in="softMap" surfaceScale="6" specularConstant="1" specularExponent="80" lighting-color="white" result="specLight">
-  <fePointLight x="-200" y="-200" z="300"/>
-</feSpecularLighting>
-<feComposite in="SourceGraphic" in2="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage"/>
-<feDisplacementMap in="litImage" in2="softMap" scale="120" xChannelSelector="R" yChannelSelector="G"/>
-
-【四层HTML结构 — 每个玻璃组件必须用4个子div叠层】
-<div class="glass-wrap" style="position:relative;display:inline-flex;border-radius:9999px;overflow:hidden;box-shadow:0 6px 6px rgba(0,0,0,0.12),0 0 20px rgba(0,0,0,0.06);transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,2.2),box-shadow 0.4s cubic-bezier(0.175,0.885,0.32,2.2);">
-  <div class="glass-effect" style="position:absolute;inset:0;z-index:0;border-radius:inherit;backdrop-filter:blur(12px) saturate(1.5);filter:url(#liquid-glass-filter);overflow:hidden;isolation:isolate;transition:backdrop-filter 0.35s ease;"></div>
-  <div class="glass-tint" style="z-index:1;position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,0.3),rgba(255,255,255,0.55),rgba(255,255,255,0.3));pointer-events:none;"></div>
-  <div class="glass-shine" style="position:absolute;inset:0;z-index:2;border-radius:inherit;overflow:hidden;pointer-events:none;box-shadow:inset 0 1px 1px rgba(255,255,255,0.5),inset 0 -1px 1px rgba(0,0,0,0.08);"></div>
-  <div class="glass-content" style="position:relative;z-index:3;display:inline-flex;align-items:center;justify-content:center;padding:14px 28px;font-size:15px;font-weight:500;letter-spacing:-0.01em;color:rgba(0,0,0,0.85);border-radius:inherit;height:52px;">内容</div>
-</div>
-
-【交互规则 — 必须同时操作三层】
-- hover(外层): transform:translateY(-2px) scale(1.03); box-shadow增强
-- hover(effect层): backdrop-filter:blur(16px) saturate(2.0) ← 增强模糊=更多光线折射
-- hover(shine层): inset高光亮度提高到0.65
-- active(外层): transform:scale(0.94); transition-duration:0.12s
-- active(effect层): backdrop-filter:saturate(1.2) ← 去掉blur! 变高透玻璃
-- active(shine层): 暗化边缘:inset 0 1px 2px rgba(0,0,0,0.1),inset 0 -2px 3px rgba(0,0,0,0.06)
-
-【Primary蓝色调变体】tint层从白色渐变改为:linear-gradient(180deg,rgba(10,132,255,0.2),rgba(10,132,255,0.45),rgba(10,132,255,0.2));effect层加hue-rotate(-5deg)
-
-【Card卡片 — 始终磨砂玻璃，不做高透切换】
-.glass-wrap加上border-radius:28px;tint层:linear-gradient(180deg,rgba(255,255,255,0.35),rgba(255,255,255,0.55),rgba(255,255,255,0.35));effect层blur(16px) saturate(1.8);content层padding:28px
-
-【Input输入框】同按钮结构，height:48px;border-radius:12px;tint降低到0.35;effect blur(8px) saturate(1.4);shine无高光用border:1px solid rgba(0,0,0,0.08)
-
-【Nav导航栏】同按钮结构，width:100%;height:64px;border-radius:0;tint:linear-gradient(水平);底部border-bottom:1px solid rgba(0,0,0,0.05)
-
-【FAB浮动按钮】同按钮结构，width:56px;height:56px;position:fixed;z-index:100`,
-            motion: `动效规范（必须使用有效CSS）：
-- 弹性弹簧: cubic-bezier(0.175,0.885,0.32,2.2) 用于外层 transform/box-shadow 过渡
-- backdrop-filter过渡: 0.35s ease — 模拟光线透射渐变（非opacity淡入淡出）
-- hover: transform:translateY(-2px) scale(1.03) + effect层blur增加 + shine层高光亮度提升
-- active: scale(0.94) 0.12s + effect层去掉blur()变高透玻璃 + shine层暗化边缘
-- 苹果核心规则: 默认/卡片=磨砂玻璃(有blur(12-16px))，按下按钮=高透玻璃(saturate(1.2)无blur)
-- 镜面高光: feSpecularLighting光学计算（非手写CSS box-shadow），表面法线基于turbulence噪声图
-- 折射强度: feDisplacementMap scale=120（可见级折射，有机噪声图驱动非人造SDF）
-- 鼠标跟随光斑: JS更新CSS变量--glow-x/--glow-y/--glow-opacity，radial-gradient光斑跟随指针
-- 不透明度: 玻璃体≥0.45(苹果「半透明材质保持一定不透明度」)，tint层控制
-- 背景要求: 多彩渐变/壁纸+动态光点→提供折射素材。禁止深色单色背景
-- 入场: opacity 0→1 + translateY(24px→0) + scale(0.95→1); 0.5s cubic-bezier(0.175,0.885,0.32,2.2); stagger 0.06s`
-        }
-    };
-
     function analyzeDesignMdCoverage(designMd) {
         const text = String(designMd || '').toLowerCase();
         const coverage = {
@@ -5520,18 +6974,35 @@ async function loadData() {
         return [buildContextPrompt(), '【视觉规则解析】' + decision, templatePrompt].filter(Boolean).join('\n\n');
     }
     function buildSafeChatHistory() {
-        return aiChatHistory.slice(-8).map(m => {
+        const result = [];
+        let remaining = 12000;
+        const recent = aiChatHistory.slice(-8).reverse();
+        for (const m of recent) {
             const raw = m.role === 'assistant' ? (m.answer || m.content || '') : (m.content || '');
-            const clean = String(raw).replace(/<thinking>[\s\S]*?<\/thinking>/g, '').slice(0, 4000);
-            return { role: m.role, content: clean };
-        }).filter(m => m.content.trim());
+            let clean = String(raw)
+                .replace(/<thinking>[\s\S]*?<\/thinking>/gi, '')
+                .replace(/```(?:replace|edit|tool)[\s\S]*?```/gi, '')
+                .replace(/<edit>[\s\S]*?<\/edit>/gi, '')
+                .replace(/^\s*(?:DEPENDENCY|DEPENDENCIES|依赖|启用依赖)\s*[:：].*$/gmi, '')
+                .trim();
+            if (!clean) continue;
+            const perMessageLimit = m.role === 'assistant' ? 2000 : 3000;
+            clean = clean.slice(0, Math.min(perMessageLimit, remaining));
+            if (!clean) break;
+            result.unshift({ role: m.role, content: clean });
+            remaining -= clean.length;
+            if (remaining <= 0) break;
+        }
+        return result;
     }
     function classifyAiRequest(rawInput, instruction, alreadyTextOnly = false) {
         const text = String(rawInput || instruction || '').trim();
-        const write = /(?:修改|修复|解决|实现|添加|新增|删除|移除|替换|改成|调整|优化|重构|升级|完善|美化|生成页面|写入|应用|落地|全部处理|全面检查.*修|fix|modify|change|implement|add|remove|delete|replace|refactor|optimize|upgrade)/i.test(text);
-        const read = /(?:为什么|是什么|怎么理解|解释|说明|分析一下|评审|审查|建议|推荐|有哪些问题|有没有问题|缺点|风险|可能遇到什么|explain|review|analy[sz]e|recommend|what|why|how)/i.test(text);
-        const broad = /(?:全面|全部|整个|全局|逐项|系统性|多处|一并|完整升级|深度排查|回归测试|端到端|架构|重构|响应式|兼容性)/i.test(text);
-        return { readOnly: alreadyTextOnly || (read && !write), write, broad, shouldUseAgent: write && broad };
+        const explicitReadOnly = /(?:不要|别|无需|不用|禁止|不必|不可|不能)(?:再|直接|自动|帮我|对代码|代码)?(?:修改|改动|编辑|写入|应用|执行|重构|优化|修复|生成代码|动代码)|(?:只|仅)(?:需|要|做)?(?:分析|解释|说明|审查|评审|检查|给建议|告诉我|列出问题)|(?:不要动代码|保持代码不变|不改代码|仅供参考)/i.test(text);
+        const withoutNegatedWrites = text.replace(/(?:不要|别|无需|不用|禁止|不必|不可|不能)(?:再|直接|自动|帮我|对代码|代码)?(?:修改|改动|编辑|写入|应用|执行|重构|优化|修复|生成代码|动代码)/gi, '');
+        const write = !explicitReadOnly && /(?:修改|修复|解决|实现|添加|新增|删除|移除|替换|改成|调整|优化|重构|升级|完善|美化|生成页面|写入|应用|落地|全部处理|全面检查.*修|fix|modify|change|implement|add|remove|delete|replace|refactor|optimize|upgrade)/i.test(withoutNegatedWrites);
+        const read = explicitReadOnly || /(?:为什么|是什么|怎么理解|解释|说明|分析|评审|审查|检查|建议|推荐|问题|缺点|风险|可能遇到什么|explain|review|analy[sz]e|recommend|what|why|how)/i.test(text);
+        const broad = /(?:全面|全部|整个|全局|逐项|系统性|多处|一并|完整升级|深度排查|回归测试|端到端|架构|重构|响应式|移动端|桌面端|多设备|截图验证|兼容性)/i.test(text);
+        return { readOnly: alreadyTextOnly || explicitReadOnly || (read && !write), write, broad, shouldUseAgent: write && broad };
     }
     function buildUnifiedExecutionPolicy(mode, readOnly) {
         return `【统一执行规则】
@@ -5564,70 +7035,6 @@ async function loadData() {
         const top = scored[0]?.key || 'default';
         return [top];
     }
-
-    function getDesignSystemPrompt(dsKeys) {
-        const firstKey = (Array.isArray(dsKeys) ? dsKeys[0] : dsKeys) || 'default';
-        const ds = DESIGN_SYSTEMS[firstKey] || DESIGN_SYSTEMS.default;
-        return buildSingleDesignPrompt(ds, ds === DESIGN_SYSTEMS.default ? undefined : buildGroupKey(firstKey));
-    }
-
-    function buildGroupKey(dsKey) {
-        if (!dsKey) return undefined;
-        if (['lightModern', 'claude', 'stripe', 'linear', 'apple', 'spotify'].includes(dsKey)) return 'lightModern';
-        if (['darkTech', 'supabase', 'vercel'].includes(dsKey)) return 'darkTech';
-        if (['warmEditorial', 'nike'].includes(dsKey)) return 'warmEditorial';
-        if (['brutal', 'neobrutalism'].includes(dsKey)) return 'brutal';
-        if (['neon', 'cyberpunk'].includes(dsKey)) return 'neon';
-        if (['glass', 'glassmorphism'].includes(dsKey)) return 'glass';
-        if (dsKey === 'liquidGlass') return 'liquidGlass';
-        return undefined;
-    }
-
-    const DESIGN_PRINCIPLES = `通用设计原则：
-- 先保证信息层级、可读性和可访问性，再添加装饰。
-- 使用一致的间距尺度、圆角语言、边框和动效时长。
-- 交互状态必须覆盖 hover、focus-visible、active、disabled 和 loading。
-- 移动端优先保证 44px 触控目标、无横向溢出和安全区适配。
-- 避免无意义的渐变、卡片嵌套和过度阴影；每个视觉元素都应服务于信息或操作。`;
-
-    function buildSingleDesignPrompt(ds, groupKey) {
-        const c = ds.colors;
-        const t = ds.typography;
-        const r = ds.radius;
-        const rulesText = ds.rules.map((r, i) => `${i + 1}. ${r}`).join('\n');
-        const compMotion = groupKey ? getComponentMotionPromptGroup(groupKey) : '';
-        return `【设计规范：${ds.name}】
-${ds.desc}
-
-颜色系统：
-- 画布：${c.canvas} | 卡片表面：${c.surface || c.surfaceCard || c.surface1}
-- 主文字：${c.ink} | 正文：${c.body} | 次要：${c.muted}
-- 主色：${c.primary} | 悬停：${c.primaryHover || c.primary} | 文字在主色上：${c.onPrimary}
-- 边框：${c.hairline}
-
-字体：${t.fontFamily}
-- Display：${t.display}
-- Title：${t.title || t.titleLg || ''}
-- Body：${t.body}
-- Caption：${t.caption}
-- Button：${t.button}
-
-圆角：sm=${r.sm} md=${r.md} lg=${r.lg} xl=${r.xl} pill=${r.pill}
-
-设计规则：
-${rulesText}${compMotion}
-
-${DESIGN_PRINCIPLES}
-
-重要：这套模板只是后备参考，仅能补充项目规范和当前页面未定义的部分，不得覆盖更高优先级规则。使用 CSS 变量定义颜色。所有 CSS 必须语法正确，禁止输出无效的 CSS 值或属性。`;
-    }
-
-    function getComponentMotionPromptGroup(groupKey) {
-        const spec = COMPONENT_MOTION_SPEC[groupKey];
-        if (!spec) return '';
-        return `\n\n${spec.components}\n\n${spec.motion}`;
-    }
-
 
     const COMPLEXITY_KEYWORDS = {
         high: ['重构', '架构', '优化', '性能', '设计模式', '组件化', '模块化', '状态管理', '路由', '响应式', '兼容', '安全', '异步', '并发', '缓存', '微前端', 'webpack', 'vite', 'typescript严格', 'hooks', 'context', 'redux', 'vuex', 'pinia', '依赖注入', '服务层', '数据流', '算法', '数据结构', '编译', '转译', 'polyfill', 'shim', 'middleware', '拦截器', '装饰器', '代理', '反射', '泛型', '协变', '逆变', '不可变', '函数式', '响应式编程', 'rxjs', 'graphql', 'restful', 'oauth', 'jwt', 'csrf', 'xss', 'sql注入', '内存泄漏', '死锁', '竞态条件', '事件循环', '渲染管线', '重排', '重绘', '虚拟化', '懒加载', '预加载', '服务端渲染', 'ssr', '静态生成', 'ssg', '边缘计算', 'serverless', '容器化', 'docker', 'kubernetes', 'ci/cd', '自动化测试', 'e2e', '单元测试', '集成测试', '覆盖率', 'lint', '格式化', '代码审查', '文档生成', '类型推导', '类型守卫', '类型断言', '命名空间', '模块解析', '树摇', '代码分割', 'chunk', 'bundle', '按需加载', '预渲染', 'hydration', '同构', '水合', 'pwa', 'service worker', '离线优先', '推送通知', '后台同步', ' IndexedDB', 'webgl', 'webassembly', 'wasm', 'webrtc', 'websocket', 'sse', '长轮询', 'graphql订阅', '实时', '协作编辑', 'ot', 'crdt', 'diff算法', '虚拟列表', '无限滚动', '瀑布流', ' masonry', '视差', '3d', '粒子', '着色器', 'glsl', '物理引擎', '碰撞检测', '游戏循环', 'ai', '机器学习', '神经网络', '深度学习', '自然语言处理', '计算机视觉', '语音识别', '图像识别', '推荐系统', '搜索引擎', '排序算法', '查找算法', '图算法', '动态规划', '贪心算法', '回溯算法', '分治算法', '排序', '去重', '过滤', '映射', '归约', '柯里化', '偏函数', '组合', '管道', 'monad', 'functor', 'applicative'],
@@ -6573,7 +7980,7 @@ ${currentCode}
                     const message = result.message || (result.reason === 'managed_asset_policy' ? '已阻止直接写入外部资源地址。请只声明库名，由系统底层启用。' : '行号编辑应用失败：' + (result.reason || '未知原因'));
                     if (targetMsgEl) setAssistantMsgText(targetMsgEl, message);
                     addDiffCard(targetMsgEl, parsed.answer, false);
-                    return result.reason === 'managed_asset_policy' ? { retry: true, errorMessage: message } : { retry: false };
+                    return { retry: true, errorMessage: message };
                 }
                 const afterCode = getCode();
                 const safety = checkCodeSafety(beforeCode, afterCode, 'searchreplace');
@@ -6594,7 +8001,7 @@ ${currentCode}
                     const message = result.message || ('自动应用失败：' + (result.reason === 'search_not_found' ? '找不到匹配文本' : result.reason === 'ambiguous_search' ? '匹配文本不唯一' : result.reason || '未知错误'));
                     if (targetMsgEl) setAssistantMsgText(targetMsgEl, message);
                     addDiffCard(targetMsgEl, parsed.answer, false);
-                    return result.reason === 'managed_asset_policy' ? { retry: true, errorMessage: message } : { retry: false };
+                    return { retry: true, errorMessage: message };
                 }
                 const afterCode = getCode();
                 const safety = checkCodeSafety(beforeCode, afterCode, 'searchreplace');
@@ -7137,52 +8544,7 @@ ${currentCode}
         return { messages, codeFence, currentCode };
     }
 
-    // ==================== Non-streaming fallback (for models that don't support stream) ====================
-    async function callAiApi(apiKey, model, instruction, deepThinking) {
-        const { messages, codeFence, currentCode } = buildAiPayload(instruction, deepThinking);
-        const chatUrl = getEndpointChatUrl(loadAiEndpoint());
-        const payload = { model: model, messages: messages };
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for non-streaming
-        let res;
-        try {
-            res = await fetch(chatUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey }, body: JSON.stringify(payload), signal: controller.signal, credentials: 'omit' });
-        } catch(e) {
-            clearTimeout(timeoutId);
-            if (e.name === 'AbortError') throw new Error('请求超时（60s），请检查网络或尝试切换模型');
-            throw e;
-        }
-        clearTimeout(timeoutId);
-        if (!res.ok) {
-            let em = 'API 错误 ' + res.status;
-            if (res.status === 401) em = 'API Key 无效';
-            else if (res.status === 429) em = '请求过于频繁';
-            else if (res.status === 400) {
-                try { const errData = await res.clone().json(); em = '请求参数错误：' + (errData.error?.message || errData.message || JSON.stringify(errData)); }
-                catch (e) { const text = await res.clone().text(); em = '请求参数错误：' + text.slice(0, 200); }
-            }
-            throw new Error(em);
-        }
-        const data = await res.json();
-        const aiText = data.choices?.[0]?.message?.content || '';
-        if (!aiText.trim()) return { text: 'AI 返回了空响应，请重试。', code: null, thinking: null, mode: null };
-        if (aiText.includes('NOT_CODE_TASK')) return { text: '请描述代码修改需求。', code: null, thinking: null, mode: null };
-        const parsed = parseThinkingResponse(aiText);
-        const editBlocks = parseEditBlocks(parsed.answer);
-        if (editBlocks.length > 0) return { text: 'AI 建议了 ' + editBlocks.length + ' 处行号编辑', code: parsed.answer, thinking: parsed.thinking, mode: 'lineedit', editBlocks };
-        const srBlocks = parseSearchReplaceBlocks(parsed.answer);
-        if (srBlocks.length > 0) return { text: 'AI 建议了 ' + srBlocks.length + ' 处修改', code: parsed.answer, thinking: parsed.thinking, mode: 'searchreplace', srBlocks };
-        const blockRe = new RegExp('```(?:' + codeFence + '|html|edit)?\\s*\\n?([\\s\\S]*?)```');
-        const codeMatch = parsed.answer.match(blockRe);
-        let extractedCode = codeMatch ? codeMatch[1].trim() : parsed.answer.trim();
-        // Strip edit-format markers if present (e.g. "REPLACE 1-1:\n")
-        extractedCode = extractedCode.replace(/^(?:REPLACE\s+\d+(?:-\d+)?|INSERT\s+after\s+\d+|DELETE\s+\d+(?:-\d+)?)\s*:?\s*\n?/, '').replace(/\s*END\s*$/, '').trim();
-        // Remove 【自检】 prefix line if present
-        extractedCode = extractedCode.replace(/^【自检】[^\n]*\n?/, '').trim();
-        if (!extractedCode) return { text: '未能从 AI 响应中提取到代码，请重试。', code: null, thinking: parsed.thinking, mode: null };
-        const diffSummary = buildDiffSummary(currentCode, extractedCode);
-        return { text: diffSummary || '代码已修改', code: extractedCode, thinking: parsed.thinking, mode: 'full' };
-    }
+    // Streaming API also handles non-SSE JSON responses, so a separate non-streaming implementation is unnecessary.
 
     // ==================== Streaming API ====================
     async function callAiApiStream(apiKey, model, instruction, deepThinking, onChunk) {
@@ -7271,16 +8633,6 @@ ${currentCode}
         }
     }
 
-    function buildDiffSummary(orig, mod) {
-        const ol = orig.split('\n'); const nl = mod.split('\n');
-        const added = nl.length - ol.length;
-        const changed = nl.filter((l, i) => l !== ol[i] && i < ol.length).length;
-        const parts = [];
-        if (added > 0) parts.push('新增 ' + added + ' 行');
-        else if (added < 0) parts.push('删除 ' + Math.abs(added) + ' 行');
-        if (changed > 0 && changed !== Math.abs(added)) parts.push('修改 ' + changed + ' 行');
-        return parts.length ? parts.join('，') : '代码已修改';
-    }
 
     function addDiffCard(msgEl, code, autoApplied) {
         const card = document.createElement('div'); card.className = 'ai-diff-card';
@@ -7594,7 +8946,7 @@ ${currentCode}
             }, required: ['library'] }
         }},
         { type: 'function', function: {
-            name: 'get_skill', description: '获取内置技能知识（GSAP 动画、设计系统DESIGN.md、代码片段、API数据源、MCP服务器状态）',
+            name: 'get_skill', description: '获取内置能力说明（GSAP 动画、设计规则、组件类型目录、API数据源、MCP服务器状态）。返回的是约束与参考，不保证存在可直接粘贴的固定模板。',
             parameters: { type: 'object', properties: {
                 domain: { type: 'string', enum: ['gsap', 'design', 'snippet', 'api', 'mcp'], description: '技能领域' },
                 query: { type: 'string', description: '具体查询内容' }
@@ -7645,7 +8997,7 @@ ${currentCode}
             }, required: [] }
         }},
         { type: 'function', function: {
-            name: 'get_project_context', description: '获取项目规范（PRODUCT.md 产品定位 + DESIGN.md 设计规范）。若返回空，说明用户尚未定义，应主动访谈引导填写。',
+            name: 'get_project_context', description: '读取项目规范（PRODUCT.md 产品定位 + DESIGN.md 设计规范）。规范为空时继续沿用当前页面与默认规则；只有用户明确要求建立长期规范时才提出问题或保存。',
             parameters: { type: 'object', properties: {}, required: [] }
         }},
         { type: 'function', function: {
@@ -7667,7 +9019,7 @@ ${currentCode}
                 status: { type: 'string', enum: ['changed', 'no_change_needed'], description: 'changed=已修改代码；no_change_needed=检查后确认无需修改' },
                 summary: { type: 'string', description: '完成总结，必须包含修改或无需修改的依据、验证结果' },
                 limitations: { type: 'string', description: '仍存在的限制；没有则写“无”' }
-            }, required: ['status', 'summary'] }
+            }, required: ['status', 'summary', 'limitations'] }
         }}
     ];
 
@@ -8056,47 +9408,6 @@ ${currentCode}
     }
 
     // ==================== 视觉验证辅助函数（对比度计算）====================
-    // 解析颜色字符串为 {r,g,b,a}
-    function parseColor(str) {
-        if (!str) return null;
-        str = str.trim();
-        if (str.startsWith('#')) {
-            let hex = str.slice(1);
-            if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
-            if (hex.length === 6) return { r: parseInt(hex.slice(0,2),16), g: parseInt(hex.slice(2,4),16), b: parseInt(hex.slice(4,6),16), a: 1 };
-            if (hex.length === 8) return { r: parseInt(hex.slice(0,2),16), g: parseInt(hex.slice(2,4),16), b: parseInt(hex.slice(4,6),16), a: parseInt(hex.slice(6,8),16)/255 };
-        }
-        const m = str.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+))?\s*\)/);
-        if (m) return { r: +m[1], g: +m[2], b: +m[3], a: m[4] !== undefined ? +m[4] : 1 };
-        return null;
-    }
-    // 相对亮度（WCAG 2.1）
-    function relativeLuminance(c) {
-        if (!c) return 0;
-        const ch = v => { v /= 255; return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); };
-        return 0.2126 * ch(c.r) + 0.7152 * ch(c.g) + 0.0722 * ch(c.b);
-    }
-    // 对比度比
-    function contrastRatio(color1, color2) {
-        const c1 = parseColor(color1), c2 = parseColor(color2);
-        if (!c1 || !c2) return 21; // 无法解析时假设达标
-        const l1 = relativeLuminance(c1), l2 = relativeLuminance(c2);
-        return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
-    }
-    // 获取元素的有效背景色（向上遍历直到找到不透明背景）
-    function getEffectiveBg(el, win) {
-        let node = el;
-        let depth = 0;
-        while (node && depth < 10) {
-            const style = win.getComputedStyle(node);
-            const bg = style.backgroundColor;
-            const c = parseColor(bg);
-            if (c && c.a >= 0.9) return bg;
-            node = node.parentElement;
-            depth++;
-        }
-        return '#ffffff'; // 默认白色背景
-    }
 
     async function executeAgentTool(toolName, args) {
         switch (toolName) {
@@ -8202,13 +9513,13 @@ ${currentCode}
                             try {
                                 const data = JSON.parse(text);
                                 const results = [];
-                                if (data.AbstractText) results.push(data.AbstractText);
+                                if (data.AbstractText) results.push(data.AbstractText + (data.AbstractURL ? '\n来源: ' + data.AbstractURL : ''));
                                 if (data.RelatedTopics) {
                                     for (const t of data.RelatedTopics.slice(0, 3)) {
-                                        if (t.Text) results.push(t.Text);
+                                        if (t.Text) results.push(t.Text + (t.FirstURL ? '\n来源: ' + t.FirstURL : ''));
                                     }
                                 }
-                                if (results.length > 0) return results.join('\n');
+                                if (results.length > 0) return results.join('\n\n');
                             } catch(e2) { /* not JSON, try HTML extraction */ }
                             // Try to extract some text from HTML
                             const snippets = text.match(/class="result__snippet"[^>]*>([^<]+)/g);
@@ -8275,10 +9586,10 @@ ${currentCode}
                     return '设计技能必须服从统一优先级。\n' + resolveDesignGuidance(args.query || activeAgentRequest || '', getCode());
                 }
                 if (args.domain === 'snippet') {
-                    return '内置代码片段：按钮组件、卡片组件、导航栏、Hero区域、Footer、表单、模态框、加载动画、粒子背景、3D卡片翻转、视差滚动、打字机效果。可用 get_skill domain=snippet query=按钮 获取具体代码。';
+                    return '组件类型目录：按钮、卡片、导航、Hero、Footer、表单、模态框、加载状态、粒子背景、3D翻转、视差和打字效果。系统不返回固定模板代码；请结合当前页面结构、DESIGN.md 与用户要求生成最小实现，避免重复调用本工具。';
                 }
                 if (args.domain === 'api') {
-                    return '内置 API 参考：JSONPlaceholder、Open-Meteo、REST Countries、PokéAPI、Open Library、GitHub API、CoinGecko、Dog CEO。可用 get_skill domain=api 查询使用规则。';
+                    return PUBLIC_APIS_KNOWLEDGE + '\n可用示例：' + PUBLIC_APIS.map(a => a.name + '（' + a.desc + '）').join('、') + '。接口实时可用性仍需通过 search_web 或实际请求验证。';
                 }
                 if (args.domain === 'mcp') {
                     // 返回已连接的 MCP 服务器和可用工具
@@ -8340,7 +9651,7 @@ ${currentCode}
             case 'get_project_context': {
                 const product = loadProductMd();
                 const design = loadDesignMd();
-                if (!product && !design) return '[INFO] 项目规范为空。用户尚未定义 PRODUCT.md / DESIGN.md。建议主动访谈：询问产品定位、目标用户、品牌调性，然后用 set_project_context 保存。';
+                if (!product && !design) return '[INFO] 项目规范为空。继续沿用当前页面风格与通用默认；除非用户明确要求创建长期规范，否则不要阻塞本次任务，也不要调用 set_project_context。';
                 let r = '【项目规范】\n';
                 if (product) r += '--- PRODUCT.md ---\n' + product + '\n\n';
                 if (design) r += '--- DESIGN.md ---\n' + design + '\n';
@@ -8531,7 +9842,7 @@ ${buildUnifiedExecutionPolicy('agent', false)}
 
 【工作流】
 1. 判断任务范围与完成标准；如需展示计划，只在 <thinking> 中写 3-6 条高层步骤、风险和验证点，不写逐字推理或自我对话。
-2. 先 analyze_code / get_selection / get_project_context 获取必要信息。大文件分段读取，不重复拉取无关全文。
+2. 先用 analyze_code 或 get_selection 定位实际代码。项目规范已在系统上下文中提供；只有用户要求查看或更新规范时才调用 get_project_context。大文件分段读取，不重复拉取无关全文。
 3. 选择最小可行改动。独立只读工具可并行；所有写工具串行。工具失败先读错误再修正，不盲目重复。
 4. 代码需要 GSAP、Chart.js 等库时调用 enable_dependency，只传库名；严禁用 edit_code 写入任何外部脚本或样式地址。
 5. 修改后运行 run_code_check；UI/样式/响应式任务还必须运行 visual_verify。发现阻断问题立即修复并重新验证。
@@ -8555,24 +9866,29 @@ ${designGuidance}
     function parseFallbackToolCalls(contentText) {
         const calls = [];
         const seen = new Set();
-        const add = (value) => {
+        const add = (value, rawCode = null) => {
             try {
                 const parsed = typeof value === 'string' ? JSON.parse(value) : value;
                 const list = Array.isArray(parsed) ? parsed : [parsed];
-                list.forEach(item => {
+                list.forEach((item, index) => {
                     const name = item?.name || item?.tool;
-                    const args = item?.arguments || item?.args || {};
+                    const args = { ...(item?.arguments || item?.args || {}) };
+                    if (rawCode != null && index === 0 && name === 'edit_code' && args.code == null) args.code = rawCode;
                     if (!name) return;
                     const key = name + ':' + JSON.stringify(args);
                     if (!seen.has(key)) { seen.add(key); calls.push({ name, args }); }
                 });
             } catch (_) {}
         };
-        String(contentText || '').replace(/```tool\s*\n([\s\S]*?)```/gi, (_, json) => { add(json.trim()); return _; });
-        String(contentText || '').replace(/\[TOOL_JSON\]([\s\S]*?)\[\/TOOL_JSON\]/gi, (_, json) => { add(json.trim()); return _; });
+        const text = String(contentText || '');
+        text.replace(/```tool\s*\n([\s\S]*?)```(?:\s*```tool-code\s*\n([\s\S]*?)```)?/gi, (_, json, rawCode) => {
+            add(json.trim(), rawCode == null ? null : rawCode.replace(/\n$/, ''));
+            return _;
+        });
+        text.replace(/\[TOOL_JSON\]([\s\S]*?)\[\/TOOL_JSON\]/gi, (_, json) => { add(json.trim()); return _; });
         const legacy = /\[TOOL:\s*([\w-]+)\s*\(([^)]*)\)\s*\]/g;
         let m;
-        while ((m = legacy.exec(String(contentText || ''))) !== null) {
+        while ((m = legacy.exec(text)) !== null) {
             const args = {};
             const argRe = /(\w+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^,\s]+))/g;
             let a; while ((a = argRe.exec(m[2])) !== null) args[a[1]] = a[2] || a[3] || a[4] || '';
@@ -8588,12 +9904,27 @@ ${designGuidance}
         const endpoint = validateServiceEndpoint(loadAiEndpoint() || DEFAULT_ENDPOINT, 'API 端点');
         const chatUrl = getEndpointChatUrl(endpoint);
 
-        // Refresh model analysis
+        // Refresh model capabilities only when the endpoint cache is missing or older than one hour.
         try {
-            const modelsUrl = getEndpointModelsUrl(endpoint);
-            const modelCtrl = new AbortController(); const modelTimer = setTimeout(() => modelCtrl.abort(), 10000); const res = await fetch(modelsUrl, { headers: { 'Authorization': 'Bearer ' + apiKey }, signal: modelCtrl.signal, credentials: 'omit' }); clearTimeout(modelTimer);
-            if (res.ok) { const data = await res.json(); analyzeModelCapabilities(data.data || []); }
-        } catch(e) { console.warn('[Werkstatt] 模型列表 fetch 失败，使用缓存:', e.message); }
+            const cachedModels = loadModelsCache();
+            const cacheFresh = cachedModels && cachedModels.endpoint === endpoint && Array.isArray(cachedModels.models) && Date.now() - Number(cachedModels.ts || 0) < 3600000;
+            if (cacheFresh) {
+                analyzeModelCapabilities(cachedModels.models);
+            } else {
+                const modelsUrl = getEndpointModelsUrl(endpoint);
+                const modelCtrl = new AbortController();
+                const modelTimer = setTimeout(() => modelCtrl.abort(), 10000);
+                try {
+                    const res = await fetch(modelsUrl, { headers: { 'Authorization': 'Bearer ' + apiKey }, signal: modelCtrl.signal, credentials: 'omit' });
+                    if (res.ok) {
+                        const data = await res.json();
+                        const models = data.data || [];
+                        analyzeModelCapabilities(models);
+                        saveModelsCache(endpoint, models);
+                    }
+                } finally { clearTimeout(modelTimer); }
+            }
+        } catch(e) { console.warn('[Werkstatt] 模型列表刷新失败，继续使用已知能力:', e.message); }
 
         const imgModel = getBestImageModel();
         const imgCapabilityNote = imgModel ? '\n【图片生成】可用模型：' + imgModel : '\n【图片生成】当前 API 不支持图片生成';
@@ -8639,10 +9970,14 @@ ${designGuidance}
             toolSignatureCounts.set(key, count);
             return consecutiveToolRepeats <= 2 && count <= 3;
         };
-        const isPassingVerification = text => !text.includes('[ERR]') && !text.includes('[WARN]') && !text.includes('【');
+        const isPassingVerification = value => {
+            const text = String(value || '');
+            if (!text.includes('[OK]')) return false;
+            return !/(?:\[ERR\]|\[WARN\]|\[底线\]|【(?:控制台错误·需修复|渲染异常|水平溢出|对比度|无障碍|DOM|资源)】)/.test(text);
+        };
         const markToolOutcome = (name, result) => {
             const text = String(result || '');
-            if (['analyze_code','get_selection','get_project_context'].includes(name) && !text.startsWith('[ERR]')) inspectedCode = true;
+            if (['analyze_code','get_selection'].includes(name) && !text.startsWith('[ERR]')) inspectedCode = true;
             if (['edit_code','batch_edit','format_code','undo_edit','enable_dependency'].includes(name) && text.startsWith('[OK]')) {
                 codeChanged = true; codeCheckAfterChange = false; visualVerifiedAfterChange = false; toolStateVersion += 1;
             }
@@ -8674,7 +10009,7 @@ ${designGuidance}
                 } else {
                     // Fallback: prompt-based tool calling — inject tool-call format into system prompt
                     const toolList = activeTools.map(t => '- ' + t.function.name + '(' + Object.entries(t.function.parameters.properties || {}).map(([k,v]) => k + (t.function.parameters.required?.includes(k) ? '!' : '') + ':' + (v.type||'string')).join(', ') + ') — ' + t.function.description).join('\n');
-                    const fbPrompt = messages[0].content + '\n\n【兼容工具协议】\n当前 API 不支持原生 function calling。调用工具时只输出一个或多个 JSON 代码块：\n```tool\n{"name":"analyze_code","arguments":{}}\n```\n多行代码必须放在 JSON 字符串中并正确转义。收到工具结果后继续；完成时单独输出 complete 的 tool JSON。\n\n可用工具：\n' + toolList;
+                    const fbPrompt = messages[0].content + '\n\n【兼容工具协议】\n当前 API 不支持原生 function calling。每个工具调用使用一个独立 JSON 代码块，不要在代码块外解释：\n```tool\n{"name":"analyze_code","arguments":{}}\n```\n调用 edit_code 且代码为多行时，不要把 code 塞进 JSON 字符串；在工具 JSON 后紧接一个原始代码块，arguments 中省略 code：\n```tool\n{"name":"edit_code","arguments":{"operation":"replace","startLine":10,"endLine":12}}\n```\n```tool-code\n原始多行代码\n```\n收到工具结果后继续；完成时单独输出 complete 的 tool JSON。\n\n可用工具：\n' + toolList;
                     const fbMessages = [...messages];
                     fbMessages[0] = { role: 'system', content: fbPrompt };
                     payload = { model, messages: fbMessages, stream: true };
@@ -8697,8 +10032,8 @@ ${designGuidance}
                         toolsSupported = false;
                         totalTurns--; // retry this turn without tools
                         addChatMessage('assistant', '当前 API 不支持原生工具调用，已切换到兼容工具协议', ICONS.info);
-                        // Replace system prompt to remove tool references
-                        messages[0] = { role: 'system', content: systemPrompt.replace(/【ReAct 工作流】[\s\S]*?串行。\n\n/g, '').replace(/通过 edit_code 工具[\s\S]*?验证。\n/g, '直接输出修改后的完整代码。\n') };
+                        // Keep the same execution policy; the next turn adds the compatibility tool protocol locally.
+                        messages[0] = { role: 'system', content: systemPrompt };
                         continue;
                     }
                     setAgentStatus('错误', 'API 返回 ' + res.status);
@@ -8780,13 +10115,17 @@ ${designGuidance}
                 if (msg.tool_calls.length === 0) delete msg.tool_calls;
                 messages.push(msg);
 
-                // Context window management — truncate old tool results, preserve analyze_code
+                // Context window management — preserve only the latest code inspection with line numbers.
                 if (messages.length > 20) {
+                    const isCodeInspection = content => /^(?:代码共|语言:|\[INFO\] 大文件已启用分段分析)/.test(String(content || ''));
+                    let latestInspectionIndex = -1;
+                    for (let mi = messages.length - 1; mi >= 0; mi--) {
+                        if (messages[mi].role === 'tool' && isCodeInspection(messages[mi].content)) { latestInspectionIndex = mi; break; }
+                    }
                     for (let mi = 0; mi < messages.length - 6; mi++) {
                         if (messages[mi].role === 'tool' && typeof messages[mi].content === 'string' && messages[mi].content.length > 200) {
-                            // Never truncate analyze_code results — AI needs complete code with line numbers
-                            if (messages[mi].content.startsWith('代码共')) continue;
-                            messages[mi].content = messages[mi].content.slice(0, 100) + '\n…（已截断，' + messages[mi].content.length + ' 字）';
+                            if (mi === latestInspectionIndex) continue;
+                            messages[mi].content = messages[mi].content.slice(0, 100) + '\n…（已截断，原 ' + messages[mi].content.length + ' 字）';
                         }
                     }
                 }
@@ -9145,9 +10484,67 @@ ${designGuidance}
     document.querySelectorAll(modalSelector).forEach(modal => modalClassObserver.observe(modal, { attributes: true, attributeFilter: ['class'], attributeOldValue: true }));
 
     // ==================== Events ====================
+    function beginFileRename() {
+        if (!currentFileInput || !currentFileButton) return;
+        const parts = splitCurrentFileName();
+        currentFileInput.value = parts.base;
+        currentFileButton.hidden = true;
+        currentFileInput.hidden = false;
+        currentFileInput.focus();
+        currentFileInput.select();
+    }
+
+    function finishFileRename(commit = true) {
+        if (!currentFileInput || !currentFileButton || currentFileInput.hidden) return;
+        if (commit) {
+            const cfg = LANG_CONFIG[currentLang] || LANG_CONFIG.html;
+            const cleanBase = currentFileInput.value.trim().replace(/[\/:*?"<>|]+/g, '-').replace(/^\.+|\.+$/g, '') || 'untitled';
+            currentFileName = cleanBase + cfg.ext;
+            safeStorage.set(FILE_NAME_PREFIX + currentLang, currentFileName);
+            updateLanguageUi();
+            showToast('文件名已更新', 'success');
+        }
+        currentFileInput.hidden = true;
+        currentFileButton.hidden = false;
+        currentFileButton.focus({ preventScroll: true });
+    }
+
+    currentFileButton?.addEventListener('click', beginFileRename);
+    currentFileInput?.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') { event.preventDefault(); finishFileRename(true); }
+        if (event.key === 'Escape') { event.preventDefault(); finishFileRename(false); }
+    });
+    currentFileInput?.addEventListener('blur', () => finishFileRename(true));
+
+    if (languageSelect) {
+        languageSelect.addEventListener('change', () => {
+            const selected = languageSelect.value;
+            if (selected === 'auto') {
+                setDocumentTypeMode('auto');
+                const changed = autoDetectDocumentLanguage({ force: true, silent: true, showDetection: true });
+                updateLanguageUi({ showDetection: true });
+                updatePreview();
+                showToast(changed
+                    ? '已恢复自动识别，当前识别为 ' + getDocumentTypeLabel(currentLang)
+                    : '已恢复自动识别，当前为 ' + getDocumentTypeLabel(currentLang), 'success');
+                return;
+            }
+            const lang = selected;
+            setDocumentTypeMode('manual');
+            const baseName = (currentFileName || 'untitled').replace(/\.[^.]+$/, '') || 'untitled';
+            switchLanguage(lang, baseName + LANG_CONFIG[lang].ext, { saveCurrent: false });
+            showToast('已手动锁定为 ' + getDocumentTypeLabel(lang) + '；选择“自动”可恢复识别', 'success');
+        });
+    }
+
     editor.on('change', () => {
+        updateDocumentMetrics();
+        setDocumentSaveState('saving');
         if (previewDebounceTimer) clearTimeout(previewDebounceTimer);
-        previewDebounceTimer = setTimeout(() => { updatePreview(); }, PREVIEW_DEBOUNCE_DELAY);
+        previewDebounceTimer = setTimeout(() => {
+            autoDetectDocumentLanguage();
+            updatePreview();
+        }, PREVIEW_DEBOUNCE_DELAY);
         showStatus('等待更新…', 'syncing');
         if (formatLastFormatted !== null) { formatLastOriginal = null; formatLastFormatted = null; btnFormat.innerHTML = '<svg class="btn-icon"><use href="#icon-format"/></svg> 格式化'; }
         if (debounceTimer) clearTimeout(debounceTimer);
